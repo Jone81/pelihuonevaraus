@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { DailyScheduleViewer } from './DailyScheduleViewer';
 import type { CreateReservationRequest, ReservationType } from '../types';
 
 interface BookingCalendarProps {
@@ -261,17 +262,21 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         {/* Päivämäärä ja ajat */}
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="date">{t('booking.date')}</label>
-            <input
-              id="date"
-              type="date"
-              className="input-touch"
-              min={dateBounds.today}
-              max={dateBounds.maxDateStr}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+            <label htmlFor="date">
+              <span className="calendar-indicator-badge">📅</span> {t('booking.date')}
+            </label>
+            <div className="date-input-with-icon">
+              <input
+                id="date"
+                type="date"
+                className="input-touch schedule-date-input"
+                min={dateBounds.today}
+                max={dateBounds.maxDateStr}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
@@ -301,6 +306,21 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Päivän aikataulutaulukko ja varaukset (Näyttää varatut koneet vaikka olisivat juuri nyt vapaana) */}
+        <div className="booking-schedule-section">
+          <DailyScheduleViewer
+            selectedDate={date}
+            onDateChange={(newDate) => setDate(newDate)}
+            onSelectSlot={(stationId, sHour, eHour) => {
+              setSelectedStationId(stationId);
+              setStartHour(sHour);
+              setEndHour(eHour);
+              setReservationType(1);
+            }}
+            showDateSelector={true}
+          />
         </div>
 
         {/* Pelipisteen valinta yksittäisvarauksille */}

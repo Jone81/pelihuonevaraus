@@ -96,15 +96,19 @@ export const SuperAdminPanel: React.FC = () => {
       <form onSubmit={handleOverride} className="booking-form admin-form">
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="admin-date">Päivämäärä</label>
-            <input
-              id="admin-date"
-              type="date"
-              className="input-touch"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+            <label htmlFor="admin-date">
+              <span className="calendar-indicator-badge">📅</span> Päivämäärä
+            </label>
+            <div className="date-input-with-icon">
+              <input
+                id="admin-date"
+                type="date"
+                className="input-touch schedule-date-input"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">

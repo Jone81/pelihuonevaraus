@@ -1,4 +1,6 @@
 :root {
+  color-scheme: dark;
+
   /* Xamk Brand Colors */
   --xamk-yellow: #fbba18;
   --xamk-yellow-hover: #e0a307;
@@ -2692,4 +2694,698 @@ html, body {
   background-color: #ef4444 !important;
   color: white !important;
   font-weight: 800;
+}
+
+/* =====================================================================
+   KALENTERIN MERKKI (VALKOINEN INDIKAATTORI) & SYÖTEKENTÄT
+   ===================================================================== */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+  position: relative;
+  font-family: inherit;
+}
+
+/* Chrome, Edge, Brave, Opera ja Safari: Täysin kirkkaanvalkoinen kalenterikuvake tummassa tilassa */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1) !important;
+  cursor: pointer;
+  opacity: 1 !important;
+  width: 22px;
+  height: 22px;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(251, 186, 24, 0.2);
+  transform: scale(1.15);
+  filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(251, 186, 24, 0.8)) !important;
+}
+
+/* Kalenterin syötekehyksen tyylit */
+.date-input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.calendar-indicator-badge {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  font-size: 1.15rem;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+}
+
+.date-input-with-icon .schedule-date-input,
+.date-input-with-icon .input-touch {
+  padding-left: 38px;
+}
+
+/* =====================================================================
+   PÄIVÄKOHTAINEN AIKATAULUNÄKYMÄ & VARAUSTILANNE (DailyScheduleViewer)
+   ===================================================================== */
+.daily-schedule-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.daily-schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.schedule-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.schedule-icon {
+  font-size: 1.4rem;
+}
+
+.schedule-title-row h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.bookings-count-pill {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  background-color: rgba(251, 186, 24, 0.15);
+  color: var(--xamk-yellow);
+  border: 1px solid rgba(251, 186, 24, 0.35);
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.schedule-description {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.schedule-view-toggle {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Päivämääränavigaatio */
+.schedule-date-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.date-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.date-nav-btn {
+  font-size: 0.9rem;
+  padding: 8px 14px;
+}
+
+.schedule-date-picker-wrap {
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.date-quick-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-btn:hover {
+  border-color: var(--xamk-yellow);
+  color: var(--xamk-yellow);
+  background-color: rgba(251, 186, 24, 0.08);
+}
+
+.current-date-title {
+  margin-left: 0.5rem;
+  font-weight: 700;
+  color: var(--xamk-yellow);
+  text-transform: capitalize;
+}
+
+/* Koko tilan varausbanneri */
+.schedule-room-alert {
+  display: flex;
+  gap: 1rem;
+  background-color: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  color: #ddd6fe;
+}
+
+.schedule-room-alert .alert-icon {
+  font-size: 1.6rem;
+}
+
+.room-res-list {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.25rem;
+}
+
+.room-res-list li {
+  margin-bottom: 0.35rem;
+}
+
+.schedule-hint-bar {
+  background-color: rgba(251, 186, 24, 0.08);
+  border: 1px dashed rgba(251, 186, 24, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--xamk-yellow);
+}
+
+/* =====================================================================
+   TIMELINE MATRIISI (Visual Timetable Matrix)
+   ===================================================================== */
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.dot-free {
+  background-color: rgba(16, 185, 129, 0.25);
+  border: 1px solid #10b981;
+}
+
+.dot-busy {
+  background-color: rgba(239, 68, 68, 0.35);
+  border: 1px solid #ef4444;
+}
+
+.dot-tv {
+  background-color: rgba(251, 186, 24, 0.3);
+  border: 1px solid #fbba18;
+}
+
+.dot-room {
+  background-color: rgba(139, 92, 246, 0.35);
+  border: 1px solid #8b5cf6;
+}
+
+.timeline-scroll-area {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-secondary);
+}
+
+.timeline-header-row {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background-color: rgba(0, 0, 0, 0.35);
+  min-width: 680px;
+}
+
+.timeline-station-col-header {
+  width: 160px;
+  min-width: 160px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-color);
+  position: sticky;
+  left: 0;
+  background-color: #111419;
+  z-index: 5;
+}
+
+.timeline-hours-track {
+  position: relative;
+  flex: 1;
+  height: 38px;
+}
+
+.timeline-hour-mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hour-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.hour-tick {
+  width: 1px;
+  height: 6px;
+  background-color: var(--border-color);
+  margin-top: 4px;
+}
+
+.timeline-rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 680px;
+}
+
+.timeline-row {
+  display: flex;
+  border-bottom: 1px solid var(--border-color-subtle);
+  min-height: 48px;
+  position: relative;
+}
+
+.timeline-row:last-child {
+  border-bottom: none;
+}
+
+.timeline-station-cell {
+  width: 160px;
+  min-width: 160px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-right: 1px solid var(--border-color);
+  position: sticky;
+  left: 0;
+  background-color: #15181e;
+  z-index: 4;
+}
+
+.station-mini-icon {
+  font-size: 1.1rem;
+}
+
+.station-cell-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.mini-tv-tag {
+  font-size: 0.65rem;
+  padding: 1px 4px;
+  background-color: rgba(251, 186, 24, 0.15);
+  color: var(--xamk-yellow);
+  border-radius: 4px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.timeline-track {
+  position: relative;
+  flex: 1;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+/* Aikajanalohkot */
+.timeline-block {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.block-free {
+  background-color: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+.clickable-slot {
+  cursor: pointer;
+}
+
+.clickable-slot:hover {
+  background-color: rgba(16, 185, 129, 0.32);
+  border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+  z-index: 3;
+}
+
+.block-busy {
+  background-color: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+  cursor: not-allowed;
+}
+
+.block-tv-locked {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(251, 186, 24, 0.12),
+    rgba(251, 186, 24, 0.12) 8px,
+    rgba(251, 186, 24, 0.25) 8px,
+    rgba(251, 186, 24, 0.25) 16px
+  );
+  border: 1px solid rgba(251, 186, 24, 0.6);
+  color: #fde047;
+  cursor: not-allowed;
+}
+
+.block-room-locked {
+  background-color: rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.6);
+  color: #c4b5fd;
+  cursor: not-allowed;
+}
+
+.block-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   KORTTINÄKYMÄ (Station Cards / List View)
+   ===================================================================== */
+.schedule-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.schedule-station-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+}
+
+.schedule-station-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.station-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.station-card-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.station-card-code {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.station-all-free {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  color: #6ee7b7;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.quick-pick-btn {
+  margin-top: 4px;
+}
+
+.station-bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bookings-subhead {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.schedule-booking-pill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pill-station-busy {
+  background-color: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.pill-tv-locked {
+  background-color: rgba(251, 186, 24, 0.16);
+  border: 1px solid rgba(251, 186, 24, 0.45);
+  color: #fde047;
+}
+
+.pill-room-locked {
+  background-color: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #ddd6fe;
+}
+
+.free-slots-summary {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-color-subtle);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.free-subhead {
+  font-size: 0.75rem;
+  color: #6ee7b7;
+  font-weight: 600;
+}
+
+.free-chips-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.free-chip {
+  background-color: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.free-chip-clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.free-chip-clickable:hover {
+  background-color: rgba(16, 185, 129, 0.3);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+/* =====================================================================
+   YHTEENVETOTAULUKKO (Summary View)
+   ===================================================================== */
+.schedule-summary-table-wrap {
+  overflow-x: auto;
+}
+
+.schedule-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.schedule-summary-table th {
+  text-align: left;
+  padding: 10px 14px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.schedule-summary-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color-subtle);
+  color: var(--text-primary);
+}
+
+.table-time-cell {
+  color: var(--xamk-yellow);
+}
+
+.table-station-name {
+  font-weight: 600;
+}
+
+.booker-contact-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* RealtimeStatus laitekohtainen esikatselutieto */
+.station-day-schedule-preview {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color-subtle);
+  font-size: 0.75rem;
+}
+
+.schedule-preview-title {
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.schedule-preview-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-pill {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-pill-busy {
+  background-color: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.preview-pill-tv {
+  background-color: rgba(251, 186, 24, 0.18);
+  color: #fde047;
+  border: 1px solid rgba(251, 186, 24, 0.4);
+}
+
+.preview-pill-room {
+  background-color: rgba(139, 92, 246, 0.18);
+  color: #ddd6fe;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.preview-all-free {
+  color: #6ee7b7;
+  font-weight: 500;
 }

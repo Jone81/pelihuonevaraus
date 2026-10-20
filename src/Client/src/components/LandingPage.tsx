@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { RealtimeStatus } from './RealtimeStatus';
 import type { NewsItem } from '../types';
 
 interface LandingPageProps {
@@ -29,6 +30,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [showRealtimeStatus, setShowRealtimeStatus] = useState(false);
 
   // Hae uutiset ja tiedotteet
   const { data: newsItems, isLoading: isNewsLoading } = useQuery<NewsItem[]>({
@@ -163,6 +165,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <strong>{t('landing.equipmentTitle')}</strong> {t('landing.equipmentValue')}
               </div>
             </div>
+            <button
+              type="button"
+              className={`info-pill btn-touch info-pill-btn ${showRealtimeStatus ? 'info-pill-active' : ''}`}
+              onClick={() => setShowRealtimeStatus((prev) => !prev)}
+              title={t('status.title')}
+            >
+              <span className="info-pill-icon">🟢</span>
+              <div>
+                <strong>{showRealtimeStatus ? t('common.close') : t('nav.status')}</strong>
+              </div>
+            </button>
+
             {onOpenFloorPlan && (
               <button
                 type="button"
@@ -192,6 +206,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       </section>
+
+      {/* Tilan tilanne ja päivän varaukset avattuna esikatseluna myös ennen kirjautumista */}
+      {showRealtimeStatus && (
+        <section className="landing-status-section" style={{ maxWidth: '1200px', margin: '1rem auto 2rem auto', padding: '0 1rem' }}>
+          <RealtimeStatus
+            onOpenFloorPlan={onOpenFloorPlan}
+            onNavigateToBooking={onOpenLogin}
+          />
+        </section>
+      )}
 
       {/* Pääosio: 2-palstainen jako (Uutiset vasemmalla, Kirjautuminen oikealla) */}
       <main className="landing-main-grid">

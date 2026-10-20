@@ -85,7 +85,10 @@ export const AppContent: React.FC = () => {
         )}
 
         {activeTab === 'status' && (
-          <RealtimeStatus onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+          <RealtimeStatus
+            onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+            onNavigateToBooking={() => setActiveTab('book')}
+          />
         )}
 
         {activeTab === 'games' && <GamesCatalog />}
