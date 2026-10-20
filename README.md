@@ -55,16 +55,16 @@ npm run dev
 
 ---
 
-## 🔑 Sisäänkirjautuminen ja testitunnukset
+## 🔑 Sisäänkirjautuminen ja pikanapit
 
-Kirjautumiseen kelpaa mikä tahansa koulun sähköpostiosoite (`@edu.xamk.fi` tai `@xamk.fi`):
+> ⚡ **Helpoin tapa kirjautua:**  
+> Kirjautumisikkunassa ja etusivulla on suoraan valmiit **pikapainikkeet**, joita klikkaamalla pääsee sisään ilman tietojen kirjoittamista:
+> - **Opiskelija** (peruskäyttäjän näkymä ja omat varaukset)
+> - **Pääkäyttäjä** (Admin- ja SuperAdmin-hallintavalikot)
 
-1. **Opiskelijatunnus (peruskäyttäjä):**
-   - Sähköposti: `opiskelija@edu.xamk.fi`
-   - Vahvistuskoodi (OTP): `123456`
-2. **Pääkäyttäjä (Admin & SuperAdmin -oikeudet):**
-   - Sähköposti: `admin@xamk.fi`
-   - Vahvistuskoodi (OTP): `123456`
+Halutessasi voit kirjautua myös manuaalisesti millä tahansa koulun osoitteella (`@edu.xamk.fi` tai `@xamk.fi`):
+1. **Opiskelijatunnus:** `opiskelija@edu.xamk.fi` (koodi: `123456`)
+2. **Pääkäyttäjätunnus:** `admin@xamk.fi` (koodi: `123456`)
 
 *(Kehitystilassa vahvistuskoodi `123456` toimii aina yleisenä testikoodina, tai koodin voi lukea suoraan API-vastauksesta).*
 
