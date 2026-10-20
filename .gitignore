@@ -17,6 +17,10 @@ dist/
 dist-ssr/
 *.local
 
+## Scripts & Setup
+setup-workspace.ps1
+*.ps1
+
 ## OS generated
 .DS_Store
 Thumbs.db
