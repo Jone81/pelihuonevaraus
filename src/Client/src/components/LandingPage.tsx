@@ -209,11 +209,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Tilan tilanne ja päivän varaukset avattuna esikatseluna myös ennen kirjautumista */}
       {showRealtimeStatus && (
-        <section className="landing-status-section" style={{ maxWidth: '1200px', margin: '1rem auto 2rem auto', padding: '0 1rem' }}>
-          <RealtimeStatus
-            onOpenFloorPlan={onOpenFloorPlan}
-            onNavigateToBooking={onOpenLogin}
-          />
+        <section className="landing-status-section">
+          <div className="landing-status-wrapper">
+            <RealtimeStatus
+              onOpenFloorPlan={onOpenFloorPlan}
+              onNavigateToBooking={onOpenLogin}
+            />
+          </div>
         </section>
       )}
 

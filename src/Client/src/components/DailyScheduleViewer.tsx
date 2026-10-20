@@ -274,7 +274,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
             onClick={() => setViewMode('timeline')}
             title="Näytä graafinen aikataulumatriisi"
           >
-            {t('schedule.timelineView')}
+            <span className="btn-full-text">{t('schedule.timelineView')}</span>
+            <span className="btn-short-text">📊 Aikataulu</span>
           </button>
           <button
             type="button"
@@ -282,7 +283,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
             onClick={() => setViewMode('cards')}
             title="Näytä pelipisteiden varauskortit"
           >
-            {t('schedule.listView')}
+            <span className="btn-full-text">{t('schedule.listView')}</span>
+            <span className="btn-short-text">📋 Pisteet</span>
           </button>
           <button
             type="button"
@@ -290,11 +292,12 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
             onClick={() => setViewMode('summary')}
             title="Kaikki varaukset listana"
           >
-            {t('schedule.summaryView')}
+            <span className="btn-full-text">{t('schedule.summaryView')}</span>
+            <span className="btn-short-text">📑 Lista</span>
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-secondary"
+            className="btn btn-sm btn-secondary refresh-icon-btn"
             onClick={() => refetch()}
             title={t('status.refresh')}
           >
@@ -313,7 +316,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
               onClick={handlePrevDay}
               aria-label={t('schedule.prevDay')}
             >
-              {t('schedule.prevDay')}
+              <span className="btn-full-text">{t('schedule.prevDay')}</span>
+              <span className="btn-short-text">◀</span>
             </button>
 
             <div className="schedule-date-picker-wrap">
@@ -338,7 +342,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
               onClick={handleNextDay}
               aria-label={t('schedule.nextDay')}
             >
-              {t('schedule.nextDay')}
+              <span className="btn-full-text">{t('schedule.nextDay')}</span>
+              <span className="btn-short-text">▶</span>
             </button>
           </div>
 

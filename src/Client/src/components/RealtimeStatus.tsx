@@ -178,29 +178,34 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
                 className={`station-card ${isAvailable ? 'station-free' : 'station-busy'}`}
               >
                 <div className="station-card-header">
-                  <span className="station-icon">
-                    {station.type === 'PC' ? '🖥️' : station.type === 'PlayStation5' ? '🎮' : '🕹️'}
-                  </span>
-                  <span className={`status-pill ${isAvailable ? 'pill-free' : 'pill-busy'}`}>
-                    {isToday
-                      ? isAvailable
-                        ? t('status.free')
-                        : isTvLocked
-                        ? 'TV ' + t('status.busy')
-                        : t('status.busy')
-                      : hasBookingsToday
-                      ? t('schedule.busy')
-                      : t('schedule.free')}
-                  </span>
-                </div>
-                <h3 className="station-name">{station.name}</h3>
-                <span className="station-type">{station.type}</span>
-
-                {station.usesSharedTv && (
-                  <div className="shared-tv-tag">
-                    {t('booking.sharedTvBadge')}
+                  <div className="station-card-identity">
+                    <span className="station-icon">
+                      {station.type === 'PC' ? '🖥️' : station.type === 'PlayStation5' ? '🎮' : '🕹️'}
+                    </span>
+                    <div className="station-card-title-group">
+                      <h3 className="station-name">{station.name}</h3>
+                      <span className="station-type">{station.type}</span>
+                    </div>
                   </div>
-                )}
+                  <div className="station-card-badges">
+                    {station.usesSharedTv && (
+                      <span className="tv-badge">
+                        📺 {t('booking.sharedTvBadge')}
+                      </span>
+                    )}
+                    <span className={`status-pill ${isAvailable ? 'pill-free' : 'pill-busy'}`}>
+                      {isToday
+                        ? isAvailable
+                          ? t('status.free')
+                          : isTvLocked
+                          ? 'TV ' + t('status.busy')
+                          : t('status.busy')
+                        : hasBookingsToday
+                        ? t('schedule.busy')
+                        : t('schedule.free')}
+                    </span>
+                  </div>
+                </div>
 
                 {/* Päivän varatut ajat tälle laitteelle vaikka nyt olisi vapaana */}
                 <div className="station-day-schedule-preview">
