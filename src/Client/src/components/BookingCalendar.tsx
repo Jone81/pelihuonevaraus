@@ -4,6 +4,8 @@ import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { DailyScheduleViewer } from './DailyScheduleViewer';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { CreateReservationRequest, ReservationType } from '../types';
 
 interface BookingCalendarProps {
@@ -350,7 +352,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     <span className="station-title">{station.name}</span>
                     <span className="station-meta">{station.type}</span>
                     {station.usesSharedTv && (
-                      <span className="tv-badge">{t('booking.sharedTvBadge')}</span>
+                      <Badge variant="warning" className="tv-badge text-[11px]">
+                        {t('booking.sharedTvBadge')}
+                      </Badge>
                     )}
                   </button>
                 ))}
@@ -372,13 +376,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
         {/* Toimintopainike */}
         <div className="booking-submit">
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary btn-touch btn-large"
+            variant="xamk"
+            size="lg"
+            className="btn-touch w-full sm:w-auto font-bold text-base px-8 py-3"
             disabled={reservationMutation.isPending || (Boolean(user) && reservationType === 1 && !selectedStationId)}
           >
             {reservationMutation.isPending ? t('booking.processing') : user ? t('booking.submit') : t('booking.loginToBook')}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

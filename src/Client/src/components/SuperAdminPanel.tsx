@@ -2,6 +2,9 @@ import React, { useState, useId } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { OverrideReservationRequest } from '../types';
 
 export const SuperAdminPanel: React.FC = () => {
@@ -95,10 +98,10 @@ export const SuperAdminPanel: React.FC = () => {
 
       <form onSubmit={handleOverride} className="booking-form admin-form">
         <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="admin-date">
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-date">
               <span className="calendar-indicator-badge">📅</span> Päivämäärä
-            </label>
+            </Label>
             <div className="date-input-with-icon">
               <input
                 id="admin-date"
@@ -111,11 +114,11 @@ export const SuperAdminPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="admin-start">Alkaa</label>
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-start">Alkaa</Label>
             <select
               id="admin-start"
-              className="input-touch"
+              className="flex h-11 w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
               value={startHour}
               onChange={(e) => setStartHour(e.target.value)}
             >
@@ -125,11 +128,11 @@ export const SuperAdminPanel: React.FC = () => {
             </select>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="admin-end">Päättyy</label>
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-end">Päättyy</Label>
             <select
               id="admin-end"
-              className="input-touch"
+              className="flex h-11 w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
               value={endHour}
               onChange={(e) => setEndHour(e.target.value)}
             >
@@ -140,28 +143,29 @@ export const SuperAdminPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="override-reason">Jyräyksen ja tapahtuman perustelu</label>
-          <input
+        <div className="space-y-1.5 my-4">
+          <Label htmlFor="override-reason">Jyräyksen ja tapahtuman perustelu</Label>
+          <Input
             id="override-reason"
             type="text"
-            className="input-touch"
             placeholder="esim. Koulun virallinen peliturnaus / Vierailijapäivä"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             required
           />
-          <span className="form-hint">Tämä viesti tallentuu peruttujen varausten syyksi.</span>
+          <span className="text-xs text-[#9da3ae]">Tämä viesti tallentuu peruttujen varausten syyksi.</span>
         </div>
 
-        <div className="booking-submit">
-          <button
+        <div className="booking-submit pt-2">
+          <Button
             type="submit"
-            className="btn btn-danger btn-touch btn-large"
+            variant="destructive"
+            size="lg"
+            className="btn-touch w-full sm:w-auto font-bold text-base px-8 py-3"
             disabled={overrideMutation.isPending}
           >
             {overrideMutation.isPending ? 'Käsitellään jyräystä...' : '⚠️ Jyrää varaukset ja luo tapahtuma'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

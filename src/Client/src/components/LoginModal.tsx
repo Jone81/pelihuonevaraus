@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -19,8 +29,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [devCodeHint, setDevCodeHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  if (!isOpen) return null;
 
   // Vaihe 1: Lähetä varmistuskoodi sähköpostiin
   const handleSendCode = async (e: React.FormEvent) => {
@@ -95,111 +103,113 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-title-wrap">
-            <img src="/xamk-logo.png" alt="Xamk" className="modal-xamk-logo" />
-            <h2>{t('login.title')}</h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[480px]">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <img
+              src="/xamk-logo.png"
+              alt="Xamk"
+              className="modal-xamk-logo"
+              style={{ height: '32px', width: 'auto', maxHeight: '32px', objectFit: 'contain' }}
+            />
+            <DialogTitle className="text-xl font-bold text-white">
+              {t('login.title')}
+            </DialogTitle>
           </div>
-          <button
-            type="button"
-            className="btn-close btn-touch"
-            onClick={onClose}
-            aria-label={t('common.close')}
-          >
-            ✕
-          </button>
-        </div>
-
-        <p className="modal-description">
-          {t('login.desc')} {t('login.sessionNotice')}
-        </p>
+          <DialogDescription className="text-sm text-[#9da3ae] mt-1">
+            {t('login.desc')} {t('login.sessionNotice')}
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Pikatunnukset */}
-        <div className="quick-login-hints">
-          <span className="quick-login-label">{t('login.tryQuick')}</span>
-          <div className="quick-login-buttons">
-            <button
+        <div className="quick-login-hints my-2">
+          <span className="quick-login-label text-xs text-[#9da3ae]">{t('login.tryQuick')}</span>
+          <div className="quick-login-buttons flex gap-2 mt-1">
+            <Button
               type="button"
-              className="btn btn-secondary btn-touch quick-btn"
+              variant="outline"
+              size="sm"
+              className="quick-btn btn-touch flex-1 hover:border-[#fbba18] hover:text-[#fbba18]"
               onClick={() => handleQuickLogin('opiskelija@edu.xamk.fi', 'Matti Meikäläinen')}
               disabled={loading}
             >
               {t('login.quickStudent')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn btn-secondary btn-touch quick-btn"
+              variant="outline"
+              size="sm"
+              className="quick-btn btn-touch flex-1 hover:border-[#fbba18] hover:text-[#fbba18]"
               onClick={() => handleQuickLogin('admin@xamk.fi', 'Pääkäyttäjä')}
               disabled={loading}
             >
               {t('login.quickAdmin')}
-            </button>
+            </Button>
           </div>
         </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && <div className="alert alert-error my-2">{error}</div>}
 
         {step === 1 ? (
           /* VAIHE 1: Sähköpostin syöttö */
-          <form onSubmit={handleSendCode} className="form">
-            <div className="step-indicator">
-              <span className="step-badge active">1</span>
-              <span className="step-title">{t('login.step1')}</span>
+          <form onSubmit={handleSendCode} className="space-y-4">
+            <div className="step-indicator flex items-center gap-2">
+              <span className="step-badge active font-bold text-[#fbba18]">1</span>
+              <span className="step-title font-semibold">{t('login.step1')}</span>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email">{t('login.emailLabel')}</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="email">{t('login.emailLabel')}</Label>
+              <Input
                 id="email"
                 type="email"
-                className="input-touch"
                 placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
               />
-              <span className="form-hint">{t('login.allowedHint')}</span>
+              <span className="text-xs text-[#9da3ae]">{t('login.allowedHint')}</span>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="displayName">{t('login.nameLabel')}</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="displayName">{t('login.nameLabel')}</Label>
+              <Input
                 id="displayName"
                 type="text"
-                className="input-touch"
                 placeholder={t('login.namePlaceholder')}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
             </div>
 
-            <div className="modal-actions">
-              <button
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
                 type="button"
-                className="btn btn-secondary btn-touch"
+                variant="secondary"
+                className="btn-touch"
                 onClick={onClose}
                 disabled={loading}
               >
                 {t('common.cancel')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="btn btn-primary btn-touch"
+                variant="xamk"
+                className="btn-touch"
                 disabled={loading}
               >
                 {loading ? t('common.submitting') : t('login.sendCode')}
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
           /* VAIHE 2: 6-numeroinen vahvistuskoodi */
-          <form onSubmit={handleVerifyCode} className="form">
-            <div className="step-indicator">
-              <span className="step-badge active">2</span>
-              <span className="step-title">{t('login.step2')}</span>
+          <form onSubmit={handleVerifyCode} className="space-y-4">
+            <div className="step-indicator flex items-center gap-2">
+              <span className="step-badge active font-bold text-[#fbba18]">2</span>
+              <span className="step-title font-semibold">{t('login.step2')}</span>
             </div>
 
             <div className="alert alert-info">
@@ -212,12 +222,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="otp-code">{t('login.enterCodeLabel')}</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="otp-code">{t('login.enterCodeLabel')}</Label>
+              <Input
                 id="otp-code"
                 type="text"
-                className="input-touch code-input"
+                className="text-center font-mono tracking-widest text-lg"
                 placeholder="123456"
                 maxLength={6}
                 value={code}
@@ -227,26 +237,28 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               />
             </div>
 
-            <div className="modal-actions">
-              <button
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
                 type="button"
-                className="btn btn-secondary btn-touch"
+                variant="secondary"
+                className="btn-touch"
                 onClick={() => setStep(1)}
                 disabled={loading}
               >
                 {t('common.back')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="btn btn-primary btn-touch"
+                variant="xamk"
+                className="btn-touch"
                 disabled={loading}
               >
                 {loading ? t('common.verifying') : t('login.verifyCode')}
-              </button>
+              </Button>
             </div>
           </form>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

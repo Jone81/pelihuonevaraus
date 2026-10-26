@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 import { DailyScheduleViewer } from './DailyScheduleViewer';
+import { Button } from '@/components/ui/button';
 import type { GamingStation } from '../types';
 
 interface RealtimeStatusProps {
@@ -110,36 +111,38 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
 
   return (
     <div className="status-container">
-      <div className="section-header">
+      <div className="section-header flex justify-between items-center flex-wrap gap-4">
         <div>
           <h2>🟢 {t('status.title')}</h2>
           <p className="section-description">
             {t('status.desc')}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="flex gap-2 flex-wrap">
           {onOpenFloorPlan && (
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary btn-touch"
+              variant="secondary"
+              className="btn-touch"
               onClick={onOpenFloorPlan}
             >
               {t('booking.openFloorPlan')}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
-            className="btn btn-secondary btn-touch"
+            variant="outline"
+            className="btn-touch"
             onClick={() => refetch()}
           >
             {t('status.refresh')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {activeRoomReservation && (
         <div className="alert alert-warning" role="alert">
-          🏢 <strong>{t('status.roomBookedNow')} ({activeRoomReservation.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}):</strong>{' '}
+          <strong>{t('status.roomBookedNow')} ({activeRoomReservation.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}):</strong>{' '}
           {activeRoomReservation.bookerName ? (
             <>
               {t('status.booker')} <strong>{activeRoomReservation.bookerName}</strong>{' '}
@@ -187,13 +190,25 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
                       <span className="station-type">{station.type}</span>
                     </div>
                   </div>
-                  <div className="station-card-badges">
+                  <div className="station-card-badges flex items-center gap-1.5 flex-wrap">
                     {station.usesSharedTv && (
                       <span className="tv-badge">
-                        📺 {t('booking.sharedTvBadge')}
+                        {t('booking.sharedTvBadge')}
                       </span>
                     )}
-                    <span className={`status-pill ${isAvailable ? 'pill-free' : 'pill-busy'}`}>
+                    <span
+                      className={`status-pill ${
+                        isToday
+                          ? isAvailable
+                            ? 'pill-free'
+                            : isTvLocked
+                            ? 'pill-busy'
+                            : 'pill-busy'
+                          : hasBookingsToday
+                          ? 'pill-busy'
+                          : 'pill-free'
+                      }`}
+                    >
                       {isToday
                         ? isAvailable
                           ? t('status.free')
@@ -242,16 +257,16 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
         </div>
       )}
 
-      {/* Päiväkohtainen aikataulumatriisi ja kaikkien varausten tarkastelu */}
-      <div style={{ marginTop: '2.5rem' }}>
+      {/* Päiväkalenteri (Interaktiivinen aikajana) */}
+      <div className="mt-8">
         <DailyScheduleViewer
           selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          onSelectSlot={
-            onNavigateToBooking
-              ? (stationId, sHour, eHour) => onNavigateToBooking(stationId, sHour, eHour)
-              : undefined
-          }
+          onDateChange={(newDate) => setSelectedDate(newDate)}
+          onSelectSlot={(stationId, startH, endH) => {
+            if (onNavigateToBooking) {
+              onNavigateToBooking(stationId, startH, endH);
+            }
+          }}
           showDateSelector={true}
         />
       </div>

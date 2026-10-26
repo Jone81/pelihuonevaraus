@@ -5,6 +5,10 @@ import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { RealtimeStatus } from './RealtimeStatus';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { NewsItem } from '../types';
 
 interface LandingPageProps {
@@ -115,7 +119,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="navbar-brand">
             <img src="/xamk-logo.png" alt="Xamk Logo" className="navbar-xamk-logo" />
             <div className="navbar-brand-text">
-              <span className="navbar-title">Xamk Game Room</span>
+              <span className="navbar-title">{t('nav.title')}</span>
               <span className="navbar-subtitle">{t('nav.subtitle')}</span>
             </div>
           </div>
@@ -125,9 +129,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <LanguageSwitcher />
 
             {/* Kirjautumispainike */}
-            <button
+            <Button
               type="button"
-              className="btn btn-primary btn-touch landing-header-login-btn"
+              variant="xamk"
+              size="sm"
+              className="btn-touch landing-header-login-btn font-semibold"
               onClick={() => {
                 if (onOpenLogin) {
                   onOpenLogin();
@@ -140,7 +146,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               aria-label={t('nav.login')}
             >
               {t('nav.login')}
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -148,7 +154,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Hero esittelybanneri */}
       <section className="landing-hero">
         <div className="landing-hero-content">
-          <span className="badge badge-accent">Gaming Lounge & Community</span>
+          <Badge variant="xamk" className="px-3 py-1 text-xs uppercase tracking-wider mb-2">
+            Gaming Lounge & Community
+          </Badge>
           <h1 className="landing-hero-title">{t('landing.welcome')}</h1>
           <p className="landing-hero-subtitle">{t('landing.subtitle')}</p>
 
@@ -173,7 +181,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <span className="info-pill-icon">🟢</span>
               <div>
-                <strong>{showRealtimeStatus ? t('common.close') : t('nav.status')}</strong>
+                <strong>{showRealtimeStatus ? t('common.close') : t('landing.statusPreview')}</strong>
               </div>
             </button>
 
@@ -186,7 +194,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               >
                 <span className="info-pill-icon">🗺️</span>
                 <div>
-                  <strong>{t('nav.floorplan')}</strong>
+                  <strong>{t('floorplan.title')}</strong>
                 </div>
               </button>
             )}
@@ -225,9 +233,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <section className="landing-news-section">
           <div className="landing-section-header">
             <h2>{t('landing.newsHeader')}</h2>
-            <span className="news-count-badge">
+            <Badge variant="secondary" className="news-count-badge">
               {newsItems ? `${newsItems.length} ${t('landing.announcementsCount')}` : ''}
-            </span>
+            </Badge>
           </div>
 
           {isNewsLoading ? (
@@ -243,7 +251,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   className={`news-card ${item.isPinned ? 'news-card-pinned' : ''}`}
                 >
                   <div className="news-card-header">
-                    {item.isPinned && <span className="pinned-badge">{t('news.pinned')}</span>}
+                    {item.isPinned && (
+                      <Badge variant="xamk" className="pinned-badge text-xs">
+                        {t('news.pinned')}
+                      </Badge>
+                    )}
                     <time className="news-date">
                       {new Date(item.createdAtUtc).toLocaleDateString(isEn ? 'en-GB' : 'fi-FI', {
                         day: 'numeric',
@@ -309,13 +321,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             )}
 
             {step === 1 ? (
-              <form onSubmit={handleSendCode} className="login-form-inner">
-                <div className="form-group">
-                  <label htmlFor="landing-email">{t('login.step1')} *</label>
-                  <input
+              <form onSubmit={handleSendCode} className="login-form-inner space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="landing-email">{t('login.step1')} *</Label>
+                  <Input
                     id="landing-email"
                     type="email"
-                    className="form-control"
                     placeholder={t('login.emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -328,12 +339,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </small>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="landing-name">{t('login.nameLabel')}</label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="landing-name">{t('login.nameLabel')}</Label>
+                  <Input
                     id="landing-name"
                     type="text"
-                    className="form-control"
                     placeholder={t('login.namePlaceholder')}
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
@@ -341,36 +351,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
-                  className="btn btn-primary btn-block btn-touch"
+                  variant="xamk"
+                  size="lg"
+                  className="w-full btn-touch font-bold mt-2"
                   disabled={isLoading}
-                  style={{ marginTop: '0.5rem' }}
                 >
                   {isLoading ? t('common.submitting') : `📨 ${t('login.sendCode')}`}
-                </button>
+                </Button>
               </form>
             ) : (
-              <form onSubmit={handleVerifyCode} className="login-form-inner">
+              <form onSubmit={handleVerifyCode} className="login-form-inner space-y-3">
                 <div className="login-target-email">
                   <span>{t('login.codeSentAlert')}</span>
                   <strong>{email}</strong>
-                  <button
+                  <Button
                     type="button"
-                    className="link-btn"
+                    variant="link"
+                    size="sm"
+                    className="p-0 h-auto text-xs"
                     onClick={() => setStep(1)}
                   >
                     {t('login.changeEmail')}
-                  </button>
+                  </Button>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="landing-code">{t('login.step2')} *</label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="landing-code">{t('login.step2')} *</Label>
+                  <Input
                     id="landing-code"
                     type="text"
                     maxLength={6}
-                    className="form-control otp-input"
+                    className="text-center font-mono tracking-widest text-lg"
                     placeholder="123456"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
@@ -381,13 +394,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <small className="form-hint">{t('login.codeHint')}</small>
                 </div>
 
-                <button
+                <Button
                   type="submit"
-                  className="btn btn-primary btn-block btn-touch"
+                  variant="xamk"
+                  size="lg"
+                  className="w-full btn-touch font-bold"
                   disabled={isLoading}
                 >
                   {isLoading ? t('common.verifying') : `🚀 ${t('login.verifyCode')}`}
-                </button>
+                </Button>
               </form>
             )}
 
@@ -395,20 +410,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="quick-login-box">
               <span className="quick-login-label">{t('landing.quickDevLogin')}</span>
               <div className="quick-buttons-row">
-                <button
+                <Button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 hover:border-[#fbba18] hover:text-[#fbba18]"
                   onClick={() => handleQuickLogin('opiskelija@edu.xamk.fi', 'Matti Opiskelija')}
                 >
                   {t('login.quickStudent')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 hover:border-[#fbba18] hover:text-[#fbba18]"
                   onClick={() => handleQuickLogin('superadmin@xamk.fi', 'SuperAdmin Opettaja')}
                 >
                   {t('login.quickAdmin')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

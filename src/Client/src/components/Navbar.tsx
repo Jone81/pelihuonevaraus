@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 export type AppTab = 'book' | 'status' | 'games' | 'rules' | 'my-bookings' | 'admin' | 'superadmin';
 
@@ -87,15 +96,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Työpöytänäkymän toiminnot (piilotetaan mobiilissa) */}
         <div className="navbar-desktop-actions">
           {onOpenIssueModal && (
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary btn-touch"
+              variant="outline"
+              size="sm"
+              className="btn-touch border-[#ef4444]/40 text-[#ef4444] hover:bg-[#ef4444]/10"
               onClick={onOpenIssueModal}
               title={t('issue.desc')}
-              style={{ borderColor: 'rgba(211, 67, 32, 0.5)', color: '#ff7755' }}
             >
-              ⚠️ {t('issue.reportBtn')}
-            </button>
+              {t('issue.reportBtn')}
+            </Button>
           )}
 
           {/* Kielivalitsin (FI / EN) */}
@@ -109,24 +119,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {user.role}
                 </span>
               </div>
-              <button
+              <Button
                 type="button"
-                className="btn btn-secondary btn-touch"
+                variant="outline"
+                size="sm"
+                className="btn-touch border-[#2b313d] bg-[#1c2027] text-white hover:bg-[#242933] hover:border-[#fbba18]/60 hover:text-[#fbba18] font-medium shadow-sm transition-all"
                 onClick={logout}
                 aria-label={t('nav.logout')}
               >
                 {t('nav.logout')}
-              </button>
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
               type="button"
-              className="btn btn-primary btn-touch"
+              variant="xamk"
+              size="sm"
+              className="btn-touch"
               onClick={onOpenLogin}
               aria-label={t('nav.login')}
             >
               {t('nav.login')}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -207,22 +221,44 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
         {isAdmin && (
-          <button
-            type="button"
-            className={`tab-btn btn-touch ${activeTab === 'admin' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('admin')}
-          >
-            {t('nav.admin')}
-          </button>
-        )}
-        {isSuperAdmin && (
-          <button
-            type="button"
-            className={`tab-btn btn-touch tab-admin ${activeTab === 'superadmin' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('superadmin')}
-          >
-            {t('nav.superadmin')}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`tab-btn btn-touch tab-admin flex items-center gap-1.5 ${
+                  activeTab === 'admin' || activeTab === 'superadmin' ? 'tab-active' : ''
+                }`}
+                aria-label="Ylläpitovalikko"
+              >
+                <span>{t('nav.admin')}</span>
+                <span className="text-[10px] opacity-75">▼</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-[#1c2027] border-[#2b313d] text-foreground p-1.5 rounded-xl shadow-2xl">
+              <DropdownMenuLabel className="text-xs text-[#9da3ae] px-3 py-1.5 font-semibold uppercase tracking-wider">
+                Ylläpito / Admin
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-[#2b313d] my-1" />
+              <DropdownMenuItem
+                className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-medium hover:bg-[#242933] hover:text-[#fbba18] flex items-center gap-2 ${
+                  activeTab === 'admin' ? 'bg-[#242933] text-[#fbba18] font-bold' : ''
+                }`}
+                onClick={() => handleTabClick('admin')}
+              >
+                <span>{t('nav.admin')} (Hallintapaneeli)</span>
+              </DropdownMenuItem>
+              {isSuperAdmin && (
+                <DropdownMenuItem
+                  className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-medium hover:bg-[#242933] hover:text-[#fbba18] flex items-center gap-2 ${
+                    activeTab === 'superadmin' ? 'bg-[#242933] text-[#fbba18] font-bold' : ''
+                  }`}
+                  onClick={() => handleTabClick('superadmin')}
+                >
+                  <span>{t('nav.superadmin')} (Tapahtumajyräys)</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </nav>
 
@@ -293,7 +329,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`mobile-nav-item ${activeTab === 'book' ? 'item-active' : ''}`}
                 onClick={() => handleTabClick('book')}
               >
-                <span className="mobile-nav-icon">📅</span>
                 <span className="mobile-nav-text">{t('nav.book')}</span>
                 {activeTab === 'book' && <span className="active-dot">●</span>}
               </button>
@@ -303,7 +338,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`mobile-nav-item ${activeTab === 'status' ? 'item-active' : ''}`}
                 onClick={() => handleTabClick('status')}
               >
-                <span className="mobile-nav-icon">🟢</span>
                 <span className="mobile-nav-text">{t('nav.status')}</span>
                 {activeTab === 'status' && <span className="active-dot">●</span>}
               </button>
@@ -313,7 +347,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`mobile-nav-item ${activeTab === 'games' ? 'item-active' : ''}`}
                 onClick={() => handleTabClick('games')}
               >
-                <span className="mobile-nav-icon">🎮</span>
                 <span className="mobile-nav-text">{t('nav.games')}</span>
                 {activeTab === 'games' && <span className="active-dot">●</span>}
               </button>
@@ -323,7 +356,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`mobile-nav-item ${activeTab === 'rules' ? 'item-active' : ''}`}
                 onClick={() => handleTabClick('rules')}
               >
-                <span className="mobile-nav-icon">📖</span>
                 <span className="mobile-nav-text">{t('nav.rules')}</span>
                 {activeTab === 'rules' && <span className="active-dot">●</span>}
               </button>
@@ -333,7 +365,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="mobile-nav-item"
                 onClick={handleFloorPlanClick}
               >
-                <span className="mobile-nav-icon">🗺️</span>
                 <span className="mobile-nav-text">{t('nav.floorplan')}</span>
               </button>
 
@@ -343,7 +374,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className={`mobile-nav-item ${activeTab === 'my-bookings' ? 'item-active' : ''}`}
                   onClick={() => handleTabClick('my-bookings')}
                 >
-                  <span className="mobile-nav-icon">📋</span>
                   <span className="mobile-nav-text">{t('nav.myBookings')}</span>
                   {activeTab === 'my-bookings' && <span className="active-dot">●</span>}
                 </button>
@@ -355,7 +385,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className={`mobile-nav-item item-admin ${activeTab === 'admin' ? 'item-active' : ''}`}
                   onClick={() => handleTabClick('admin')}
                 >
-                  <span className="mobile-nav-icon">⚙️</span>
                   <span className="mobile-nav-text">{t('nav.admin')}</span>
                   {activeTab === 'admin' && <span className="active-dot">●</span>}
                 </button>
@@ -367,7 +396,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className={`mobile-nav-item item-superadmin ${activeTab === 'superadmin' ? 'item-active' : ''}`}
                   onClick={() => handleTabClick('superadmin')}
                 >
-                  <span className="mobile-nav-icon">⚡</span>
                   <span className="mobile-nav-text">{t('nav.superadmin')}</span>
                   {activeTab === 'superadmin' && <span className="active-dot">●</span>}
                 </button>
@@ -382,7 +410,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="mobile-extra-btn issue-extra-btn"
                   onClick={handleIssueClick}
                 >
-                  <span>⚠️</span>
                   <span>{t('issue.reportBtn')}</span>
                 </button>
               )}
@@ -394,7 +421,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="mobile-extra-btn discord-extra-btn"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <span>💬</span>
                 <span>{t('footer.discord')}</span>
               </a>
             </div>

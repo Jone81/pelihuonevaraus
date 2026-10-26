@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
+import { Badge } from '@/components/ui/badge';
 
 export const NewsBanner: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -22,9 +23,9 @@ export const NewsBanner: React.FC = () => {
       {displayNews.map((item) => (
         <div key={item.id} className="news-item">
           <div className="news-header">
-            <span className="news-badge">
+            <Badge variant={item.isPinned ? 'xamk' : 'secondary'} className="text-xs">
               {item.isPinned ? t('news.pinned') : t('news.badge')}
-            </span>
+            </Badge>
             <span className="news-title">{item.title}</span>
             <span className="news-date">
               {new Date(item.createdAtUtc).toLocaleDateString(lang === 'en' ? 'en-GB' : 'fi-FI')}

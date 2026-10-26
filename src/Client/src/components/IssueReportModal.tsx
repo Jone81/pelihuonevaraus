@@ -2,6 +2,17 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface IssueReportModalProps {
   isOpen: boolean;
@@ -37,8 +48,6 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,25 +91,24 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-content issue-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div>
-            <h2 className="modal-title">{t('issue.title')}</h2>
-            <p className="modal-subtitle">{t('issue.desc')}</p>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[560px]">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <DialogTitle className="text-xl font-bold text-white">
+                {t('issue.title')}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-[#9da3ae] mt-1">
+                {t('issue.desc')}
+              </DialogDescription>
+            </div>
           </div>
-          <button
-            type="button"
-            className="modal-close-btn"
-            onClick={onClose}
-            aria-label={t('common.close')}
-          >
-            ✕
-          </button>
-        </div>
+        </DialogHeader>
 
         {successMessage ? (
-          <div className="alert alert-success" style={{ margin: '1.5rem 0' }}>
+          <div className="alert alert-success my-4">
             <span>✅</span>
             <div>
               <strong>{successMessage}</strong>
@@ -110,19 +118,19 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="issue-form">
+          <form onSubmit={handleSubmit} className="space-y-4 my-2">
             {errorMessage && (
-              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+              <div className="alert alert-error">
                 <span>⚠️</span>
                 <span>{errorMessage}</span>
               </div>
             )}
 
-            <div className="form-group">
-              <label htmlFor="issue-target">{t('issue.target')} *</label>
+            <div className="space-y-1.5">
+              <Label htmlFor="issue-target">{t('issue.target')} *</Label>
               <select
                 id="issue-target"
-                className="form-control"
+                className="flex h-11 w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
                 required
@@ -135,12 +143,11 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
               </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="issue-title">{t('issue.reportTitle')} *</label>
-              <input
+            <div className="space-y-1.5">
+              <Label htmlFor="issue-title">{t('issue.reportTitle')} *</Label>
+              <Input
                 id="issue-title"
                 type="text"
-                className="form-control"
                 placeholder={t('issue.reportTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -148,66 +155,65 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="issue-desc">{t('issue.description')} *</label>
+            <div className="space-y-1.5">
+              <Label htmlFor="issue-desc">{t('issue.reportDesc')} *</Label>
               <textarea
                 id="issue-desc"
-                className="form-control"
-                rows={4}
-                placeholder={t('issue.descriptionPlaceholder')}
+                className="flex min-h-[90px] w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
+                placeholder={t('issue.reportDescPlaceholder')}
+                rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
             </div>
 
-            <div className="form-row-2col">
-              <div className="form-group">
-                <label htmlFor="issue-name">{t('issue.name')}</label>
-                <input
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="issue-name">{t('issue.reporterName')}</Label>
+                <Input
                   id="issue-name"
                   type="text"
-                  className="form-control"
-                  placeholder={isEn ? 'John Doe' : 'Matti Meikäläinen'}
+                  placeholder={t('issue.reporterNamePlaceholder')}
                   value={reporterName}
                   onChange={(e) => setReporterName(e.target.value)}
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="issue-email">{t('issue.email')}</label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="issue-email">{t('issue.reporterEmail')}</Label>
+                <Input
                   id="issue-email"
                   type="email"
-                  className="form-control"
-                  placeholder="nimi@edu.xamk.fi"
+                  placeholder={t('issue.reporterEmailPlaceholder')}
                   value={reporterEmail}
                   onChange={(e) => setReporterEmail(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="modal-actions" style={{ marginTop: '1.25rem' }}>
-              <button
+            <DialogFooter className="pt-2">
+              <Button
                 type="button"
-                className="btn btn-secondary"
+                variant="secondary"
+                className="btn-touch"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
                 {t('common.cancel')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="btn btn-primary"
+                variant="xamk"
+                className="btn-touch"
                 disabled={isSubmitting}
-                style={{ backgroundColor: '#d34320', borderColor: '#d34320' }}
               >
-                {isSubmitting ? t('issue.submitting') : `🚀 ${t('issue.submit')}`}
-              </button>
-            </div>
+                {isSubmitting ? t('common.submitting') : t('issue.submitBtn')}
+              </Button>
+            </DialogFooter>
           </form>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

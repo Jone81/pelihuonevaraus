@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { CreateGameRequest, CreateNewsRequest, UpdateSiteSettingsRequest } from '../types';
 
 type AdminSubTab = 'games' | 'news' | 'users' | 'settings' | 'statistics' | 'issues';
@@ -363,19 +365,21 @@ export const AdminPanel: React.FC = () => {
                         )}
                       </td>
                       <td>
-                        <span className={`status-pill ${game.isWishlist ? 'pill-wishlist' : 'pill-installed'}`}>
+                        <Badge variant={game.isWishlist ? 'warning' : 'success'} className="text-xs">
                           {game.isWishlist ? '💡 Toivelistalla' : '✅ Asennettu'}
-                        </span>
+                        </Badge>
                       </td>
                       <td>
-                        <button
+                        <Button
                           type="button"
-                          className={`btn ${game.isWishlist ? 'btn-primary' : 'btn-secondary'} btn-touch btn-small`}
+                          variant={game.isWishlist ? 'xamk' : 'secondary'}
+                          size="sm"
+                          className="btn-touch text-xs"
                           onClick={() => toggleWishlistMutation.mutate(game.id)}
                           disabled={toggleWishlistMutation.isPending}
                         >
                           {game.isWishlist ? '✅ Hyväksy valikoimaan' : 'Siirrä toivelistalle'}
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -470,13 +474,14 @@ export const AdminPanel: React.FC = () => {
                 </label>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="btn btn-primary btn-touch"
+                variant="xamk"
+                className="btn-touch font-bold"
                 disabled={createNewsMutation.isPending}
               >
                 {createNewsMutation.isPending ? 'Julkaistaan...' : 'Julkaise tiedote'}
-              </button>
+              </Button>
             </form>
           </div>
 
@@ -499,14 +504,16 @@ export const AdminPanel: React.FC = () => {
                       <td>{news.isPinned ? '📌 Kyllä' : '—'}</td>
                       <td>{new Date(news.createdAtUtc).toLocaleDateString('fi-FI')}</td>
                       <td>
-                        <button
+                        <Button
                           type="button"
-                          className="btn btn-secondary btn-touch btn-small btn-danger"
+                          variant="destructive"
+                          size="sm"
+                          className="btn-touch text-xs"
                           onClick={() => deleteNewsMutation.mutate(news.id)}
                           disabled={deleteNewsMutation.isPending}
                         >
                           Poista
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -541,9 +548,12 @@ export const AdminPanel: React.FC = () => {
                       <td><strong>{u.displayName}</strong></td>
                       <td>{u.email}</td>
                       <td>
-                        <span className={`role-badge role-${u.role.toLowerCase()}`}>
+                        <Badge
+                          variant={u.role.toLowerCase().includes('admin') ? 'xamk' : 'secondary'}
+                          className="text-xs"
+                        >
                           {u.role}
-                        </span>
+                        </Badge>
                       </td>
                       <td>
                         {u.role === 'SuperAdmin' ? (
@@ -614,13 +624,14 @@ export const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="btn btn-primary btn-touch"
+                variant="xamk"
+                className="btn-touch font-bold"
                 disabled={updateSettingsMutation.isPending}
               >
                 {updateSettingsMutation.isPending ? 'Tallennetaan...' : 'Tallenna asetukset'}
-              </button>
+              </Button>
             </form>
           </div>
         </div>
@@ -736,9 +747,9 @@ export const AdminPanel: React.FC = () => {
                     <div className="issue-card-header">
                       <div className="issue-meta">
                         <span className="target-tag">🖥️ {issue.target}</span>
-                        <span className={`status-pill ${issue.isResolved ? 'pill-installed' : 'pill-wishlist'}`}>
+                        <Badge variant={issue.isResolved ? 'success' : 'warning'} className="text-xs">
                           {issue.isResolved ? '🟢 Ratkaistu' : '🟡 Avoin'}
-                        </span>
+                        </Badge>
                         <time className="issue-date">
                           {new Date(issue.createdAt).toLocaleDateString('fi-FI', {
                             day: 'numeric',
@@ -782,9 +793,11 @@ export const AdminPanel: React.FC = () => {
                           placeholder="Kirjaa toimenpide (esim. hiiri vaihdettu)..."
                           id={`resolve-note-${issue.id}`}
                         />
-                        <button
+                        <Button
                           type="button"
-                          className="btn btn-primary btn-sm btn-touch"
+                          variant="xamk"
+                          size="sm"
+                          className="btn-touch"
                           onClick={() => {
                             const inputEl = document.getElementById(`resolve-note-${issue.id}`) as HTMLInputElement | null;
                             const notes = inputEl?.value.trim() || undefined;
@@ -793,7 +806,7 @@ export const AdminPanel: React.FC = () => {
                           disabled={resolveIssueMutation.isPending}
                         >
                           ✓ Merkitse ratkaistuksi
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

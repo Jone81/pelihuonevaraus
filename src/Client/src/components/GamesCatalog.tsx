@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { WishGameRequest } from '../types';
 
 export const GamesCatalog: React.FC = () => {
@@ -93,78 +105,91 @@ export const GamesCatalog: React.FC = () => {
 
   return (
     <div className="games-catalog-container">
-      <div className="section-header">
+      <div className="section-header flex justify-between items-center flex-wrap gap-4">
         <div>
           <h2>🎮 {t('games.title')}</h2>
           <p className="section-description">
             {t('games.subtitle')}
           </p>
         </div>
-        <button
+        <Button
           type="button"
-          className="btn btn-primary btn-touch"
+          variant="xamk"
+          className="btn-touch font-bold"
           onClick={() => setIsWishModalOpen(true)}
         >
           {t('wishlist.propose')}
-        </button>
+        </Button>
       </div>
 
       {/* Suodatusnapit */}
-      <div className="catalog-filters" role="tablist" aria-label="Pelialustat">
-        <button
+      <div className="catalog-filters flex flex-wrap gap-2 my-4" role="tablist" aria-label="Pelialustat">
+        <Button
           type="button"
-          className={`filter-btn btn-touch ${selectedFilter === 'ALL' ? 'filter-active' : ''}`}
+          variant={selectedFilter === 'ALL' ? 'xamk' : 'secondary'}
+          size="sm"
+          className="btn-touch"
           onClick={() => setSelectedFilter('ALL')}
         >
           {t('games.filterAll')}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={`filter-btn btn-touch ${selectedFilter === 'PC' ? 'filter-active' : ''}`}
+          variant={selectedFilter === 'PC' ? 'xamk' : 'secondary'}
+          size="sm"
+          className="btn-touch"
           onClick={() => setSelectedFilter('PC')}
         >
           🖥️ PC
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={`filter-btn btn-touch ${selectedFilter === 'PlayStation5' ? 'filter-active' : ''}`}
+          variant={selectedFilter === 'PlayStation5' ? 'xamk' : 'secondary'}
+          size="sm"
+          className="btn-touch"
           onClick={() => setSelectedFilter('PlayStation5')}
         >
           🎮 PlayStation 5
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={`filter-btn btn-touch ${selectedFilter === 'NintendoSwitch' ? 'filter-active' : ''}`}
+          variant={selectedFilter === 'NintendoSwitch' ? 'xamk' : 'secondary'}
+          size="sm"
+          className="btn-touch"
           onClick={() => setSelectedFilter('NintendoSwitch')}
         >
           🕹️ Nintendo Switch
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={`filter-btn btn-touch ${selectedFilter === 'WISHLIST' ? 'filter-active' : ''}`}
+          variant={selectedFilter === 'WISHLIST' ? 'xamk' : 'secondary'}
+          size="sm"
+          className="btn-touch relative"
           onClick={() => setSelectedFilter('WISHLIST')}
-          style={{ position: 'relative' }}
         >
-          ⭐ {t('wishlist.tabWishlist')}
+          {t('wishlist.tabWishlist')}
           {wishlistCount > 0 && (
-            <span className="badge-counter">{wishlistCount}</span>
+            <Badge variant="warning" className="ml-1.5 px-1.5 py-0 text-[10px]">
+              {wishlistCount}
+            </Badge>
           )}
-        </button>
+        </Button>
       </div>
 
       {selectedFilter === 'WISHLIST' && (
-        <div className="wishlist-intro-banner">
+        <div className="wishlist-intro-banner flex justify-between items-center p-4 rounded-xl border border-border bg-[#15181e] my-4 gap-4 flex-wrap">
           <div className="wishlist-intro-text">
-            <h3>{t('wishlist.introTitle')}</h3>
-            <p>{t('wishlist.introDesc')}</p>
+            <h3 className="font-bold text-base text-foreground">{t('wishlist.introTitle')}</h3>
+            <p className="text-sm text-[#9da3ae]">{t('wishlist.introDesc')}</p>
           </div>
-          <button
+          <Button
             type="button"
-            className="btn btn-accent btn-touch"
+            variant="xamk"
+            className="btn-touch font-bold"
             onClick={() => setIsWishModalOpen(true)}
           >
             {t('wishlist.proposeNew')}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -186,7 +211,7 @@ export const GamesCatalog: React.FC = () => {
         <div className="games-grid">
           {filteredGames.map((game) => (
             <div key={game.id} className={`game-card ${game.isWishlist ? 'game-card-wish' : ''}`}>
-              <div className="game-card-header">
+              <div className="game-card-header flex items-center justify-between">
                 <span className="platform-tag">
                   {game.platform === 'PC'
                     ? '🖥️ PC'
@@ -199,25 +224,32 @@ export const GamesCatalog: React.FC = () => {
                     🔥 {game.votesCount || 0} {t('wishlist.votes')}
                   </span>
                 ) : (
-                  <span className="installed-badge">✅ {t('games.installed')}</span>
+                  <span className="status-pill pill-free" style={{ fontSize: '0.72rem' }}>
+                    {t('games.installed')}
+                  </span>
                 )}
               </div>
 
-              <h3 className="game-title">{game.name}</h3>
-              <p className="game-desc">{game.description || t('games.noDesc')}</p>
+              <h3 className="game-title font-bold text-lg text-foreground my-2">{game.name}</h3>
+              {game.description && (
+                <p className="game-description text-sm text-[#9da3ae]">{game.description}</p>
+              )}
 
               {game.isWishlist && (
-                <div className="wishlist-vote-action">
-                  <button
+                <div className="game-card-footer mt-4 flex items-center justify-between">
+                  <span className="text-xs text-[#9da3ae]">
+                    {t('wishlist.communityWish')}
+                  </span>
+                  <Button
                     type="button"
-                    className={`btn btn-sm ${
-                      votedGameIds.has(game.id) ? 'btn-secondary' : 'btn-primary'
-                    }`}
+                    variant={votedGameIds.has(game.id) ? 'secondary' : 'xamk'}
+                    size="sm"
+                    className="btn-touch"
                     onClick={() => handleVote(game.id)}
                     disabled={votedGameIds.has(game.id) || voteMutation.isPending}
                   >
-                    {votedGameIds.has(game.id) ? `✓ ${t('wishlist.voted')}` : `👍 ${t('wishlist.vote')} (+1)`}
-                  </button>
+                    {votedGameIds.has(game.id) ? '👍 ' + t('wishlist.voted') : t('wishlist.vote')}
+                  </Button>
                 </div>
               )}
             </div>
@@ -225,89 +257,80 @@ export const GamesCatalog: React.FC = () => {
         </div>
       )}
 
-      {/* Ehdota peliä -modaali */}
-      {isWishModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsWishModalOpen(false)} role="dialog" aria-modal="true">
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{t('wishlist.modalTitle')}</h2>
-              <button
-                type="button"
-                className="btn-close btn-touch"
-                onClick={() => setIsWishModalOpen(false)}
-                aria-label={t('common.close')}
-              >
-                ✕
-              </button>
+      {/* Peli-ehdotusmodaali */}
+      <Dialog open={isWishModalOpen} onOpenChange={(open) => !open && setIsWishModalOpen(false)}>
+        <DialogContent className="max-w-md bg-[#1c2027] border-[#2b313d] text-foreground p-6 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {t('wishlist.modalTitle')}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-[#9da3ae] mt-1">
+              {t('wishlist.modalDesc')}
+            </DialogDescription>
+          </DialogHeader>
+
+          {wishSuccess && <div className="alert alert-success my-2">{wishSuccess}</div>}
+          {wishError && <div className="alert alert-error my-2">{wishError}</div>}
+
+          <form onSubmit={handleWishSubmit} className="space-y-4 my-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-name">{t('wishlist.gameName')} *</Label>
+              <Input
+                id="wish-name"
+                type="text"
+                placeholder={t('wishlist.gameNamePlaceholder')}
+                value={wishName}
+                onChange={(e) => setWishName(e.target.value)}
+                required
+              />
             </div>
 
-            <p className="modal-description">
-              {t('wishlist.modalDesc')}
-            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-platform">{t('wishlist.platform')} *</Label>
+              <select
+                id="wish-platform"
+                className="flex h-11 w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
+                value={wishPlatform}
+                onChange={(e) => setWishPlatform(e.target.value)}
+              >
+                <option value="PC">🖥️ PC</option>
+                <option value="PlayStation5">🎮 PlayStation 5</option>
+                <option value="NintendoSwitch">🕹️ Nintendo Switch</option>
+              </select>
+            </div>
 
-            {wishSuccess && <div className="alert alert-success">{wishSuccess}</div>}
-            {wishError && <div className="alert alert-error">{wishError}</div>}
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-desc">{t('wishlist.reasonDesc')}</Label>
+              <Input
+                id="wish-desc"
+                type="text"
+                placeholder={t('wishlist.reasonPlaceholder')}
+                value={wishDesc}
+                onChange={(e) => setWishDesc(e.target.value)}
+              />
+            </div>
 
-            <form onSubmit={handleWishSubmit} className="form">
-              <div className="form-group">
-                <label htmlFor="wish-name">{t('wishlist.gameName')} *</label>
-                <input
-                  id="wish-name"
-                  type="text"
-                  className="input-touch"
-                  placeholder={t('wishlist.gameNamePlaceholder')}
-                  value={wishName}
-                  onChange={(e) => setWishName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="wish-platform">{t('wishlist.platform')} *</label>
-                <select
-                  id="wish-platform"
-                  className="input-touch"
-                  value={wishPlatform}
-                  onChange={(e) => setWishPlatform(e.target.value)}
-                >
-                  <option value="PC">🖥️ PC</option>
-                  <option value="PlayStation5">🎮 PlayStation 5</option>
-                  <option value="NintendoSwitch">🕹️ Nintendo Switch</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="wish-desc">{t('wishlist.reasonDesc')}</label>
-                <input
-                  id="wish-desc"
-                  type="text"
-                  className="input-touch"
-                  placeholder={t('wishlist.reasonPlaceholder')}
-                  value={wishDesc}
-                  onChange={(e) => setWishDesc(e.target.value)}
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-touch"
-                  onClick={() => setIsWishModalOpen(false)}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-touch"
-                  disabled={wishMutation.isPending || !wishName.trim()}
-                >
-                  {wishMutation.isPending ? t('common.submitting') : t('wishlist.submitWish')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="secondary"
+                className="btn-touch"
+                onClick={() => setIsWishModalOpen(false)}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="submit"
+                variant="xamk"
+                className="btn-touch"
+                disabled={wishMutation.isPending || !wishName.trim()}
+              >
+                {wishMutation.isPending ? t('common.submitting') : t('wishlist.submitWish')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

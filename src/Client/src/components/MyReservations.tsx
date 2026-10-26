@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { CancelReservationRequest, Reservation } from '../types';
 
 export const MyReservations: React.FC = () => {
@@ -98,17 +100,20 @@ export const MyReservations: React.FC = () => {
                 className={`booking-card ${booking.status === 'Cancelled' ? 'booking-cancelled' : ''}`}
               >
                 <div className="booking-card-main">
-                  <div className="booking-card-header">
-                    <span className="booking-title">
+                  <div className="booking-card-header flex items-center justify-between">
+                    <span className="booking-title font-bold text-base">
                       {booking.reservationType === 'Individual'
                         ? `🎮 ${station?.name || 'PC / Konsoli'}`
                         : booking.reservationType === 'Room'
-                        ? `🏢 ${t('booking.type.room')}`
-                        : `🏆 ${t('booking.type.event')}`}
+                        ? t('booking.type.room')
+                        : t('booking.type.event')}
                     </span>
-                    <span className={`status-pill ${booking.status === 'Active' ? 'pill-free' : 'pill-busy'}`}>
+                    <Badge
+                      variant={booking.status === 'Active' ? 'success' : 'destructive'}
+                      className="text-xs"
+                    >
                       {booking.status === 'Active' ? (lang === 'en' ? 'Active' : 'Aktiivinen') : (lang === 'en' ? 'Cancelled' : 'Peruttu')}
-                    </span>
+                    </Badge>
                   </div>
 
                   <div className="booking-time-info">
@@ -129,15 +134,17 @@ export const MyReservations: React.FC = () => {
 
                 {booking.status === 'Active' && (
                   <div className="booking-card-actions">
-                    <button
+                    <Button
                       type="button"
-                      className="btn btn-danger btn-touch"
+                      variant="destructive"
+                      size="sm"
+                      className="btn-touch"
                       onClick={() => handleCancel(booking)}
                       disabled={hasStarted || cancelMutation.isPending}
                       title={hasStarted ? 'Alkanutta varausta ei voi perua' : t('myBookings.cancel')}
                     >
                       {hasStarted ? (lang === 'en' ? 'In progress' : 'Käynnissä') : (cancelMutation.isPending ? t('myBookings.cancelling') : t('myBookings.cancel'))}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

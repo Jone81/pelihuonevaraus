@@ -1,5 +1,15 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface FloorPlanModalProps {
   isOpen: boolean;
@@ -9,37 +19,33 @@ interface FloorPlanModalProps {
 export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose }) => {
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
-  if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="floorplan-title">
-      <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-title-wrap">
-            <span className="modal-icon">🗺️</span>
-            <h2 id="floorplan-title">{t('floorplan.title')}</h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[700px]">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🗺️</span>
+            <div>
+              <DialogTitle className="text-xl font-bold text-white">
+                {t('floorplan.title')}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-[#9da3ae] mt-1">
+                {t('floorplan.desc')}
+              </DialogDescription>
+            </div>
           </div>
-          <button
-            type="button"
-            className="btn-close btn-touch"
-            onClick={onClose}
-            aria-label={t('floorplan.close')}
-          >
-            ✕
-          </button>
-        </div>
+        </DialogHeader>
 
-        <p className="modal-description">
-          {t('floorplan.desc')}
-        </p>
-
-        {/* Kuva-ikkuna (Toistaiseksi tyhjä kuva-alue) */}
-        <div className="floorplan-image-box">
+        {/* Kuva-ikkuna / Luonnosalue */}
+        <div className="floorplan-image-box my-4">
           <div className="floorplan-empty-area">
             <div className="floorplan-sketch">
-              <div className="sketch-header">
+              <div className="sketch-header flex items-center justify-between">
                 <span className="sketch-title">{t('floorplan.sketchHeader')}</span>
-                <span className="sketch-badge">{isEn ? '6 PCs + 2 Consoles' : '6 PC + 2 Konsolia'}</span>
+                <Badge variant="xamk">
+                  {isEn ? '6 PCs + 2 Consoles' : '6 PC + 2 Konsolia'}
+                </Badge>
               </div>
 
               <div className="sketch-room">
@@ -82,16 +88,17 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
           </div>
         </div>
 
-        <div className="modal-actions">
-          <button
+        <DialogFooter className="flex justify-end">
+          <Button
             type="button"
-            className="btn btn-secondary btn-touch"
+            variant="secondary"
+            className="btn-touch px-6"
             onClick={onClose}
           >
             {t('floorplan.close')}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

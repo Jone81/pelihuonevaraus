@@ -216,6 +216,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.equipmentValue': '6 kpl PC, PS5, Switch',
     'landing.discordLink': 'Liity Discordiin ↗',
     'landing.rulesNotice': 'Tutustu tilan sääntöihin ja muista kirjautua ulos henkilökohtaisilta pelitileiltäsi (Steam, Discord).',
+    'landing.statusPreview': 'Tilan tilanne',
     'landing.openFloorPlan': 'Tutustu tilan pohjakuvaan',
     'landing.quickDevLogin': 'Pikakirjautuminen kehitysympäristössä:',
 
@@ -454,6 +455,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.equipmentValue': '6 PCs, PS5, Switch',
     'landing.discordLink': 'Join Discord ↗',
     'landing.rulesNotice': 'Check out the room guidelines and remember to sign out from personal gaming accounts (Steam, Discord).',
+    'landing.statusPreview': 'Live Status',
     'landing.openFloorPlan': 'View Floor Plan',
     'landing.quickDevLogin': 'Quick login for testing:',
 

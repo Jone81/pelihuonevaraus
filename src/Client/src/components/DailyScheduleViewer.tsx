@@ -380,7 +380,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                 return (
                   <li key={r.id}>
                     <span className="res-badge res-room-badge">
-                      {r.reservationType === 'Event' ? '🏆 ' + t('booking.type.event') : '🏢 ' + t('booking.type.room')}
+                      {r.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}
                     </span>{' '}
                     <strong>klo {s} – {e}</strong> • {t('booking.booker')}{' '}
                     <strong>{r.bookerName || 'Opiskelija/Admin'}</strong>{' '}
@@ -579,7 +579,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                         </div>
                       </div>
                       {station.usesSharedTv && (
-                        <span className="tv-badge">📺 {t('booking.sharedTvBadge')}</span>
+                        <span className="tv-badge">{t('booking.sharedTvBadge')}</span>
                       )}
                     </div>
 
@@ -700,10 +700,10 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                               }`}
                             >
                               {r.reservationType === 'Event'
-                                ? '🏆 ' + t('booking.type.event')
+                                ? t('booking.type.event')
                                 : r.reservationType === 'Room'
-                                ? '🏢 ' + t('booking.type.room')
-                                : '🎮 ' + t('booking.type.individual')}
+                                ? t('booking.type.room')
+                                : t('booking.type.individual')}
                             </span>
                           </td>
                           <td>
