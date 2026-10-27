@@ -12,20 +12,12 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = 6, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={cn(
-        'z-50 min-w-[200px] overflow-hidden rounded-xl border border-[#2b313d] bg-[#1c2027] p-1.5 text-foreground shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2',
-        className
-      )}
-      style={{
-        backgroundColor: '#1c2027',
-        borderColor: '#2b313d',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(251,186,24,0.1)',
-      }}
+      className={cn('xamk-dropdown-content', className)}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -41,7 +33,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium outline-none transition-colors hover:bg-[#242933] hover:text-[#fbba18] focus:bg-[#242933] focus:text-[#fbba18] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'xamk-dropdown-item',
       inset && 'pl-8',
       className
     )}
@@ -59,7 +51,7 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      'px-3 py-1.5 text-xs font-semibold text-[#9da3ae] tracking-wider uppercase',
+      'xamk-dropdown-label',
       inset && 'pl-8',
       className
     )}
@@ -74,7 +66,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-[#2b313d]', className)}
+    className={cn('xamk-dropdown-separator', className)}
     {...props}
   />
 ))
