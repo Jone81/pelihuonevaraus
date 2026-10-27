@@ -8,8 +8,8 @@ interface LanguageSwitcherProps {
 const FinlandFlag: React.FC = () => (
   <svg
     viewBox="0 0 18 11"
-    width="18"
-    height="12"
+    width="16"
+    height="10"
     aria-hidden="true"
     className="flag-icon"
     style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}
@@ -23,8 +23,8 @@ const FinlandFlag: React.FC = () => (
 const UKFlag: React.FC = () => (
   <svg
     viewBox="0 0 60 30"
-    width="18"
-    height="12"
+    width="16"
+    height="10"
     aria-hidden="true"
     className="flag-icon"
     style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}
@@ -47,29 +47,40 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
 
   return (
     <div
-      className={`lang-switcher ${className}`}
+      className={`lang-switcher flex items-center bg-[#14161f] border border-[#2b313d] rounded-lg p-0.5 ${className}`}
       role="group"
       aria-label="Kielivalitsin / Language selector"
     >
       <button
         type="button"
-        className={`lang-btn btn-touch ${lang === 'fi' ? 'lang-active' : ''}`}
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
+          lang === 'fi'
+            ? 'bg-[#1e2230] text-[#fbba18] font-bold border border-[#d89619]/40 shadow-xs'
+            : 'text-gray-400 hover:text-white'
+        }`}
         onClick={() => setLang('fi')}
         aria-pressed={lang === 'fi'}
         title="Suomeksi (Finnish)"
       >
         <FinlandFlag />
-        <span className="lang-text">Suomi</span>
+        <span className="hidden sm:inline text-xs font-semibold">Suomi</span>
+        <span className="sm:hidden text-[10px] font-bold">FI</span>
       </button>
+
       <button
         type="button"
-        className={`lang-btn btn-touch ${lang === 'en' ? 'lang-active' : ''}`}
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
+          lang === 'en'
+            ? 'bg-[#1e2230] text-[#fbba18] font-bold border border-[#d89619]/40 shadow-xs'
+            : 'text-gray-400 hover:text-white'
+        }`}
         onClick={() => setLang('en')}
         aria-pressed={lang === 'en'}
         title="In English"
       >
         <UKFlag />
-        <span className="lang-text">English</span>
+        <span className="hidden sm:inline text-xs font-semibold">English</span>
+        <span className="sm:hidden text-[10px] font-bold">EN</span>
       </button>
     </div>
   );

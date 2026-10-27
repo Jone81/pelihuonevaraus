@@ -71,7 +71,7 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -3679,4 +3679,102 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
     width: 100% !important;
     box-sizing: border-box !important;
   }
+}
+
+
+/* =========================================================
+   Cockpit Dashboard Layout (Mockup 2-column view)
+   ========================================================= */
+.cockpit-booking-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .cockpit-booking-container {
+    grid-template-columns: 5fr 7fr;
+    gap: 2rem;
+  }
+}
+
+.cockpit-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease;
+}
+
+.cockpit-card:hover {
+  border-color: rgba(251, 186, 24, 0.3);
+}
+
+.booking-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-schedule-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: auto;
+}
+
+
+/* =========================================================
+   Cockpit Dashboard & Viewport Overflow Prevention Overrides
+   ========================================================= */
+html, body, #root {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+
+.daily-schedule-card {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.timeline-scroll-area {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border: 1px solid rgba(216, 150, 25, 0.3) !important;
+  border-radius: 12px !important;
+  background-color: #111318 !important;
+}
+
+.timeline-header-row,
+.timeline-rows {
+  min-width: 720px !important;
+}
+
+.timeline-station-col-header,
+.timeline-station-cell {
+  width: 165px !important;
+  min-width: 165px !important;
+  background-color: #111318 !important;
+  border-right: 1px solid rgba(216, 150, 25, 0.25) !important;
+}
+
+.btn-touch {
+  min-height: unset !important;
+  min-width: unset !important;
+  padding: inherit !important;
+  font-size: inherit !important;
 }

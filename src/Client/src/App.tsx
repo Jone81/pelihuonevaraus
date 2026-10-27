@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar, type AppTab } from './components/Navbar';
 import { BookingCalendar } from './components/BookingCalendar';
 import { RealtimeStatus } from './components/RealtimeStatus';
@@ -9,12 +9,13 @@ import { GamesCatalog } from './components/GamesCatalog';
 import { MyReservations } from './components/MyReservations';
 import { AdminPanel } from './components/AdminPanel';
 import { SuperAdminPanel } from './components/SuperAdminPanel';
-import { NewsBanner } from './components/NewsBanner';
 import { LoginModal } from './components/LoginModal';
 import { FloorPlanModal } from './components/FloorPlanModal';
 import { RulesAndGuide } from './components/RulesAndGuide';
 import { LandingPage } from './components/LandingPage';
 import { IssueReportModal } from './components/IssueReportModal';
+import { HeroBanner } from './components/HeroBanner';
+import { Footer } from './components/Footer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,13 +28,12 @@ const queryClient = new QueryClient({
 
 export const AppContent: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<AppTab>('book');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
-  // Jos käyttäjä EI OLE kirjautunut: Ensimmäinen sivu on LandingPage (Xamk logo, uutiset & kirjautuminen)
+  // Jos käyttäjä EI OLE kirjautunut: Ensimmäinen sivu on LandingPage
   if (!user) {
     return (
       <>
@@ -61,9 +61,10 @@ export const AppContent: React.FC = () => {
     );
   }
 
-  // Kun kirjautuminen onnistuu: aukeaa varausjärjestelmä
+  // Kun käyttäjä on kirjautunut: Aukeaa päänäkymä mallin mukaisella värimaailmalla
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-[#0a0b0d] text-white">
+      {/* 1. Yläpalkki (Pikimusta tausta) */}
       <Navbar
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
@@ -72,62 +73,47 @@ export const AppContent: React.FC = () => {
         setActiveTab={setActiveTab}
       />
 
-      <main className="main-content">
-        {/* Tärkeät tiedotteet aina näkyvillä yläosassa */}
-        <NewsBanner />
+      {/* 2. Hero-banneri valokuvalla ja aukioloajoilla */}
+      <HeroBanner />
 
-        {activeTab === 'book' && (
-          <BookingCalendar
-            onRequireLogin={() => setIsLoginOpen(true)}
-            onSuccessBooking={() => setActiveTab('my-bookings')}
-            onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-          />
-        )}
+      {/* 3. KESKIALUE HARMAA (#23262d) EROTTUVUUDEN TAKIA */}
+      <main className="flex-1 w-full max-w-full overflow-hidden bg-[#23262d] border-y border-[#181a20] py-6 sm:py-8 lg:py-10">
+        <div className="max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8">
+          {activeTab === 'book' && (
+            <BookingCalendar
+              onRequireLogin={() => setIsLoginOpen(true)}
+              onSuccessBooking={() => setActiveTab('my-bookings')}
+              onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+            />
+          )}
 
-        {activeTab === 'status' && (
-          <RealtimeStatus
-            onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-            onNavigateToBooking={() => setActiveTab('book')}
-          />
-        )}
+          {activeTab === 'status' && (
+            <RealtimeStatus
+              onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+              onNavigateToBooking={() => setActiveTab('book')}
+            />
+          )}
 
-        {activeTab === 'games' && <GamesCatalog />}
+          {activeTab === 'games' && <GamesCatalog />}
 
-        {activeTab === 'rules' && (
-          <RulesAndGuide onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
-        )}
+          {activeTab === 'rules' && (
+            <RulesAndGuide onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+          )}
 
-        {activeTab === 'my-bookings' && <MyReservations />}
+          {activeTab === 'my-bookings' && <MyReservations />}
 
-        {activeTab === 'admin' && <AdminPanel />}
+          {activeTab === 'admin' && <AdminPanel />}
 
-        {activeTab === 'superadmin' && <SuperAdminPanel />}
+          {activeTab === 'superadmin' && <SuperAdminPanel />}
+        </div>
       </main>
 
-      <footer className="footer">
-        <div className="footer-content">
-          <span>{t('footer.school')}</span>
-          <span className="footer-separator">•</span>
-          <span className="footer-gold">Xamk Game Room</span>
-          <span className="footer-separator">•</span>
-          <button
-            type="button"
-            className="footer-link-btn"
-            onClick={() => setIsIssueModalOpen(true)}
-          >
-            {t('footer.report')}
-          </button>
-          <span className="footer-separator">•</span>
-          <a
-            href="https://discord.gg/xamk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-discord-link"
-          >
-            {t('footer.discord')}
-          </a>
-        </div>
-      </footer>
+      {/* 4. Alapalkki (Kultainen korostusviiva + musta tausta) */}
+      <Footer
+        onOpenIssueModal={() => setIsIssueModalOpen(true)}
+        onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+        onNavigateTab={(tab) => setActiveTab(tab)}
+      />
 
       <LoginModal
         isOpen={isLoginOpen}
@@ -143,7 +129,7 @@ export const AppContent: React.FC = () => {
         isOpen={isIssueModalOpen}
         onClose={() => setIsIssueModalOpen(false)}
       />
-    </>
+    </div>
   );
 };
 

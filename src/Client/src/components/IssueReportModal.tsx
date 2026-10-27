@@ -3,16 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+  AlertTriangle,
+  CheckCircle2,
+  X,
+  Send,
+  User,
+  Mail,
+  HelpCircle,
+  FileText,
+} from 'lucide-react';
 
 interface IssueReportModalProps {
   isOpen: boolean;
@@ -49,6 +48,8 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  if (!isOpen) return null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) {
@@ -74,7 +75,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 2500);
+      }, 2000);
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
@@ -91,129 +92,142 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-[560px]">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            <div>
-              <DialogTitle className="text-xl font-bold text-white">
-                {t('issue.title')}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-[#9da3ae] mt-1">
-                {t('issue.desc')}
-              </DialogDescription>
-            </div>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#181a20] border border-[#2d323f] rounded-2xl w-full max-w-lg p-6 shadow-2xl flex flex-col gap-4 relative animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between pb-3 border-b border-[#2d323f]">
+          <div className="flex flex-col">
+            <h2 className="text-base font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-[#fbba18]" />
+              <span>{t('issue.title')}</span>
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">{t('issue.desc')}</p>
           </div>
-        </DialogHeader>
+          <button
+            type="button"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            onClick={onClose}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-        {successMessage ? (
-          <div className="alert alert-success my-4">
-            <span>✅</span>
-            <div>
-              <strong>{successMessage}</strong>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
-                {t('issue.successDetail')}
-              </p>
-            </div>
+        {successMessage && (
+          <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            <span>{successMessage}</span>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 my-2">
-            {errorMessage && (
-              <div className="alert alert-error">
-                <span>⚠️</span>
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="issue-target">{t('issue.target')} *</Label>
-              <select
-                id="issue-target"
-                className="flex h-11 w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-                required
-              >
-                {targetOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="issue-title">{t('issue.reportTitle')} *</Label>
-              <Input
-                id="issue-title"
-                type="text"
-                placeholder={t('issue.reportTitlePlaceholder')}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="issue-desc">{t('issue.reportDesc')} *</Label>
-              <textarea
-                id="issue-desc"
-                className="flex min-h-[90px] w-full rounded-xl border border-border bg-[#15181e] px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbba18]"
-                placeholder={t('issue.reportDescPlaceholder')}
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="issue-name">{t('issue.reporterName')}</Label>
-                <Input
-                  id="issue-name"
-                  type="text"
-                  placeholder={t('issue.reporterNamePlaceholder')}
-                  value={reporterName}
-                  onChange={(e) => setReporterName(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="issue-email">{t('issue.reporterEmail')}</Label>
-                <Input
-                  id="issue-email"
-                  type="email"
-                  placeholder={t('issue.reporterEmailPlaceholder')}
-                  value={reporterEmail}
-                  onChange={(e) => setReporterEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="secondary"
-                className="btn-touch"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                variant="xamk"
-                className="btn-touch"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? t('common.submitting') : t('issue.submitBtn')}
-              </Button>
-            </DialogFooter>
-          </form>
         )}
-      </DialogContent>
-    </Dialog>
+
+        {errorMessage && (
+          <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          {/* Kohde */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              <HelpCircle className="w-3 h-3 text-[#d89619]" />
+              <span>{t('issue.target')} *</span>
+            </label>
+            <select
+              className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors cursor-pointer"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+            >
+              {targetOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Otsikko */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+              <FileText className="w-3 h-3 text-[#d89619]" />
+              <span>{t('issue.reportTitle')} *</span>
+            </label>
+            <input
+              type="text"
+              placeholder={t('issue.reportTitlePlaceholder')}
+              className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Kuvaus */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              {t('issue.description')} *
+            </label>
+            <textarea
+              rows={4}
+              placeholder={t('issue.descriptionPlaceholder')}
+              className="w-full bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl p-3 text-xs outline-none transition-colors resize-none leading-relaxed"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Yhteystiedot */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                <User className="w-3 h-3 text-gray-400" />
+                <span>{t('issue.name')}</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Matti Meikäläinen"
+                className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
+                value={reporterName}
+                onChange={(e) => setReporterName(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                <Mail className="w-3 h-3 text-gray-400" />
+                <span>{t('issue.email')}</span>
+              </label>
+              <input
+                type="email"
+                placeholder="etunimi.sukunimi@edu.xamk.fi"
+                className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
+                value={reporterEmail}
+                onChange={(e) => setReporterEmail(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Painikkeet */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#2d323f]">
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl bg-[#111318] hover:bg-[#1a1d26] border border-[#2d323f] text-gray-300 text-xs font-semibold cursor-pointer transition-colors"
+              onClick={onClose}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#d89619] via-[#fbba18] to-[#d89619] text-[#0a0b0d] font-bold text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{isSubmitting ? t('issue.submitting') : t('issue.submit')}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
