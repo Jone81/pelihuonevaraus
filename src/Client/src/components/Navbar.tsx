@@ -88,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="w-full max-w-full overflow-hidden bg-[#0a0b0d] border-b border-[#1c1f26] sticky top-0 z-50 select-none">
       <div className="max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-        {/* Vasen laita: Virallinen XAMK Hero -logo ja otsikot (mobiilissa vain logo ilman tekstin katkeamista) */}
+        {/* Vasen laita: Virallinen XAMK Hero -logo ja otsikot (Aina näkyvissä myös mobiilissa) */}
         <div
           className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group min-w-0 flex-shrink-0"
           onClick={() => handleTabClick('book')}
@@ -96,13 +96,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <img
             src="/xamk-hero-logo.png"
             alt="Xamk Logo"
-            className="h-7 sm:h-8 w-auto object-contain flex-shrink-0"
+            className="h-6 sm:h-7 md:h-8 w-auto object-contain flex-shrink-0"
           />
-          <div className="hidden sm:flex flex-col leading-tight min-w-0">
-            <span className="text-white font-extrabold tracking-wide text-xs sm:text-sm uppercase truncate">
+          <div className="flex flex-col leading-tight min-w-0">
+            <span className="text-white font-extrabold tracking-wide text-[11px] sm:text-xs md:text-sm uppercase truncate">
               {t('nav.title')}
             </span>
-            <span className="text-[#d89619] text-[9px] sm:text-[10px] font-bold tracking-widest uppercase truncate">
+            <span className="text-[#d89619] text-[8px] sm:text-[9px] md:text-[10px] font-bold tracking-widest uppercase truncate">
               {t('nav.subtitle')}
             </span>
           </div>
