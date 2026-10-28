@@ -4,30 +4,36 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] cursor-pointer select-none',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d49a2a] disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none btn-touch',
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground font-semibold hover:bg-primary/90 shadow-[0_0_15px_rgba(251,186,24,0.2)] hover:shadow-[0_0_20px_rgba(251,186,24,0.35)]',
+          'xamk-confirm-pill-btn',
         xamk:
-          'bg-[#fbba18] text-[#0d0f12] font-semibold hover:bg-[#e0a307] active:bg-[#c78f03] shadow-[0_0_15px_rgba(251,186,24,0.25)]',
+          'xamk-confirm-pill-btn',
+        pill:
+          'xamk-confirm-pill-btn',
+        segment:
+          'xamk-segment-btn',
+        station:
+          'xamk-station-row-card',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
+          'xamk-table-action-btn action-danger',
         outline:
-          'border border-border bg-transparent hover:bg-secondary hover:text-foreground text-foreground',
+          'xamk-modal-cancel-btn',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'xamk-modal-cancel-btn',
         ghost:
-          'hover:bg-secondary hover:text-foreground text-foreground',
+          'rounded-md px-3 py-1.5 text-[#cfd2d8] hover:bg-[#25272d] hover:text-white',
         link:
-          'text-primary underline-offset-4 hover:underline',
+          'text-[#d49a2a] underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-lg px-3 text-xs',
-        lg: 'h-12 rounded-xl px-6 text-base font-semibold',
-        icon: 'h-10 w-10',
+        default: '',
+        sm: 'text-xs px-3 py-1.5 min-h-[34px]',
+        lg: 'text-base px-6 py-2.5 min-h-[44px]',
+        icon: 'h-9 w-9 p-0',
       },
     },
     defaultVariants: {
@@ -57,4 +63,5 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = 'Button'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants }

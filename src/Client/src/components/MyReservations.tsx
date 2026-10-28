@@ -3,23 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import {
-  ClipboardList,
-  Calendar,
-  Clock,
-  Building,
-  Monitor,
-  Gamepad2,
-  Gamepad,
-  XCircle,
-  AlertCircle,
-} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import type { CancelReservationRequest, Reservation } from '../types';
 
 export const MyReservations: React.FC = () => {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
-  const isEn = lang === 'en';
   const queryClient = useQueryClient();
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -52,14 +42,14 @@ export const MyReservations: React.FC = () => {
       if (err instanceof ApiError) {
         setCancelError(err.message);
       } else {
-        setCancelError(isEn ? 'Failed to cancel reservation.' : 'Varauksen peruutus epäonnistui.');
+        setCancelError('Varauksen peruutus epäonnistui.');
       }
     },
   });
 
   if (!user) {
     return (
-      <div className="p-6 rounded-2xl bg-[#181a20] border border-[#2d323f] text-gray-300 text-xs text-center shadow-xl">
+      <div className="alert alert-info">
         {t('myBookings.requireLogin')}
       </div>
     );
@@ -79,139 +69,82 @@ export const MyReservations: React.FC = () => {
     });
   };
 
-  const getTargetIcon = (reservation: Reservation, stationType?: string) => {
-    if (reservation.reservationType === 'Room' || reservation.reservationType === 'Event') {
-      return <Building className="w-4 h-4 text-amber-400" />;
-    }
-    if (stationType === 'PlayStation5') return <Gamepad2 className="w-4 h-4 text-purple-400" />;
-    if (stationType === 'NintendoSwitch' || stationType === 'Switch') return <Gamepad className="w-4 h-4 text-rose-400" />;
-    return <Monitor className="w-4 h-4 text-cyan-400" />;
-  };
-
   return (
-    <div className="w-full max-w-full flex flex-col gap-6">
-      {/* Yläkortti: Otsikko */}
-      <div className="bg-[#181a20] border border-[#2d323f] rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col items-start">
-        <div className="flex items-center gap-2">
-          <ClipboardList className="w-4 h-4 text-[#d89619]" />
-          <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-white font-sans">
-            {t('myBookings.title')}
-          </h2>
-        </div>
-        <div className="w-10 h-0.5 bg-[#d89619] rounded-full mt-1.5" />
-        <p className="text-xs text-gray-400 mt-2">{t('myBookings.desc')}</p>
+    <div className="reservations-container">
+      <div className="section-header">
+        <h2>{t('myBookings.title')}</h2>
+        <p className="section-description">
+          {t('myBookings.desc')}
+        </p>
       </div>
 
-      {cancelError && (
-        <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{cancelError}</span>
-        </div>
-      )}
+      {cancelError && <div className="alert alert-error">{cancelError}</div>}
 
       {isLoading ? (
-        <div className="py-16 flex flex-col items-center justify-center gap-2 text-gray-400 bg-[#181a20] rounded-2xl border border-[#2d323f]">
-          <div className="w-6 h-6 border-2 border-[#d89619] border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs">{t('booking.checkingAvailable')}</span>
-        </div>
+        <div className="loading-state">{t('booking.checkingAvailable')}</div>
       ) : myBookings.length === 0 ? (
-        <div className="py-16 text-center text-gray-400 text-xs bg-[#181a20] rounded-2xl border border-[#2d323f]">
-          {t('myBookings.noneActive')}
+        <div className="empty-state">
+          <p>{t('myBookings.noneActive')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="booking-list">
           {myBookings.map((booking) => {
             const start = new Date(booking.startUtc);
             const end = new Date(booking.endUtc);
             const hasStarted = now >= start;
-            const isCancelled = booking.status === 'Cancelled';
             const station = stations?.find((s) => s.id === booking.gamingStationId);
-
-            const targetName =
-              booking.reservationType === 'Individual'
-                ? station?.name || 'Pelipiste'
-                : booking.reservationType === 'Room'
-                ? t('booking.type.room')
-                : t('booking.type.event');
 
             return (
               <div
                 key={booking.id}
-                className={`bg-[#181a20] border rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-4 transition-all ${
-                  isCancelled
-                    ? 'border-gray-800 bg-[#14151b] opacity-60'
-                    : 'border-[#2d323f] hover:border-[#fbba18]/40'
-                }`}
+                className={`booking-card ${booking.status === 'Cancelled' ? 'booking-cancelled' : ''}`}
               >
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-xl bg-[#111318] border border-[#252936]">
-                        {getTargetIcon(booking, station?.type)}
-                      </div>
-                      <span className="font-bold text-sm text-white">{targetName}</span>
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isCancelled
-                          ? 'bg-gray-800 text-gray-400 border border-gray-700'
-                          : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                      }`}
+                <div className="booking-card-main">
+                  <div className="booking-card-header flex items-center justify-between">
+                    <span className="booking-title font-bold text-base">
+                      {booking.reservationType === 'Individual'
+                        ? `🎮 ${station?.name || 'PC / Konsoli'}`
+                        : booking.reservationType === 'Room'
+                        ? t('booking.type.room')
+                        : t('booking.type.event')}
+                    </span>
+                    <Badge
+                      variant={booking.status === 'Active' ? 'success' : 'destructive'}
+                      className="text-xs"
                     >
-                      {isCancelled
-                        ? isEn ? 'Cancelled' : 'Peruttu'
-                        : isEn ? 'Active' : 'Aktiivinen'}
+                      {booking.status === 'Active' ? (lang === 'en' ? 'Active' : 'Aktiivinen') : (lang === 'en' ? 'Cancelled' : 'Peruttu')}
+                    </Badge>
+                  </div>
+
+                  <div className="booking-time-info">
+                    <span className="booking-date">
+                      📅 {start.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fi-FI', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })}
+                    </span>
+                    <span className="booking-hours">
+                      ⏰ {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
 
-                  {/* Aikatiedot */}
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-[#252936]">
-                    <div className="flex items-center gap-1.5 text-gray-300">
-                      <Calendar className="w-3.5 h-3.5 text-[#fbba18] flex-shrink-0" />
-                      <span className="capitalize">
-                        {start.toLocaleDateString(isEn ? 'en-GB' : 'fi-FI', {
-                          weekday: 'short',
-                          day: 'numeric',
-                          month: 'numeric',
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-gray-300 font-mono">
-                      <Clock className="w-3.5 h-3.5 text-[#fbba18] flex-shrink-0" />
-                      <span>
-                        {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
-                        {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  </div>
-
                   {booking.cancellationReason && (
-                    <div className="text-[11px] text-gray-400 bg-white/5 p-2 rounded-lg">
-                      {isEn ? 'Reason:' : 'Syy:'} {booking.cancellationReason}
+                    <div className="cancellation-reason">
+                      Syy: {booking.cancellationReason}
                     </div>
                   )}
                 </div>
 
-                {/* Toimintopainike: Peruuta varaus */}
-                {!isCancelled && (
-                  <div className="pt-2 border-t border-[#252936] flex items-center justify-end">
-                    <button
+                {booking.status === 'Active' && (
+                  <div className="booking-card-actions">
+                    <Button
                       type="button"
-                      className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-40"
+                      variant="destructive"
+                      size="sm"
+                      className="btn-touch"
                       onClick={() => handleCancel(booking)}
                       disabled={hasStarted || cancelMutation.isPending}
+                      title={hasStarted ? 'Alkanutta varausta ei voi perua' : t('myBookings.cancel')}
                     >
-                      <XCircle className="w-3.5 h-3.5" />
-                      <span>
-                        {hasStarted
-                          ? isEn ? 'In progress' : 'Käynnissä'
-                          : cancelMutation.isPending
-                          ? t('myBookings.cancelling')
-                          : t('myBookings.cancel')}
-                      </span>
-                    </button>
+                      {hasStarted ? (lang === 'en' ? 'In progress' : 'Käynnissä') : (cancelMutation.isPending ? t('myBookings.cancelling') : t('myBookings.cancel'))}
+                    </Button>
                   </div>
                 )}
               </div>

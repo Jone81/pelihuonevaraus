@@ -9,10 +9,10 @@ const FinlandFlag: React.FC = () => (
   <svg
     viewBox="0 0 18 11"
     width="16"
-    height="10"
+    height="11"
     aria-hidden="true"
     className="flag-icon"
-    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}
+    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0 }}
   >
     <rect width="18" height="11" fill="#ffffff" />
     <rect width="18" height="3" y="4" fill="#003580" />
@@ -24,10 +24,10 @@ const UKFlag: React.FC = () => (
   <svg
     viewBox="0 0 60 30"
     width="16"
-    height="10"
+    height="11"
     aria-hidden="true"
     className="flag-icon"
-    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}
+    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0 }}
   >
     <clipPath id="uk-flag-clip">
       <path d="M0,0 v30 h60 v-30 z" />
@@ -45,42 +45,24 @@ const UKFlag: React.FC = () => (
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   const { lang, setLang } = useLanguage();
 
+  const toggleLanguage = () => {
+    setLang(lang === 'fi' ? 'en' : 'fi');
+  };
+
   return (
     <div
-      className={`lang-switcher flex items-center bg-[#14161f] border border-[#2b313d] rounded-lg p-0.5 ${className}`}
+      className={`lang-switcher-compact ${className}`}
       role="group"
       aria-label="Kielivalitsin / Language selector"
     >
       <button
         type="button"
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
-          lang === 'fi'
-            ? 'bg-[#1e2230] text-[#fbba18] font-bold border border-[#d89619]/40 shadow-xs'
-            : 'text-gray-400 hover:text-white'
-        }`}
-        onClick={() => setLang('fi')}
-        aria-pressed={lang === 'fi'}
-        title="Suomeksi (Finnish)"
+        className="lang-pill-btn btn-touch"
+        onClick={toggleLanguage}
+        title={lang === 'fi' ? 'Switch to English' : 'Vaihda kieleksi Suomi'}
       >
-        <FinlandFlag />
-        <span className="hidden sm:inline text-xs font-semibold">Suomi</span>
-        <span className="sm:hidden text-[10px] font-bold">FI</span>
-      </button>
-
-      <button
-        type="button"
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
-          lang === 'en'
-            ? 'bg-[#1e2230] text-[#fbba18] font-bold border border-[#d89619]/40 shadow-xs'
-            : 'text-gray-400 hover:text-white'
-        }`}
-        onClick={() => setLang('en')}
-        aria-pressed={lang === 'en'}
-        title="In English"
-      >
-        <UKFlag />
-        <span className="hidden sm:inline text-xs font-semibold">English</span>
-        <span className="sm:hidden text-[10px] font-bold">EN</span>
+        {lang === 'fi' ? <FinlandFlag /> : <UKFlag />}
+        <span className="lang-text">{lang === 'fi' ? 'Suomi' : 'English'}</span>
       </button>
     </div>
   );

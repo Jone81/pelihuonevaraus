@@ -2,24 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import {
-  Calendar,
-  Activity,
-  Gamepad2,
-  BookOpen,
-  Map,
-  MessageSquare,
-  ClipboardList,
-  AlertTriangle,
-  ChevronDown,
-  ChevronRight,
-  LogOut,
-  LogIn,
-  Menu,
-  X,
-  Shield,
-  Zap,
-} from 'lucide-react';
+import { useRouter, type AppTab, type AdminSubTab } from '../router';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
-export type AppTab = 'book' | 'status' | 'games' | 'rules' | 'my-bookings' | 'admin' | 'superadmin';
+export type { AppTab };
 
 interface NavbarProps {
   onOpenLogin: () => void;
@@ -47,7 +30,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
 }) => {
   const { user, logout, isSuperAdmin, isAdmin } = useAuth();
-  const { t, lang } = useLanguage();
+  const { lang, t } = useLanguage();
+  const { adminSubTab, setAdminSubTab } = useRouter();
+  const isEn = lang === 'en';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -60,8 +45,24 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('mobile-menu-lock');
+    } else {
+      document.body.classList.remove('mobile-menu-lock');
+    }
+    return () => {
+      document.body.classList.remove('mobile-menu-lock');
+    };
+  }, [isMobileMenuOpen]);
+
   const handleTabClick = (tab: AppTab) => {
     setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAdminSubTabClick = (subTab: AdminSubTab) => {
+    setAdminSubTab(subTab);
     setIsMobileMenuOpen(false);
   };
 
@@ -80,439 +81,428 @@ export const Navbar: React.FC<NavbarProps> = ({
     logout();
   };
 
-  const handleLogin = () => {
-    setIsMobileMenuOpen(false);
-    onOpenLogin();
-  };
+  const displayName = user?.displayName || 'Matti Meikäläinen';
+  const displayRole = user?.role ? user.role.toUpperCase() : 'USER';
 
   return (
-    <header className="w-full max-w-full overflow-hidden bg-[#0a0b0d] border-b border-[#1c1f26] sticky top-0 z-50 select-none">
-      <div className="max-w-[1720px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-        {/* Vasen laita: Virallinen XAMK Hero -logo ja otsikot (Aina näkyvissä myös mobiilissa) */}
-        <div
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group min-w-0 flex-shrink-0"
+    <header className="xamk-topbar">
+      <div className="xamk-topbar-inner">
+        {/* Left: Xamk Brand Logo & Title */}
+        <button
+          type="button"
+          className="xamk-brand-btn"
           onClick={() => handleTabClick('book')}
+          aria-label="Pelihuonevaraus etusivu"
         >
           <img
-            src="/xamk-hero-logo.png"
-            alt="Xamk Logo"
-            className="h-6 sm:h-7 md:h-8 w-auto object-contain flex-shrink-0"
+            src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
+            alt="Xamk"
+            className="xamk-logo-img"
           />
-          <div className="flex flex-col leading-tight min-w-0">
-            <span className="text-white font-extrabold tracking-wide text-[11px] sm:text-xs md:text-sm uppercase truncate">
-              {t('nav.title')}
+          <div className="xamk-brand-titles">
+            <span className="xamk-brand-main">
+              {isEn ? 'GAME ROOM BOOKING' : 'PELIHUONEVARAUS'}
             </span>
-            <span className="text-[#d89619] text-[8px] sm:text-[9px] md:text-[10px] font-bold tracking-widest uppercase truncate">
-              {t('nav.subtitle')}
-            </span>
+            <span className="xamk-brand-sub">XAMK GAME ROOM</span>
           </div>
-        </div>
+        </button>
 
-        {/* Keskialue: Navigaatiotelakka työpöydällä */}
-        <nav className="hidden xl:flex items-center gap-1 bg-[#12141a]/90 backdrop-blur-md p-1 rounded-xl border border-[#262a36] min-w-0">
-          <button
-            type="button"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'book'
-                ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] shadow-xs font-bold'
-                : 'text-gray-300 hover:text-white hover:bg-white/5'
-            }`}
-            onClick={() => handleTabClick('book')}
-          >
-            <Calendar className="w-3.5 h-3.5 text-[#d89619]" />
-            <span>{t('nav.book')}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'status'
-                ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] shadow-xs font-bold'
-                : 'text-gray-300 hover:text-white hover:bg-white/5'
-            }`}
-            onClick={() => handleTabClick('status')}
-          >
-            <Activity className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{t('nav.status')}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'games'
-                ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] shadow-xs font-bold'
-                : 'text-gray-300 hover:text-white hover:bg-white/5'
-            }`}
-            onClick={() => handleTabClick('games')}
-          >
-            <Gamepad2 className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{t('nav.games')}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'rules'
-                ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] shadow-xs font-bold'
-                : 'text-gray-300 hover:text-white hover:bg-white/5'
-            }`}
-            onClick={() => handleTabClick('rules')}
-          >
-            <BookOpen className="w-3.5 h-3.5 text-purple-400" />
-            <span>{t('nav.rules')}</span>
-          </button>
-
-          <button
-            type="button"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
-            onClick={onOpenFloorPlan}
-          >
-            <Map className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t('nav.floorplan')}</span>
-          </button>
-
-          <a
-            href="https://discord.gg/xamk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-[#5865F2]" />
-            <span>Discord</span>
-          </a>
-
-          {user && (
+        {/* Center: Inline Desktop Navigation Links (Only when logged in) */}
+        {user && (
+          <nav className="xamk-nav-center desktop-tabs-only" aria-label="Päävalikko">
             <button
               type="button"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'my-bookings'
-                  ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] shadow-xs font-bold'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={() => handleTabClick('my-bookings')}
+              className={`xamk-nav-link btn-touch ${activeTab === 'book' ? 'xamk-nav-active' : ''}`}
+              onClick={() => setActiveTab('book')}
             >
-              <ClipboardList className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t('nav.myBookings')}</span>
-            </button>
-          )}
-
-          {isAdmin && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer ${
-                    activeTab === 'admin' || activeTab === 'superadmin'
-                      ? 'border border-[#d89619] bg-[#d89619]/15 text-[#fbba18] font-bold'
-                      : 'text-gray-300 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Shield className="w-3.5 h-3.5 text-[#fbba18]" />
-                  <span>Admin</span>
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 bg-[#14161f] border border-[#2b313d] text-white p-1 rounded-xl shadow-2xl">
-                <DropdownMenuLabel className="text-[11px] text-gray-400 px-3 py-1 uppercase tracking-wider font-bold">
-                  Ylläpito
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-[#2b313d] my-1" />
-                <DropdownMenuItem
-                  className="cursor-pointer px-3 py-2 text-xs font-medium hover:bg-[#202430] hover:text-[#fbba18] flex items-center gap-2"
-                  onClick={() => handleTabClick('admin')}
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>{t('nav.admin')}</span>
-                </DropdownMenuItem>
-                {isSuperAdmin && (
-                  <DropdownMenuItem
-                    className="cursor-pointer px-3 py-2 text-xs font-medium hover:bg-[#202430] hover:text-[#fbba18] flex items-center gap-2"
-                    onClick={() => handleTabClick('superadmin')}
-                  >
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{t('nav.superadmin')}</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </nav>
-
-        {/* Oikea laita: Ilmoita viasta + Kielivalitsin + Käyttäjäinfo */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
-          {onOpenIssueModal && (
-            <button
-              type="button"
-              className="hidden lg:flex items-center gap-1 text-xs font-bold text-[#d89619] hover:text-[#fbba18] transition-colors px-2 py-1 cursor-pointer"
-              onClick={onOpenIssueModal}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{t('footer.report')}</span>
-            </button>
-          )}
-
-          <LanguageSwitcher />
-
-          {user ? (
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#14161f] border border-[#262935] text-xs">
-                <span className="text-white font-bold truncate max-w-[120px]">{user.displayName}</span>
-                <span className="text-[#d89619] font-bold text-[9px] uppercase bg-[#d89619]/10 px-1 py-0.5 rounded border border-[#d89619]/30">
-                  {user.role}
-                </span>
-              </div>
-              <button
-                type="button"
-                className="hidden xl:flex p-1.5 px-2.5 py-1 rounded-lg bg-[#1a1d26] hover:bg-[#242835] border border-[#2e3342] text-xs font-medium text-gray-300 hover:text-white transition-all cursor-pointer items-center gap-1"
-                onClick={handleLogout}
-                title={t('nav.logout')}
-              >
-                <LogOut className="w-3.5 h-3.5 text-gray-400" />
-                <span>{t('nav.logout')}</span>
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#d89619] hover:bg-[#c48410] active:bg-[#a66f0d] text-[#0a0b0d] font-bold text-xs uppercase tracking-wide cursor-pointer shadow-md flex items-center gap-1.5 flex-shrink-0"
-              onClick={handleLogin}
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('nav.login')}</span>
-              <span className="sm:hidden">{lang === 'en' ? 'Login' : 'Kirjaudu'}</span>
-            </button>
-          )}
-
-          {/* Mobiilivalikon avauspainike - Aina näkyvissä ja flex-shrink-0 */}
-          <button
-            type="button"
-            className="xl:hidden p-1.5 rounded-lg bg-[#14161f] border border-[#2b313d] text-gray-300 hover:text-white cursor-pointer flex-shrink-0"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Valikko"
-          >
-            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobiilivalikko (Mobiili-optimoitu 48px kosketusalueilla) */}
-      {isMobileMenuOpen && (
-        <div className="xl:hidden bg-[#0d0f14] border-t border-[#1c1f26] px-4 py-4 flex flex-col gap-2 max-w-full animate-in fade-in slide-in-from-top-2 duration-200 shadow-2xl">
-          {user && (
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#14161f] border border-[#252936] mb-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#fbba18]/15 border border-[#fbba18]/30 flex items-center justify-center text-[#fbba18] font-bold text-xs flex-shrink-0">
-                  {user.displayName.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-white font-bold text-xs truncate">{user.displayName}</span>
-                  <span className="text-gray-400 text-[10px] truncate">{user.email}</span>
-                </div>
-              </div>
-              <span className="text-[#d89619] font-bold text-[10px] uppercase bg-[#d89619]/15 px-2 py-0.5 rounded border border-[#d89619]/30 flex-shrink-0">
-                {user.role}
-              </span>
-            </div>
-          )}
-
-          {/* Päänavigaation kortit */}
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                activeTab === 'book'
-                  ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                  : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-              }`}
-              onClick={() => handleTabClick('book')}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'book' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-[#d89619]'}`}>
-                  <Calendar className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.book')}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${activeTab === 'book' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+              <span className="nav-item-icon" aria-hidden="true">📅</span>
+              <span>{isEn ? 'Book Station' : 'Varaa laite'}</span>
             </button>
 
             <button
               type="button"
-              className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                activeTab === 'status'
-                  ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                  : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-              }`}
-              onClick={() => handleTabClick('status')}
+              className={`xamk-nav-link btn-touch ${activeTab === 'status' ? 'xamk-nav-active' : ''}`}
+              onClick={() => setActiveTab('status')}
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'status' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-emerald-400'}`}>
-                  <Activity className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.status')}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${activeTab === 'status' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+              <span className="nav-dot-green" aria-hidden="true" />
+              <span>{isEn ? 'Live Status' : 'Tilan tilanne'}</span>
             </button>
 
             <button
               type="button"
-              className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                activeTab === 'games'
-                  ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                  : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-              }`}
-              onClick={() => handleTabClick('games')}
+              className={`xamk-nav-link btn-touch ${activeTab === 'games' ? 'xamk-nav-active' : ''}`}
+              onClick={() => setActiveTab('games')}
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'games' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-cyan-400'}`}>
-                  <Gamepad2 className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.games')}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${activeTab === 'games' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+              <span className="nav-item-icon" aria-hidden="true">🎮</span>
+              <span>{isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}</span>
             </button>
 
             <button
               type="button"
-              className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                activeTab === 'rules'
-                  ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                  : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-              }`}
-              onClick={() => handleTabClick('rules')}
+              className={`xamk-nav-link btn-touch ${activeTab === 'rules' ? 'xamk-nav-active' : ''}`}
+              onClick={() => setActiveTab('rules')}
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'rules' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-purple-400'}`}>
-                  <BookOpen className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.rules')}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${activeTab === 'rules' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+              <span className="nav-item-icon" aria-hidden="true">💬</span>
+              <span>{isEn ? 'Rules & Guide' : 'Säännöt & Ohjeet'}</span>
             </button>
 
             <button
               type="button"
-              className="w-full min-h-[48px] px-3.5 py-2.5 rounded-xl bg-[#14161f] border border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
-              onClick={handleFloorPlanClick}
+              className="xamk-nav-link btn-touch"
+              onClick={onOpenFloorPlan}
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[#0e1015] text-amber-400 flex-shrink-0">
-                  <Map className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.floorplan')}</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <span className="nav-item-icon nav-icon-blue" aria-hidden="true">🗺️</span>
+              <span>{isEn ? 'Floor Plan' : 'Tilan pohjakuva'}</span>
             </button>
 
             <a
               href="https://discord.gg/xamk"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full min-h-[48px] px-3.5 py-2.5 rounded-xl bg-[#14161f] border border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
+              className="xamk-nav-link btn-touch"
+              title="Xamk Gaming Discord"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[#0e1015] text-[#5865F2] flex-shrink-0">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide">Discord</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <span className="nav-item-icon" aria-hidden="true">👾</span>
+              <span>Discord</span>
             </a>
 
-            {user && (
+            <button
+              type="button"
+              className={`xamk-nav-link btn-touch ${activeTab === 'my-bookings' ? 'xamk-nav-active' : ''}`}
+              onClick={() => setActiveTab('my-bookings')}
+            >
+              <span className="nav-item-icon" aria-hidden="true">📋</span>
+              <span>{isEn ? 'My Bookings' : 'Omat varaukset'}</span>
+            </button>
+
+            {isAdmin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={`xamk-nav-link btn-touch ${
+                      activeTab === 'admin' || activeTab === 'superadmin' ? 'xamk-nav-active' : ''
+                    }`}
+                    aria-label="Ylläpitovalikko"
+                  >
+                    <span className="nav-item-icon" aria-hidden="true">⚙️</span>
+                    <span>Admin</span>
+                    <span className="text-[10px] opacity-75">▼</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="xamk-dropdown-menu">
+                  <DropdownMenuLabel>
+                    {isEn ? 'Admin Control Panel' : 'Ylläpidon hallinta'}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'games' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('games')}
+                  >
+                    <span>🎮</span>
+                    <span>{isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'news' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('news')}
+                  >
+                    <span>📰</span>
+                    <span>{isEn ? 'News & Announcements' : 'Uutiset & Tiedotteet'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'users' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('users')}
+                  >
+                    <span>👥</span>
+                    <span>{isEn ? 'Users & Roles' : 'Käyttäjät & Roolit'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'settings' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('settings')}
+                  >
+                    <span>⚙️</span>
+                    <span>{isEn ? 'Settings & Discord' : 'Asetukset & Discord'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'statistics' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('statistics')}
+                  >
+                    <span>📊</span>
+                    <span>{isEn ? 'Statistics & Usage' : 'Tilastot & Käyttöaste'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={
+                      activeTab === 'admin' && adminSubTab === 'issues' ? 'dropdown-item-active' : ''
+                    }
+                    onClick={() => handleAdminSubTabClick('issues')}
+                  >
+                    <span>⚠️</span>
+                    <span>{isEn ? 'Issue Reports' : 'Vikailmoitukset'}</span>
+                  </DropdownMenuItem>
+                  {isSuperAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className={activeTab === 'superadmin' ? 'dropdown-item-active' : ''}
+                        onClick={() => handleTabClick('superadmin')}
+                      >
+                        <span>⚡</span>
+                        <span>{t('nav.superadmin')}</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </nav>
+        )}
+
+        {/* Right: Report Issue + Language Switcher + User Profile */}
+        <div className="xamk-topbar-right navbar-desktop-actions">
+          {user && onOpenIssueModal && (
+            <button
+              type="button"
+              className="xamk-issue-link btn-touch"
+              onClick={onOpenIssueModal}
+              title={t('issue.desc')}
+            >
+              <span className="issue-warn-icon" aria-hidden="true">⚠️</span>
+              <span>{isEn ? 'Report issue' : 'Ilmoita viasta'}</span>
+            </button>
+          )}
+
+          <LanguageSwitcher />
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="xamk-user-pill btn-touch"
+                  aria-label="Käyttäjävalikko"
+                >
+                  <span className="xamk-user-name">{displayName}</span>
+                  <span className="xamk-user-role-tag">{displayRole}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="xamk-dropdown-menu">
+                <DropdownMenuLabel>
+                  <div className="xamk-dropdown-user-header">
+                    <strong>{displayName}</strong>
+                    <span>{user.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleTabClick('my-bookings')}>
+                  <span>📋</span>
+                  <span>{isEn ? 'My Bookings' : 'Omat varaukset'}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenLogin}>
+                  <span>🔑</span>
+                  <span>{isEn ? 'Switch Account' : 'Vaihda käyttäjää'}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="dropdown-item-danger"
+                  onClick={handleLogout}
+                >
+                  <span>🚪</span>
+                  <span>{t('nav.logout')}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <button
+              type="button"
+              className="xamk-confirm-pill-btn btn-touch"
+              style={{ minHeight: '34px', padding: '5px 16px', fontSize: '0.78rem' }}
+              onClick={onOpenLogin}
+            >
+              <span>{t('nav.login')}</span>
+              <span className="confirm-arrow" aria-hidden="true">→</span>
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Actions */}
+        <div className="navbar-mobile-actions">
+          <LanguageSwitcher className="mobile-lang-switcher" />
+          {user ? (
+            <button
+              type="button"
+              className={`hamburger-btn ${isMobileMenuOpen ? 'is-active' : ''}`}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-nav-drawer"
+            >
+              <span className="hamburger-box">
+                <span className="hamburger-line top-line"></span>
+                <span className="hamburger-line middle-line"></span>
+                <span className="hamburger-line bottom-line"></span>
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="xamk-confirm-pill-btn btn-touch"
+              style={{ minHeight: '34px', padding: '5px 14px', fontSize: '0.76rem' }}
+              onClick={onOpenLogin}
+            >
+              <span>{t('nav.login')}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
+          <div
+            id="mobile-nav-drawer"
+            className="mobile-menu-drawer"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('nav.menu')}
+          >
+            <div className="mobile-drawer-header">
+              <div className="mobile-drawer-title">
+                <span className="mobile-drawer-badge">XAMK GAME ROOM</span>
+                <h3>{t('nav.menu')}</h3>
+              </div>
               <button
                 type="button"
-                className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                  activeTab === 'my-bookings'
-                    ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                    : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-                }`}
+                className="btn-close btn-touch mobile-drawer-close"
+                onClick={() => setIsMobileMenuOpen(false)}
+                aria-label={t('nav.closeMenu')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mobile-user-section">
+              <div className="mobile-user-card">
+                <div className="mobile-user-avatar">
+                  <span>{displayName.charAt(0).toUpperCase()}</span>
+                </div>
+                <div className="mobile-user-info">
+                  <span className="mobile-user-name">{displayName}</span>
+                  <span className="mobile-user-email">
+                    {user?.email || 'matti.meikalainen@edu.xamk.fi'}
+                  </span>
+                  <span className="role-badge role-user">{displayRole}</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm mobile-logout-btn"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (user) {
+                      logout();
+                    } else {
+                      onOpenLogin();
+                    }
+                  }}
+                >
+                  {user ? t('nav.logout') : t('nav.login')}
+                </button>
+              </div>
+            </div>
+
+            <nav className="mobile-nav-list" aria-label="Mobiilin päävalikko">
+              <button
+                type="button"
+                className={`mobile-nav-item ${activeTab === 'book' ? 'item-active' : ''}`}
+                onClick={() => handleTabClick('book')}
+              >
+                <span className="mobile-nav-text">{t('nav.book')}</span>
+              </button>
+              <button
+                type="button"
+                className={`mobile-nav-item ${activeTab === 'status' ? 'item-active' : ''}`}
+                onClick={() => handleTabClick('status')}
+              >
+                <span className="mobile-nav-text">{t('nav.status')}</span>
+              </button>
+              <button
+                type="button"
+                className={`mobile-nav-item ${activeTab === 'games' ? 'item-active' : ''}`}
+                onClick={() => handleTabClick('games')}
+              >
+                <span className="mobile-nav-text">{t('nav.games')}</span>
+              </button>
+              <button
+                type="button"
+                className={`mobile-nav-item ${activeTab === 'rules' ? 'item-active' : ''}`}
+                onClick={() => handleTabClick('rules')}
+              >
+                <span className="mobile-nav-text">{t('nav.rules')}</span>
+              </button>
+              <button
+                type="button"
+                className="mobile-nav-item"
+                onClick={handleFloorPlanClick}
+              >
+                <span className="mobile-nav-text">{t('nav.floorplan')}</span>
+              </button>
+              <button
+                type="button"
+                className={`mobile-nav-item ${activeTab === 'my-bookings' ? 'item-active' : ''}`}
                 onClick={() => handleTabClick('my-bookings')}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'my-bookings' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-emerald-400'}`}>
-                    <ClipboardList className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.myBookings')}</span>
-                </div>
-                <ChevronRight className={`w-4 h-4 ${activeTab === 'my-bookings' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+                <span className="mobile-nav-text">{t('nav.myBookings')}</span>
               </button>
-            )}
-          </div>
-
-          {/* Ylläpito-osio */}
-          {isAdmin && (
-            <div className="pt-3 mt-1 border-t border-[#1c1f26] flex flex-col gap-2">
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold px-1">
-                Ylläpito
-              </span>
-              <button
-                type="button"
-                className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                  activeTab === 'admin'
-                    ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                    : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-                }`}
-                onClick={() => handleTabClick('admin')}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'admin' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-[#fbba18]'}`}>
-                    <Shield className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.admin')}</span>
-                </div>
-                <ChevronRight className={`w-4 h-4 ${activeTab === 'admin' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
-              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={`mobile-nav-item item-admin ${activeTab === 'admin' ? 'item-active' : ''}`}
+                  onClick={() => handleTabClick('admin')}
+                >
+                  <span className="mobile-nav-text">{t('nav.admin')}</span>
+                </button>
+              )}
               {isSuperAdmin && (
                 <button
                   type="button"
-                  className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                    activeTab === 'superadmin'
-                      ? 'bg-[#fbba18]/10 border-[#fbba18]/60 text-[#fbba18] font-bold shadow-md'
-                      : 'bg-[#14161f] border-[#262a36] text-gray-200 hover:bg-[#1c202a] hover:text-white'
-                  }`}
+                  className={`mobile-nav-item item-superadmin ${activeTab === 'superadmin' ? 'item-active' : ''}`}
                   onClick={() => handleTabClick('superadmin')}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${activeTab === 'superadmin' ? 'bg-[#fbba18]/20 text-[#fbba18]' : 'bg-[#0e1015] text-amber-400'}`}>
-                      <Zap className="w-4 h-4" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-semibold tracking-wide">{t('nav.superadmin')}</span>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 ${activeTab === 'superadmin' ? 'text-[#fbba18]' : 'text-gray-500'}`} />
+                  <span className="mobile-nav-text">{t('nav.superadmin')}</span>
                 </button>
               )}
+            </nav>
+
+            <div className="mobile-drawer-extra">
+              {onOpenIssueModal && (
+                <button
+                  type="button"
+                  className="mobile-extra-btn issue-extra-btn"
+                  onClick={handleIssueClick}
+                >
+                  <span>{t('issue.reportBtn')}</span>
+                </button>
+              )}
+              <a
+                href="https://discord.gg/xamk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mobile-extra-btn discord-extra-btn"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span>{t('footer.discord')}</span>
+              </a>
             </div>
-          )}
-
-          {/* Alaosa: Vikailmoitus ja Uloskirjautuminen */}
-          <div className="pt-3 mt-1 border-t border-[#1c1f26] flex flex-col gap-2">
-            {onOpenIssueModal && (
-              <button
-                type="button"
-                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-[#14161f] border border-[#262a36] hover:border-[#fbba18]/40 text-[#fbba18] flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
-                onClick={handleIssueClick}
-              >
-                <div className="flex items-center gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-[#fbba18]" />
-                  <span className="text-xs font-semibold">{t('footer.report')}</span>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
-              </button>
-            )}
-
-            {user && (
-              <button
-                type="button"
-                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-300 flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
-                onClick={handleLogout}
-              >
-                <div className="flex items-center gap-2.5">
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-xs font-semibold">{t('nav.logout')}</span>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-rose-400/50" />
-              </button>
-            )}
           </div>
         </div>
       )}

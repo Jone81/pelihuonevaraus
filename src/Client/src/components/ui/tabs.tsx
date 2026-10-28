@@ -10,10 +10,7 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn(
-      'inline-flex h-12 items-center justify-center rounded-xl bg-[#15181e] p-1 border border-border text-muted-foreground',
-      className
-    )}
+    className={cn('xamk-segmented-bar', className)}
     {...props}
   />
 ))
@@ -26,7 +23,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-[#1c2027] data-[state=active]:text-[#fbba18] data-[state=active]:font-semibold data-[state=active]:shadow-sm cursor-pointer select-none',
+      'xamk-segment-btn btn-touch data-[state=active]:bg-[#5d5e63] data-[state=active]:text-white data-[state=active]:font-bold cursor-pointer select-none',
       className
     )}
     {...props}
@@ -40,10 +37,7 @@ const TabsContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
-    className={cn(
-      'mt-3 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-      className
-    )}
+    className={cn('focus-visible:outline-none', className)}
     {...props}
   />
 ))

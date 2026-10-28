@@ -3,24 +3,21 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-lg border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  'xamk-station-status-pill transition-colors focus:outline-none',
   {
     variants: {
       variant: {
-        default:
-          'border-transparent bg-primary text-primary-foreground shadow',
-        secondary:
-          'border-transparent bg-secondary text-secondary-foreground',
-        destructive:
-          'border-transparent bg-destructive text-destructive-foreground',
-        outline:
-          'text-foreground border-border',
-        success:
-          'border-emerald-500/30 bg-emerald-500/15 text-emerald-400',
-        warning:
-          'border-amber-500/30 bg-amber-500/15 text-amber-300',
-        xamk:
-          'border-amber-400/40 bg-amber-400/15 text-amber-300 font-semibold',
+        default: '',
+        status: '',
+        occupied: 'status-pill-occupied',
+        installed: 'status-pill-installed',
+        wishlist: 'status-pill-wishlist',
+        secondary: 'bg-[#25272d] border-[#3d4049] text-[#dcdfe6]',
+        destructive: 'status-pill-occupied',
+        outline: 'bg-transparent border-[#454852] text-[#e2e5ec]',
+        success: 'status-pill-installed',
+        warning: 'status-pill-wishlist',
+        xamk: '',
       },
     },
     defaultVariants: {
@@ -30,13 +27,14 @@ const badgeVariants = cva(
 )
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <span className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Badge, badgeVariants }

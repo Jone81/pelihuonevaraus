@@ -3,15 +3,18 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  X,
-  Send,
-  User,
-  Mail,
-  HelpCircle,
-  FileText,
-} from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Label } from '@/components/ui/label';
 
 interface IssueReportModalProps {
   isOpen: boolean;
@@ -23,20 +26,23 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
-  const targetOptions = useMemo(() => [
-    'PC 1',
-    'PC 2',
-    'PC 3',
-    'PC 4',
-    'PC 5',
-    'PC 6',
-    'PlayStation 5',
-    'Nintendo Switch',
-    t('issue.targetConsole'),
-    t('issue.targetNetwork'),
-    t('issue.targetFurniture'),
-    t('issue.targetOther'),
-  ], [t]);
+  const targetOptions = useMemo(
+    () => [
+      'PC 1',
+      'PC 2',
+      'PC 3',
+      'PC 4',
+      'PC 5',
+      'PC 6',
+      'PlayStation 5',
+      'Nintendo Switch',
+      t('issue.targetConsole'),
+      t('issue.targetNetwork'),
+      t('issue.targetFurniture'),
+      t('issue.targetOther'),
+    ],
+    [t]
+  );
 
   const [target, setTarget] = useState('PC 1');
   const [title, setTitle] = useState('');
@@ -47,8 +53,6 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +79,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 2000);
+      }, 2500);
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
@@ -92,142 +96,127 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#181a20] border border-[#2d323f] rounded-2xl w-full max-w-lg p-6 shadow-2xl flex flex-col gap-4 relative animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-[#2d323f]">
-          <div className="flex flex-col">
-            <h2 className="text-base font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-[#fbba18]" />
-              <span>{t('issue.title')}</span>
-            </h2>
-            <p className="text-xs text-gray-400 mt-1">{t('issue.desc')}</p>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="xamk-modal-md">
+        <DialogHeader>
+          <div className="xamk-modal-header-row">
+            <div className="xamk-modal-icon-badge" aria-hidden="true">
+              ⚠️
+            </div>
+            <div className="xamk-modal-title-group">
+              <DialogTitle>{t('issue.title')}</DialogTitle>
+              <div className="xamk-modal-underline" />
+              <DialogDescription>{t('issue.desc')}</DialogDescription>
+            </div>
           </div>
-          <button
-            type="button"
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            onClick={onClose}
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        </DialogHeader>
 
-        {successMessage && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>{successMessage}</span>
+        {successMessage ? (
+          <div className="alert alert-success">
+            <span>✅</span>
+            <div>
+              <strong>{successMessage}</strong>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
+                {t('issue.successDetail')}
+              </p>
+            </div>
           </div>
-        )}
+        ) : (
+          <form onSubmit={handleSubmit} className="xamk-modal-form">
+            {errorMessage && (
+              <div className="alert alert-error">
+                <span>⚠️</span>
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
-        {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
+            <div className="xamk-field-group">
+              <Label htmlFor="issue-target">{t('issue.target')} *</Label>
+              <NativeSelect
+                id="issue-target"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                required
+              >
+                {targetOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </NativeSelect>
+            </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-          {/* Kohde */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-              <HelpCircle className="w-3 h-3 text-[#d89619]" />
-              <span>{t('issue.target')} *</span>
-            </label>
-            <select
-              className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors cursor-pointer"
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-            >
-              {targetOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Otsikko */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-              <FileText className="w-3 h-3 text-[#d89619]" />
-              <span>{t('issue.reportTitle')} *</span>
-            </label>
-            <input
-              type="text"
-              placeholder={t('issue.reportTitlePlaceholder')}
-              className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Kuvaus */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-              {t('issue.description')} *
-            </label>
-            <textarea
-              rows={4}
-              placeholder={t('issue.descriptionPlaceholder')}
-              className="w-full bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl p-3 text-xs outline-none transition-colors resize-none leading-relaxed"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Yhteystiedot */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                <User className="w-3 h-3 text-gray-400" />
-                <span>{t('issue.name')}</span>
-              </label>
-              <input
+            <div className="xamk-field-group">
+              <Label htmlFor="issue-title">{t('issue.reportTitle')} *</Label>
+              <Input
+                id="issue-title"
                 type="text"
-                placeholder="Matti Meikäläinen"
-                className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
-                value={reporterName}
-                onChange={(e) => setReporterName(e.target.value)}
+                placeholder={t('issue.reportTitlePlaceholder')}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
               />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                <Mail className="w-3 h-3 text-gray-400" />
-                <span>{t('issue.email')}</span>
-              </label>
-              <input
-                type="email"
-                placeholder="etunimi.sukunimi@edu.xamk.fi"
-                className="w-full h-10 bg-[#111318] border border-[#2d323f] focus:border-[#fbba18] text-white rounded-xl px-3 text-xs outline-none transition-colors"
-                value={reporterEmail}
-                onChange={(e) => setReporterEmail(e.target.value)}
+            <div className="xamk-field-group">
+              <Label htmlFor="issue-desc">{t('issue.reportDesc')} *</Label>
+              <Textarea
+                id="issue-desc"
+                placeholder={t('issue.reportDescPlaceholder')}
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
               />
             </div>
-          </div>
 
-          {/* Painikkeet */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#2d323f]">
-            <button
-              type="button"
-              className="px-4 py-2 rounded-xl bg-[#111318] hover:bg-[#1a1d26] border border-[#2d323f] text-gray-300 text-xs font-semibold cursor-pointer transition-colors"
-              onClick={onClose}
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#d89619] via-[#fbba18] to-[#d89619] text-[#0a0b0d] font-bold text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? t('issue.submitting') : t('issue.submit')}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            <div className="xamk-form-row-2col">
+              <div className="xamk-field-group">
+                <Label htmlFor="issue-name">{t('issue.reporterName')}</Label>
+                <Input
+                  id="issue-name"
+                  type="text"
+                  placeholder={t('issue.reporterNamePlaceholder')}
+                  value={reporterName}
+                  onChange={(e) => setReporterName(e.target.value)}
+                />
+              </div>
+
+              <div className="xamk-field-group">
+                <Label htmlFor="issue-email">{t('issue.reporterEmail')}</Label>
+                <Input
+                  id="issue-email"
+                  type="email"
+                  placeholder={t('issue.reporterEmailPlaceholder')}
+                  value={reporterEmail}
+                  onChange={(e) => setReporterEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="submit"
+                variant="pill"
+                disabled={isSubmitting}
+              >
+                <span>{isSubmitting ? t('common.submitting') : t('issue.submitBtn')}</span>
+                <span className="confirm-arrow" aria-hidden="true">
+                  →
+                </span>
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
