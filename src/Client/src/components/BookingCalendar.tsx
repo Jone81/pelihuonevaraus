@@ -247,8 +247,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     }
 
     const durationMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
-    if (durationMinutes < 30) {
-      setGeneralError('Varauksen vähimmäiskesto on 30 minuuttia.');
+    if (durationMinutes < 60) {
+      setGeneralError(isEn ? 'Minimum booking duration is 1 hour.' : 'Varauksen vähimmäiskesto on 1 tunti.');
       return;
     }
 
@@ -530,25 +530,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 >
                   {[
                     '08:00',
-                    '08:30',
                     '09:00',
-                    '09:30',
                     '10:00',
-                    '10:30',
                     '11:00',
-                    '11:30',
                     '12:00',
-                    '12:30',
                     '13:00',
-                    '13:30',
                     '14:00',
-                    '14:30',
                     '15:00',
-                    '15:30',
                     '16:00',
-                    '16:30',
                     '17:00',
-                    '17:30',
                   ].map((time) => (
                     <option key={time} value={time}>
                       {time}
@@ -571,25 +561,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   onChange={(e) => setEndHour(e.target.value)}
                 >
                   {[
-                    '08:30',
                     '09:00',
-                    '09:30',
                     '10:00',
-                    '10:30',
                     '11:00',
-                    '11:30',
                     '12:00',
-                    '12:30',
                     '13:00',
-                    '13:30',
                     '14:00',
-                    '14:30',
                     '15:00',
-                    '15:30',
                     '16:00',
-                    '16:30',
                     '17:00',
-                    '17:30',
                     '18:00',
                   ].map((time) => (
                     <option key={time} value={time}>
