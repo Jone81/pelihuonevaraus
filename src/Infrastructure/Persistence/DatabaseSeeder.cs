@@ -112,18 +112,11 @@ public static class DatabaseSeeder
                 {
                     News.Create(
                         NewsId.New(),
-                        "🎉 Tervetuloa Xamk Game Roomiin!",
-                        "Uudistettu pelitila on nyt käytössä! Käytössäsi on 6 tehokasta pelitietokonetta sekä PS5- ja Nintendo Switch -konsolit yhteisellä näytöllä. Aukioloajat ma–pe klo 08:00–18:00.",
-                        authorId,
-                        now,
-                        isPinned: true),
-                    News.Create(
-                        NewsId.New(),
                         "🏆 Perjantain CS2-turnaus tulossa!",
                         "SuperAdmin järjestää perjantaina opiskelijaturnauksen klo 14–18. Tilassa saattaa olla turnauksen aikana tavallista enemmän pelaajia. Tervetuloa kannustamaan!",
                         authorId,
                         now.AddHours(-2),
-                        isPinned: false),
+                        isPinned: true),
                 };
 
                 await context.News.AddRangeAsync(newsList);

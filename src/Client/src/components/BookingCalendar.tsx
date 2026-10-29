@@ -38,7 +38,7 @@ const DISPLAY_ORDER = [
   'PlayStation 5',
 ];
 
-const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) => {
   if (type === 'NintendoSwitch' || name.includes('Switch')) {
@@ -288,7 +288,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
   const applyMatrixRange = useCallback((minIdx: number, maxIdx: number) => {
     const startH = MATRIX_HOURS[minIdx];
-    const endHNum = Math.min(18, parseInt(MATRIX_HOURS[maxIdx].split(':')[0], 10) + 1);
+    const endHNum = Math.min(19, parseInt(MATRIX_HOURS[maxIdx].split(':')[0], 10) + 1);
     const endH = `${String(endHNum).padStart(2, '0')}:00`;
     setStartHour(startH);
     setEndHour(endH);
@@ -547,6 +547,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     '16:30',
                     '17:00',
                     '17:30',
+                    '18:00',
                   ].map((time) => (
                     <option key={time} value={time}>
                       {time}
@@ -589,6 +590,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     '17:00',
                     '17:30',
                     '18:00',
+                    '18:30',
+                    '19:00',
                   ].map((time) => (
                     <option key={time} value={time}>
                       {isEn ? `End time ${time}` : `Päättymisaika ${time}`}

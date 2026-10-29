@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -54,6 +54,9 @@ export const AdminPanel: React.FC = () => {
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [testWebhookStatus, setTestWebhookStatus] = useState<string | null>(null);
 
   // Kyselyt
   const { data: allGames } = useQuery({
@@ -76,13 +79,15 @@ export const AdminPanel: React.FC = () => {
 
   const { data: settings } = useQuery({
     queryKey: ['settings'],
-    queryFn: async () => {
-      const data = await api.getSettings();
-      setDiscordWebhookUrl(data.discordWebhookUrl || '');
-      return data;
-    },
+    queryFn: () => api.getSettings(),
     enabled: isAdmin && activeSubTab === 'settings',
   });
+
+  useEffect(() => {
+    if (settings?.discordWebhookUrl !== undefined) {
+      setDiscordWebhookUrl(settings.discordWebhookUrl || '');
+    }
+  }, [settings?.discordWebhookUrl]);
 
   const { data: statistics } = useQuery({
     queryKey: ['statistics'],
@@ -225,22 +230,24 @@ export const AdminPanel: React.FC = () => {
   const updateSettingsMutation = useMutation({
     mutationFn: (req: UpdateSiteSettingsRequest) => api.updateSettings(req),
     onSuccess: () => {
-      setStatusMessage(
-        isEn
-          ? 'Site settings and Discord webhook saved!'
-          : 'Sivustoasetukset ja Discord Webhook tallennettu onnistuneesti!'
-      );
+      const msg = isEn
+        ? 'Site settings and Discord webhook saved!'
+        : 'Sivustoasetukset ja Discord Webhook tallennettu onnistuneesti!';
+      setStatusMessage(msg);
+      setSettingsSuccess(msg);
+      setSettingsError(null);
       setErrorMessage(null);
       queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
     onError: (err: unknown) => {
-      setErrorMessage(
-        err instanceof ApiError
-          ? err.message
-          : isEn
-          ? 'Failed to save settings.'
-          : 'Asetusten tallennus epäonnistui.'
-      );
+      const msg = err instanceof ApiError
+        ? err.message
+        : isEn
+        ? 'Failed to save settings.'
+        : 'Asetusten tallennus epäonnistui.';
+      setErrorMessage(msg);
+      setSettingsError(msg);
+      setSettingsSuccess(null);
     },
   });
 
@@ -343,9 +350,53 @@ export const AdminPanel: React.FC = () => {
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
+    setSettingsSuccess(null);
+    setSettingsError(null);
+    setTestWebhookStatus(null);
     updateSettingsMutation.mutate({
       discordWebhookUrl: discordWebhookUrl.trim(),
     });
+  };
+
+  const handleTestWebhook = async () => {
+    const trimmed = discordWebhookUrl.trim();
+    if (!trimmed) {
+      setTestWebhookStatus(
+        isEn ? 'Please enter a webhook URL first.' : 'Syötä ensin Discord Webhook URL.'
+      );
+      return;
+    }
+    setTestWebhookStatus(
+      isEn ? 'Sending test notification...' : 'Lähetetään testi-ilmoitusta...'
+    );
+    try {
+      const res = await fetch(trimmed, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: '🎮 **Xamk Game Room Testi-ilmoitus:** Discord Webhook -yhteys toimii onnistuneesti!',
+        }),
+      });
+      if (res.ok || res.status === 204) {
+        setTestWebhookStatus(
+          isEn
+            ? '✅ Test notification sent to Discord!'
+            : '✅ Testi-ilmoitus lähetetty Discordiin onnistuneesti!'
+        );
+      } else {
+        setTestWebhookStatus(
+          isEn
+            ? `⚠️ Discord returned status ${res.status}`
+            : `⚠️ Discord palautti tilakoodin ${res.status}`
+        );
+      }
+    } catch {
+      setTestWebhookStatus(
+        isEn
+          ? '⚠️ Connection to Discord failed (check URL or CORS).'
+          : '⚠️ Yhteydenotto Discordiin epäonnistui (tarkista URL).'
+      );
+    }
   };
 
   const subTabs: { id: AdminSubTab; icon: string; labelFi: string; labelEn: string; badge?: number }[] = [
@@ -1046,15 +1097,38 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </CardHeader>
 
-            <form onSubmit={handleSaveSettings} className="xamk-modal-form">
+            <form onSubmit={handleSaveSettings} noValidate className="xamk-modal-form">
+              {settingsSuccess && (
+                <div className="alert alert-success" role="alert">
+                  <span>{settingsSuccess}</span>
+                </div>
+              )}
+
+              {settingsError && (
+                <div className="alert alert-error" role="alert">
+                  <span>{settingsError}</span>
+                </div>
+              )}
+
+              {testWebhookStatus && (
+                <div className="alert alert-info" role="alert">
+                  <span>{testWebhookStatus}</span>
+                </div>
+              )}
+
               <div className="xamk-field-group">
                 <Label htmlFor="webhook-url">Discord Webhook URL</Label>
                 <Input
                   id="webhook-url"
-                  type="url"
+                  type="text"
                   placeholder="https://discord.com/api/webhooks/..."
                   value={discordWebhookUrl}
-                  onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                  onChange={(e) => {
+                    setDiscordWebhookUrl(e.target.value);
+                    setSettingsSuccess(null);
+                    setSettingsError(null);
+                    setTestWebhookStatus(null);
+                  }}
                 />
                 <span className="xamk-field-hint">
                   {isEn
@@ -1063,7 +1137,7 @@ export const AdminPanel: React.FC = () => {
                 </span>
               </div>
 
-              <div className="xamk-submit-row">
+              <div className="xamk-submit-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <Button
                   type="submit"
                   variant="pill"
@@ -1080,6 +1154,18 @@ export const AdminPanel: React.FC = () => {
                   </span>
                   <span className="confirm-arrow" aria-hidden="true">→</span>
                 </Button>
+
+                {discordWebhookUrl.trim() && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleTestWebhook}
+                    disabled={updateSettingsMutation.isPending}
+                    title="Lähetä testi-ilmoitus kanavalle"
+                  >
+                    <span>💬 {isEn ? 'Test Webhook' : 'Testaa yhteys'}</span>
+                  </Button>
+                )}
               </div>
             </form>
           </Card>

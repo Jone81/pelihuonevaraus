@@ -40,7 +40,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.closeMenu': 'Sulje valikko',
 
     // Hero / Footer / Common
-    'app.welcome': 'Tervetuloa Xamk Game Roomiin!',
+    'app.welcome': 'Xamk Game Room',
     'app.footer': 'Kaakkois-Suomen ammattikorkeakoulu',
     'footer.school': 'Kaakkois-Suomen ammattikorkeakoulu',
     'footer.discord': '💬 Discord-yhteisö',
@@ -207,7 +207,7 @@ const translations: Record<Language, Record<string, string>> = {
     'wishlist.communityWish': 'Opiskelijatoive',
 
     // Landing Page
-    'landing.welcome': 'Tervetuloa Xamk Game Roomiin',
+    'landing.welcome': 'Xamk Game Room',
     'landing.subtitle': 'Kaakkois-Suomen ammattikorkeakoulun virallinen pelitila opiskelijoille ja henkilökunnalle.',
     'landing.newsHeader': '📢 Uutiset & Tiedotteet',
     'landing.announcementsCount': 'tiedotetta',
@@ -288,7 +288,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.closeMenu': 'Close menu',
 
     // Hero / Footer / Common
-    'app.welcome': 'Welcome to Xamk Game Room!',
+    'app.welcome': 'Xamk Game Room',
     'app.footer': 'South-Eastern Finland University of Applied Sciences',
     'footer.school': 'South-Eastern Finland University of Applied Sciences',
     'footer.discord': '💬 Discord Community',
@@ -455,7 +455,7 @@ const translations: Record<Language, Record<string, string>> = {
     'wishlist.communityWish': 'Community Wish',
 
     // Landing Page
-    'landing.welcome': 'Welcome to Xamk Game Room',
+    'landing.welcome': 'Xamk Game Room',
     'landing.subtitle': 'South-Eastern Finland University of Applied Sciences official gaming space.',
     'landing.newsHeader': '📢 News & Announcements',
     'landing.announcementsCount': 'announcements',

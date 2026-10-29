@@ -35,7 +35,10 @@ public sealed class NewsService : INewsService
     public async Task<Result<IReadOnlyList<NewsResponse>>> GetAllNewsAsync(CancellationToken cancellationToken = default)
     {
         var newsList = await _newsRepository.GetAllAsync(cancellationToken);
-        var responses = newsList.Select(MapToResponse).ToList();
+        var responses = newsList
+            .Where(n => !n.Title.Contains("Tervetuloa Xamk Game Roomiin", StringComparison.OrdinalIgnoreCase))
+            .Select(MapToResponse)
+            .ToList();
         return Result.Success<IReadOnlyList<NewsResponse>>(responses);
     }
 

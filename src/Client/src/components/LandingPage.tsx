@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -58,6 +58,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     queryKey: ['news'],
     queryFn: () => api.getNews(),
   });
+
+  const pinnedOrLatestNews = useMemo(() => {
+    if (!newsItems || newsItems.length === 0) return null;
+    return newsItems.find((n) => n.isPinned) || newsItems[0];
+  }, [newsItems]);
 
   const focusLoginInput = () => {
     const el = document.getElementById('landing-email');
@@ -223,7 +228,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     ? 'Opening hours Mon–Fri 08:00–18:00'
                     : 'Aukioloajat ma–pe klo 08:00–18:00'}
                 </h2>
-                <p className="xamk-hero-info-sub">{t('landing.subtitle')}</p>
+                <p
+                  className="xamk-hero-info-sub"
+                  style={pinnedOrLatestNews ? { cursor: 'pointer' } : undefined}
+                  onClick={() => {
+                    if (pinnedOrLatestNews) {
+                      scrollToSection('landing-news-col');
+                    }
+                  }}
+                  title={pinnedOrLatestNews ? (isEn ? 'Click to view announcements' : 'Klikkaa siirtyäksesi tiedotteisiin') : undefined}
+                >
+                  {pinnedOrLatestNews
+                    ? pinnedOrLatestNews.title
+                    : t('landing.subtitle')}
+                </p>
               </div>
             </div>
           </div>

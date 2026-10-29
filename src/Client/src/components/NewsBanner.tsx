@@ -5,24 +5,24 @@ import { useLanguage } from '../context/LanguageContext';
 
 const XamkXEmblem: React.FC = () => (
   <svg
-    viewBox="0 0 64 64"
-    width="54"
-    height="54"
+    viewBox="0 0 100 100"
+    className="xamk-x-emblem"
     aria-hidden="true"
-    className="xamk-x-emblem-svg"
+    focusable="false"
   >
     <path
-      d="M6 6 H25 L32 13 L39 6 H58 V25 L51 32 L58 39 V58 H39 L32 51 L25 58 H6 V39 L13 32 L6 25 Z"
+      d="M 12 12 L 34 12 L 50 34 L 66 12 L 88 12 L 88 34 L 66 50 L 88 66 L 88 88 L 66 88 L 50 66 L 34 88 L 12 88 L 12 66 L 34 50 L 12 34 Z"
       fill="none"
-      stroke="#e5a812"
-      strokeWidth="3.2"
+      stroke="#d49a15"
+      strokeWidth="11"
       strokeLinejoin="miter"
+      strokeMiterlimit="10"
     />
   </svg>
 );
 
 export const NewsBanner: React.FC = () => {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
   const { data: newsList } = useQuery({
@@ -60,11 +60,9 @@ export const NewsBanner: React.FC = () => {
                   : 'Aukioloajat ma–pe klo 08:00–18:00'}
               </h2>
               <p className="xamk-hero-info-sub">
-                {pinnedNews
+                {pinnedNews && !pinnedNews.title.includes('Tervetuloa Xamk Game Roomiin')
                   ? pinnedNews.title
-                  : isEn
-                  ? 'Welcome Mon–Fri to the official gaming lounge of South-Eastern Finland University of Applied Sciences!'
-                  : 'Tervetuloa ma–pe klo 08–18 Kaakkois-Suomen ammattikorkeakoulun pelihuoneeseen!'}
+                  : t('landing.subtitle')}
               </p>
             </div>
           </div>
