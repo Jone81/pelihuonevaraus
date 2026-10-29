@@ -62,7 +62,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
         title={lang === 'fi' ? 'Switch to English' : 'Vaihda kieleksi Suomi'}
       >
         {lang === 'fi' ? <FinlandFlag /> : <UKFlag />}
-        <span className="lang-text">{lang === 'fi' ? 'Suomi' : 'English'}</span>
+        <span className="lang-text hidden sm:inline">{lang === 'fi' ? 'Suomi' : 'English'}</span>
+        <span className="lang-text-short sm:hidden font-bold text-[11px]">{lang === 'fi' ? 'FI' : 'EN'}</span>
       </button>
     </div>
   );

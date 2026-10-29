@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -109,15 +109,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     anchorIndex: number;
     currentIndex: number;
   } | null>(null);
-
-  useEffect(() => {
-    if (!dragSelection) return;
-    const handleWindowMouseUp = () => {
-      setDragSelection(null);
-    };
-    window.addEventListener('mouseup', handleWindowMouseUp);
-    return () => window.removeEventListener('mouseup', handleWindowMouseUp);
-  }, [dragSelection]);
+  const dragSelectionRef = useRef<typeof dragSelection>(null);
+  const matrixWrapRef = useRef<HTMLDivElement>(null);
 
   const startDateTime = new Date(`${date}T${startHour}:00`);
   const endDateTime = new Date(`${date}T${endHour}:00`);
@@ -301,57 +294,131 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     setEndHour(endH);
   }, []);
 
-  const handleCellMouseDown = (
-    e: React.MouseEvent,
-    station: GamingStation,
-    hourIdx: number,
-    busy: boolean
-  ) => {
-    if (busy || e.button !== 0) return;
-    e.preventDefault();
-    setSelectedStationId(station.id);
-    setDragSelection({
-      stationId: station.id,
-      anchorIndex: hourIdx,
-      currentIndex: hourIdx,
-    });
-    applyMatrixRange(hourIdx, hourIdx);
-  };
+  const updateSelectionAtIndex = useCallback(
+    (hourIdx: number) => {
+      const currentDrag = dragSelectionRef.current;
+      if (!currentDrag) return;
+      const targetStation = orderedStations.find((s) => s.id === currentDrag.stationId);
+      if (!targetStation) return;
 
-  const handleCellMouseEnter = (hourIdx: number) => {
+      const { anchorIndex } = currentDrag;
+      const step = hourIdx >= anchorIndex ? 1 : -1;
+      const maxAllowedSpan = reservationType !== 1 && isAdmin ? 10 : 4;
+
+      let clampedIdx = anchorIndex;
+      for (
+        let i = anchorIndex + step;
+        step > 0 ? i <= hourIdx : i >= hourIdx;
+        i += step
+      ) {
+        if (Math.abs(i - anchorIndex) + 1 > maxAllowedSpan) {
+          break;
+        }
+        if (isStationHourBusy(targetStation, MATRIX_HOURS[i])) {
+          break;
+        }
+        clampedIdx = i;
+      }
+
+      if (clampedIdx !== currentDrag.currentIndex) {
+        const nextDrag = { ...currentDrag, currentIndex: clampedIdx };
+        setDragSelection(nextDrag);
+        dragSelectionRef.current = nextDrag;
+      }
+
+      const minIdx = Math.min(anchorIndex, clampedIdx);
+      const maxIdx = Math.max(anchorIndex, clampedIdx);
+      applyMatrixRange(minIdx, maxIdx);
+    },
+    [orderedStations, reservationType, isAdmin, applyMatrixRange]
+  );
+
+  const updateSelectionAtPoint = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!dragSelectionRef.current) return;
+
+      // Automaattinen vaakavieritys, jos sormi/kursori viedään lähelle taulukon reunaa
+      if (matrixWrapRef.current) {
+        const wrapRect = matrixWrapRef.current.getBoundingClientRect();
+        const edgeThreshold = 36;
+        if (clientX > wrapRect.right - edgeThreshold) {
+          matrixWrapRef.current.scrollLeft += 10;
+        } else if (clientX < wrapRect.left + edgeThreshold) {
+          matrixWrapRef.current.scrollLeft -= 10;
+        }
+      }
+
+      const el = document.elementFromPoint(clientX, clientY);
+      const cell = el?.closest<HTMLElement>('.matrix-slot-td, .matrix-hour-th');
+      if (!cell) return;
+
+      const rawHourIdx = cell.getAttribute('data-hour-index');
+      if (rawHourIdx === null) return;
+      const hourIdx = parseInt(rawHourIdx, 10);
+      if (!isNaN(hourIdx)) {
+        updateSelectionAtIndex(hourIdx);
+      }
+    },
+    [updateSelectionAtIndex]
+  );
+
+  const startDrag = useCallback(
+    (station: GamingStation, hourIdx: number, busy: boolean) => {
+      if (busy) return;
+      setSelectedStationId(station.id);
+      const newDrag = {
+        stationId: station.id,
+        anchorIndex: hourIdx,
+        currentIndex: hourIdx,
+      };
+      setDragSelection(newDrag);
+      dragSelectionRef.current = newDrag;
+      applyMatrixRange(hourIdx, hourIdx);
+    },
+    [applyMatrixRange]
+  );
+
+  const stopDrag = useCallback(() => {
+    setDragSelection(null);
+    dragSelectionRef.current = null;
+  }, []);
+
+  useEffect(() => {
     if (!dragSelection) return;
-    const targetStation = orderedStations.find((s) => s.id === dragSelection.stationId);
-    if (!targetStation) return;
 
-    const { anchorIndex } = dragSelection;
-    const step = hourIdx >= anchorIndex ? 1 : -1;
-    const maxAllowedSpan = reservationType !== 1 && isAdmin ? 10 : 4;
+    const handlePointerMove = (e: PointerEvent) => {
+      updateSelectionAtPoint(e.clientX, e.clientY);
+    };
 
-    let clampedIdx = anchorIndex;
-    for (
-      let i = anchorIndex + step;
-      step > 0 ? i <= hourIdx : i >= hourIdx;
-      i += step
-    ) {
-      if (Math.abs(i - anchorIndex) + 1 > maxAllowedSpan) {
-        break;
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        updateSelectionAtPoint(touch.clientX, touch.clientY);
       }
-      if (isStationHourBusy(targetStation, MATRIX_HOURS[i])) {
-        break;
-      }
-      clampedIdx = i;
-    }
+    };
 
-    if (clampedIdx !== dragSelection.currentIndex) {
-      setDragSelection((prev) =>
-        prev ? { ...prev, currentIndex: clampedIdx } : null
-      );
-    }
+    const handleEnd = () => {
+      stopDrag();
+    };
 
-    const minIdx = Math.min(anchorIndex, clampedIdx);
-    const maxIdx = Math.max(anchorIndex, clampedIdx);
-    applyMatrixRange(minIdx, maxIdx);
-  };
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handleEnd);
+    window.addEventListener('pointercancel', handleEnd);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('touchcancel', handleEnd);
+    window.addEventListener('mouseup', handleEnd);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handleEnd);
+      window.removeEventListener('pointercancel', handleEnd);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
+      window.removeEventListener('mouseup', handleEnd);
+    };
+  }, [dragSelection, updateSelectionAtPoint, stopDrag]);
 
   const handleCellKeyDown = (
     e: React.KeyboardEvent,
@@ -584,15 +651,21 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
           <span className="xamk-schedule-sublabel">
             {isEn ? 'Available TV & Station Schedule' : 'Aikataulu ja TV-varaukset'}
           </span>
-          <span className="xamk-schedule-drag-hint">
+          <span className="xamk-schedule-drag-hint hidden sm:inline">
             {isEn
-              ? `Drag across hours to select time (${startHour}–${endHour})`
-              : `Valitse tai maalaa aikaväli hiirellä (${startHour}–${endHour})`}
+              ? `Drag across hours to select time (max 4h) • ${startHour}–${endHour}`
+              : `Maalaa aikaväli vetämällä (max 4 h) • ${startHour}–${endHour}`}
+          </span>
+          <span className="xamk-schedule-drag-hint sm:hidden text-[11px]">
+            {isEn
+              ? `👉 Drag slots to select (max 4h) • ${startHour}–${endHour}`
+              : `👉 Valitse vetämällä sormella (max 4 h) • ${startHour}–${endHour}`}
           </span>
         </div>
 
         {/* All-Devices Hourly Matrix Table with Drag-to-Select */}
         <div
+          ref={matrixWrapRef}
           className={`xamk-compact-matrix-wrap ${
             dragSelection ? 'matrix-is-dragging' : ''
           }`}
@@ -601,8 +674,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             <thead>
               <tr>
                 <th className="matrix-station-th">{t('schedule.station')}</th>
-                {MATRIX_HOURS.map((h) => (
-                  <th key={h} className="matrix-hour-th">
+                {MATRIX_HOURS.map((h, hourIdx) => (
+                  <th key={h} data-hour-index={hourIdx} className="matrix-hour-th">
                     {h}
                   </th>
                 ))}
@@ -642,6 +715,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       return (
                         <td
                           key={h}
+                          data-station-id={station.id}
+                          data-hour-index={hourIdx}
+                          data-busy={busy ? 'true' : 'false'}
                           tabIndex={busy ? -1 : 0}
                           aria-label={`${station.name} ${h} ${
                             busy ? t('schedule.busy') : t('schedule.free')
@@ -653,10 +729,28 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                               ? 'slot-td-selected'
                               : 'slot-td-free'
                           }`}
-                          onMouseDown={(e) =>
-                            handleCellMouseDown(e, station, hourIdx, busy)
-                          }
-                          onMouseEnter={() => handleCellMouseEnter(hourIdx)}
+                          onPointerDown={(e) => {
+                            if (busy || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                            startDrag(station, hourIdx, busy);
+                          }}
+                          onMouseDown={(e) => {
+                            if (busy || e.button !== 0) return;
+                            startDrag(station, hourIdx, busy);
+                          }}
+                          onTouchStart={() => {
+                            if (busy) return;
+                            startDrag(station, hourIdx, busy);
+                          }}
+                          onMouseEnter={() => {
+                            if (dragSelection) {
+                              updateSelectionAtIndex(hourIdx);
+                            }
+                          }}
+                          onClick={() => {
+                            if (busy) return;
+                            setSelectedStationId(station.id);
+                            applyMatrixRange(hourIdx, hourIdx);
+                          }}
                           onKeyDown={(e) =>
                             handleCellKeyDown(e, station, hourIdx, busy)
                           }

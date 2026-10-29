@@ -430,6 +430,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                     <span className="legend-dot dot-room"></span> {t('schedule.roomLocked')}
                   </span>
                 )}
+                <span className="legend-item sm:hidden text-[#d49a15] font-semibold text-[11px] ml-auto">
+                  {isEn ? '👉 Swipe timeline 👈' : '👉 Pyyhkäise aikajanaa 👈'}
+                </span>
               </div>
 
               <div className="timeline-scroll-area">

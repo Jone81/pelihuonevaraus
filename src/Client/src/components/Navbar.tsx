@@ -90,20 +90,22 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Left: Xamk Brand Logo & Title */}
         <button
           type="button"
-          className="xamk-brand-btn"
+          className="xamk-brand-btn min-w-0 flex-shrink"
           onClick={() => handleTabClick('book')}
           aria-label="Pelihuonevaraus etusivu"
         >
           <img
             src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
             alt="Xamk"
-            className="xamk-logo-img"
+            className="xamk-logo-img h-6 sm:h-7 md:h-8 w-auto object-contain flex-shrink-0"
           />
-          <div className="xamk-brand-titles">
-            <span className="xamk-brand-main">
+          <div className="xamk-brand-titles min-w-0">
+            <span className="xamk-brand-main text-[11px] sm:text-xs md:text-sm font-extrabold uppercase truncate">
               {isEn ? 'GAME ROOM BOOKING' : 'PELIHUONEVARAUS'}
             </span>
-            <span className="xamk-brand-sub">XAMK GAME ROOM</span>
+            <span className="xamk-brand-sub text-[8px] sm:text-[9px] md:text-[10px] font-bold tracking-widest uppercase truncate">
+              XAMK GAME ROOM
+            </span>
           </div>
         </button>
 
@@ -356,10 +358,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               className="xamk-confirm-pill-btn btn-touch"
-              style={{ minHeight: '34px', padding: '5px 14px', fontSize: '0.76rem' }}
+              style={{ minHeight: '34px', padding: '5px 12px', fontSize: '0.76rem' }}
               onClick={onOpenLogin}
             >
-              <span>{t('nav.login')}</span>
+              <span className="hidden sm:inline">{t('nav.login')}</span>
+              <span className="sm:hidden">{isEn ? 'Log in' : 'Kirjaudu'}</span>
             </button>
           )}
         </div>

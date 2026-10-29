@@ -162,33 +162,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="xamk-topbar-inner">
           <button
             type="button"
-            className="xamk-brand-btn"
+            className="xamk-brand-btn min-w-0 flex-shrink"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <img
               src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
               alt="Xamk"
-              className="xamk-logo-img"
+              className="xamk-logo-img h-6 sm:h-7 md:h-8 w-auto object-contain flex-shrink-0"
             />
-            <div className="xamk-brand-titles">
-              <span className="xamk-brand-main">
+            <div className="xamk-brand-titles min-w-0">
+              <span className="xamk-brand-main text-[11px] sm:text-xs md:text-sm font-extrabold uppercase truncate">
                 {isEn ? 'GAME ROOM BOOKING' : 'PELIHUONEVARAUS'}
               </span>
-              <span className="xamk-brand-sub">XAMK GAME ROOM</span>
+              <span className="xamk-brand-sub text-[8px] sm:text-[9px] md:text-[10px] font-bold tracking-widest uppercase truncate">
+                XAMK GAME ROOM
+              </span>
             </div>
           </button>
 
-          <div className="xamk-topbar-right">
-            <LanguageSwitcher />
+          <div className="xamk-topbar-right flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+            <LanguageSwitcher className="mobile-lang-switcher" />
 
             <Button
               type="button"
               variant="pill"
               size="sm"
+              className="btn-touch"
               onClick={() => (onOpenLogin ? onOpenLogin() : focusLoginInput())}
             >
-              <span>{t('nav.login')}</span>
-              <span className="confirm-arrow" aria-hidden="true">→</span>
+              <span className="hidden sm:inline">{t('nav.login')}</span>
+              <span className="sm:hidden">{isEn ? 'Log in' : 'Kirjaudu'}</span>
+              <span className="confirm-arrow hidden sm:inline" aria-hidden="true">→</span>
             </Button>
           </div>
         </div>
@@ -345,13 +349,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 >
                   <TabsList>
                     <TabsTrigger value="1">
-                      {isEn ? '1. University Email' : '1. Koulun sähköposti'}
+                      <span className="hidden sm:inline">{isEn ? '1. University Email' : '1. Koulun sähköposti'}</span>
+                      <span className="sm:hidden">{isEn ? '1. Email' : '1. Sähköposti'}</span>
                     </TabsTrigger>
                     <TabsTrigger value="2">
-                      {isEn ? '2. Verification Code' : '2. Vahvistuskoodi'}
+                      <span className="hidden sm:inline">{isEn ? '2. Verification Code' : '2. Vahvistuskoodi'}</span>
+                      <span className="sm:hidden">{isEn ? '2. Koodi' : '2. Koodi'}</span>
                     </TabsTrigger>
                     <TabsTrigger value="floorplan">
-                      {t('floorplan.title')}
+                      <span className="hidden sm:inline">{t('floorplan.title')}</span>
+                      <span className="sm:hidden">{isEn ? 'Map' : 'Kartta'}</span>
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>

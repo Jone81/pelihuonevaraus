@@ -649,7 +649,7 @@ export const AdminPanel: React.FC = () => {
                 value={gameFilter}
                 onValueChange={(v) => setGameFilter(v as 'ALL' | 'INSTALLED' | 'WISHLIST')}
               >
-                <TabsList style={{ maxWidth: '340px' }}>
+                <TabsList className="w-full max-w-[340px]">
                   <TabsTrigger value="ALL">
                     {isEn ? 'All' : 'Kaikki'} ({allGames?.length ?? 0})
                   </TabsTrigger>
@@ -960,7 +960,7 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </div>
 
-            <div className="xamk-field-group" style={{ minWidth: '280px' }}>
+            <div className="xamk-field-group w-full sm:w-auto sm:min-w-[280px]">
               <Input
                 type="text"
                 placeholder={isEn ? '🔍 Search users by name or email...' : '🔍 Hae nimen tai sähköpostin perusteella...'}
@@ -1320,7 +1320,7 @@ export const AdminPanel: React.FC = () => {
               value={issueFilter}
               onValueChange={(v) => setIssueFilter(v as 'ALL' | 'OPEN' | 'RESOLVED')}
             >
-              <TabsList style={{ maxWidth: '340px' }}>
+              <TabsList className="w-full max-w-[340px]">
                 <TabsTrigger value="ALL">
                   {isEn ? 'All' : 'Kaikki'} ({allIssues?.length ?? 0})
                 </TabsTrigger>

@@ -655,19 +655,23 @@ textarea:focus-visible {
 /* Pelipisteruudukko (Tilan tilanne) */
 .station-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 600px) {
   .station-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 900px) {
   .station-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1132,19 +1136,23 @@ textarea:focus-visible {
 
 .games-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 600px) {
   .games-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 900px) {
   .games-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2155,6 +2163,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .timeline-legend {
@@ -2201,9 +2213,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 .timeline-scroll-area {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background-color: var(--bg-secondary);
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .timeline-header-row {
@@ -2287,6 +2304,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   z-index: 4;
 }
 
+@media (max-width: 640px) {
+  .timeline-station-col-header,
+  .timeline-station-cell {
+    width: 120px;
+    min-width: 120px;
+    padding: 8px 8px;
+    font-size: 0.78rem;
+  }
+}
+
 .station-mini-icon {
   font-size: 1.1rem;
 }
@@ -2342,6 +2369,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   text-overflow: ellipsis;
   transition: all 0.15s ease;
   user-select: none;
+  touch-action: pan-x pan-y;
 }
 
 .block-free {
@@ -2706,7 +2734,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   }
   .schedule-view-toggle {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr 38px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 38px !important;
     gap: 4px !important;
     width: 100% !important;
   }
@@ -2811,24 +2839,48 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   gap: 12px;
 }
 
+@media (max-width: 640px) {
+  .xamk-topbar-inner {
+    padding: 6px 12px;
+    min-height: 48px;
+    gap: 8px;
+  }
+}
+
 .xamk-brand-btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: transparent;
   border: none;
   cursor: pointer;
   text-align: left;
-  padding: 2px 0;
-  flex-shrink: 0;
+  padding: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .xamk-brand-btn {
+    gap: 6px;
+  }
 }
 
 .xamk-logo-img {
-  height: 30px;
+  height: 28px;
   width: auto;
+  max-width: 65px;
   display: block;
   object-fit: contain;
   flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .xamk-logo-img {
+    height: 22px;
+    max-width: 50px;
+  }
 }
 
 .xamk-logo-emblem {
@@ -2862,6 +2914,8 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .xamk-brand-main {
@@ -2869,6 +2923,21 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .xamk-brand-main {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .xamk-brand-main {
+    font-size: 0.68rem;
+  }
 }
 
 .xamk-brand-sub {
@@ -2876,6 +2945,43 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   font-weight: 700;
   color: #d49a15;
   letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .xamk-brand-sub {
+    font-size: 0.52rem;
+  }
+}
+
+.xamk-topbar .xamk-confirm-pill-btn {
+  padding: 5px 14px;
+  min-height: 32px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .xamk-topbar .xamk-confirm-pill-btn {
+    padding: 4px 10px;
+    min-height: 28px;
+    font-size: 0.72rem;
+  }
+}
+
+.xamk-topbar .lang-pill-btn {
+  padding: 4px 8px;
+  min-height: 28px;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 480px) {
+  .xamk-topbar .lang-pill-btn {
+    padding: 3px 6px;
+    min-height: 26px;
+  }
 }
 
 .xamk-nav-center {
@@ -3050,7 +3156,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   background-repeat: no-repeat;
   border-bottom: 1px solid #1e1f24;
   position: relative;
-  margin-top: 59px;
+  margin-top: 54px;
+}
+
+@media (max-width: 640px) {
+  .xamk-hero-banner {
+    margin-top: 48px;
+  }
 }
 
 .xamk-hero-overlay {
@@ -3067,6 +3179,12 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .xamk-hero-overlay {
+    min-height: auto;
+  }
+}
+
 .xamk-hero-container {
   max-width: 1040px;
   width: 100%;
@@ -3077,6 +3195,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   justify-content: space-between;
   gap: 28px;
   flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .xamk-hero-container {
+    padding: 16px 12px;
+    gap: 14px;
+  }
 }
 
 .xamk-hero-headline-group {
@@ -3105,6 +3230,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
 
+@media (max-width: 640px) {
+  .xamk-highlight-strip {
+    font-size: clamp(1.1rem, 5vw, 1.48rem);
+    padding: 2px 10px 4px;
+  }
+}
+
 .xamk-highlight-strip + .xamk-highlight-strip {
   margin-top: 2px;
 }
@@ -3119,6 +3251,25 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   gap: 18px;
   max-width: 410px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75);
+}
+
+@media (max-width: 640px) {
+  .xamk-hero-info-box {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .xamk-x-emblem-svg {
+    width: 38px;
+    height: 38px;
+  }
+  .xamk-hero-info-heading {
+    font-size: 0.84rem;
+  }
+  .xamk-hero-info-sub {
+    font-size: 0.74rem;
+  }
 }
 
 .xamk-hero-emblem-wrap {
@@ -3153,28 +3304,55 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .xamk-main-surface {
   flex: 1;
   width: 100%;
+  max-width: 100%;
   background-color: #232323;
   padding: 34px 20px 44px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .xamk-main-surface {
+    padding: 18px 12px 30px;
+  }
 }
 
 .xamk-main-container {
   max-width: 1400px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .xamk-booking-grid-layout {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 36px;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .xamk-booking-grid-layout {
+    gap: 22px;
+  }
 }
 
 @media (min-width: 900px) {
   .xamk-booking-grid-layout {
-    grid-template-columns: 1fr 1.16fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.16fr);
     gap: 44px;
   }
+}
+
+.xamk-booking-left-col,
+.xamk-booking-right-col {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xamk-section-heading {
@@ -3183,6 +3361,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   align-items: center;
   text-align: center;
   margin-bottom: 22px;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .xamk-section-heading {
+    margin-bottom: 16px;
+  }
 }
 
 .xamk-section-heading h2 {
@@ -3191,6 +3377,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   color: #ffffff;
   margin: 0;
   letter-spacing: -0.01em;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .xamk-section-heading h2 {
+    font-size: 1.18rem;
+  }
 }
 
 .xamk-heading-underline {
@@ -3243,6 +3437,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+@media (max-width: 520px) {
+  .xamk-segment-btn {
+    min-height: 36px;
+    padding: 6px 3px;
+    font-size: 0.72rem;
+  }
+}
+
 .xamk-segment-btn:last-child {
   border-right: none;
 }
@@ -3260,13 +3462,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 .xamk-two-col-fields {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 @media (min-width: 520px) {
   .xamk-two-col-fields {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -3276,11 +3481,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   border-bottom: 2px solid #c89211;
   border-radius: 4px;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xamk-clean-input,
 .xamk-clean-select {
   width: 100%;
+  max-width: 100%;
   min-height: 42px;
   padding: 8px 12px;
   background-color: transparent;
@@ -3288,6 +3498,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   color: #f3f4f6;
   font-size: 0.85rem;
   outline: none;
+  box-sizing: border-box;
 }
 
 .xamk-clean-select option {
@@ -3303,6 +3514,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xamk-double-box-top {
@@ -3361,6 +3576,15 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   cursor: not-allowed;
 }
 
+@media (max-width: 640px) {
+  .xamk-confirm-pill-btn {
+    padding: 7px 14px;
+    min-height: 34px;
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+}
+
 /* Right Column: Compact Matrix & 8 Station Cards */
 .xamk-schedule-sublabel-row {
   display: flex;
@@ -3386,6 +3610,9 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .xamk-compact-matrix-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
   border: 1px solid #3c3e44;
   border-radius: 4px;
   background-color: #191a1e;
@@ -3400,8 +3627,18 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 .xamk-compact-matrix {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   font-size: 0.72rem;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.xamk-compact-matrix th,
+.xamk-compact-matrix td {
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
 }
 
 .xamk-compact-matrix th {
@@ -3413,12 +3650,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   border-right: 1px solid #2d2f35;
   text-align: center;
   white-space: nowrap;
+  touch-action: pan-x;
 }
 
 .xamk-compact-matrix th.matrix-station-th {
   text-align: left;
   padding-left: 10px;
   min-width: 126px;
+  touch-action: pan-x pan-y;
 }
 
 .xamk-compact-matrix tbody tr {
@@ -3443,6 +3682,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
+  touch-action: pan-x pan-y;
 }
 
 .xamk-compact-matrix td.matrix-station-td:hover {
@@ -3465,6 +3705,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .matrix-slot-td {
   cursor: pointer;
   transition: background-color 0.12s ease;
+  touch-action: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .matrix-slot-td.slot-td-free:hover {
@@ -3482,15 +3726,21 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* 2-Column x 4-Row Station Cards Grid */
-.xamk-stations-8grid {
+.xamk-stations-8grid,
+.xamk-stations-2col-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 520px) {
-  .xamk-stations-8grid {
-    grid-template-columns: repeat(2, 1fr);
+  .xamk-stations-8grid,
+  .xamk-stations-2col-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 12px;
   }
 }
@@ -3508,6 +3758,9 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .xamk-station-row-card:hover {
@@ -3586,6 +3839,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+}
+
+@media (max-width: 480px) {
+  .xamk-footer-grid {
+    padding: 20px 14px 20px;
+    gap: 16px;
+  }
 }
 
 @media (min-width: 640px) {
@@ -3845,6 +4105,15 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   gap: 18px;
 }
 
+@media (max-width: 640px) {
+  .xamk-dialog-content {
+    width: calc(100% - 16px);
+    max-height: calc(100vh - 20px);
+    padding: 18px 14px;
+    gap: 14px;
+  }
+}
+
 .xamk-dialog-content:focus {
   outline: none;
 }
@@ -4094,6 +4363,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xamk-admin-header {
@@ -4107,6 +4380,17 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   border-bottom: 2px solid #d49a2a;
   border-radius: 6px;
   padding: 22px 26px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .xamk-admin-header {
+    padding: 16px 14px;
+    gap: 16px;
+  }
 }
 
 .xamk-admin-header-titles {
@@ -4132,7 +4416,15 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 280px;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .xamk-admin-mode-switcher {
+    width: auto;
+    min-width: 280px;
+  }
 }
 
 /* 4-Card KPI Strip */
@@ -4140,6 +4432,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -4166,6 +4462,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   gap: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xamk-admin-kpi-card:hover {
@@ -4220,6 +4520,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   border: 1px solid #383a42;
   border-radius: 6px;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (min-width: 720px) {
@@ -4249,6 +4553,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .xamk-admin-tab-btn {
+    padding: 10px 8px;
+    font-size: 0.74rem;
+    gap: 4px;
+  }
 }
 
 .xamk-admin-tab-btn:hover {
@@ -4279,9 +4593,19 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 /* 2-Column Admin Layout */
 .xamk-admin-2col {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.xamk-admin-2col > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 980px) {
@@ -4299,6 +4623,17 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .xamk-admin-panel-card {
+    padding: 16px 14px;
+    gap: 12px;
+  }
 }
 
 .xamk-admin-card-title {
@@ -4326,7 +4661,11 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 /* Admin Tables */
 .xamk-admin-table-wrap {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid #32343b;
   border-radius: 4px;
   background-color: #16171a;
@@ -4334,6 +4673,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 .xamk-admin-table {
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   font-size: 0.84rem;
 }
