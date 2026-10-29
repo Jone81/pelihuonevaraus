@@ -22,10 +22,10 @@ interface TimeInterval {
 }
 
 const OPEN_MIN = 8 * 60;   // 08:00 = 480 min
-const CLOSE_MIN = 19 * 60; // 19:00 = 1140 min
-const TOTAL_MIN = CLOSE_MIN - OPEN_MIN; // 660 min
+const CLOSE_MIN = 18 * 60; // 18:00 = 1080 min
+const TOTAL_MIN = CLOSE_MIN - OPEN_MIN; // 600 min
 
-const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 function minToTimeStr(min: number): string {
   const h = Math.floor(min / 60);

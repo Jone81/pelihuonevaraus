@@ -73,7 +73,7 @@ export const AdminPanel: React.FC = () => {
 
   const { data: allUsers } = useQuery({
     queryKey: ['users'],
-    queryFn: () => api.getAllUsers(),
+    queryFn: () => api.getAllUsers(user?.id ?? ''),
     enabled: isAdmin,
   });
 
@@ -205,7 +205,7 @@ export const AdminPanel: React.FC = () => {
   // Päivitä käyttäjän rooli
   const updateUserRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      api.updateUserRole(userId, role),
+      api.updateUserRole(userId, role, user?.id ?? ''),
     onSuccess: (updatedUser) => {
       setStatusMessage(
         isEn
@@ -228,7 +228,7 @@ export const AdminPanel: React.FC = () => {
 
   // Päivitä sivustoasetukset
   const updateSettingsMutation = useMutation({
-    mutationFn: (req: UpdateSiteSettingsRequest) => api.updateSettings(req),
+    mutationFn: (req: UpdateSiteSettingsRequest) => api.updateSettings(req, user?.id ?? ''),
     onSuccess: () => {
       const msg = isEn
         ? 'Site settings and Discord webhook saved!'

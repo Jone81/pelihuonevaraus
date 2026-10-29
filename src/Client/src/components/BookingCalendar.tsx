@@ -16,17 +16,6 @@ interface BookingCalendarProps {
   onNavigateMyBookings?: () => void;
 }
 
-const FALLBACK_STATIONS: GamingStation[] = [
-  { id: 'sw-01', name: 'Nintendo Switch', type: 'NintendoSwitch', usesSharedTv: true, isActive: true },
-  { id: 'pc-01', name: 'PC 1', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'pc-02', name: 'PC 2', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'pc-03', name: 'PC 3', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'pc-04', name: 'PC 4', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'pc-05', name: 'PC 5', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'pc-06', name: 'PC 6', type: 'PC', usesSharedTv: false, isActive: true },
-  { id: 'ps5-01', name: 'PlayStation 5', type: 'PlayStation5', usesSharedTv: true, isActive: true },
-];
-
 const DISPLAY_ORDER = [
   'Nintendo Switch',
   'PC 1',
@@ -38,7 +27,7 @@ const DISPLAY_ORDER = [
   'PlayStation 5',
 ];
 
-const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
 const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) => {
   if (type === 'NintendoSwitch' || name.includes('Switch')) {
@@ -126,6 +115,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     queryKey: ['available-stations', startUtc, endUtc],
     queryFn: () => api.getAvailableStations(startUtc, endUtc),
     enabled: endDateTime > startDateTime,
+    refetchInterval: 15000,
   });
 
   const startDayUtc = new Date(`${date}T00:00:00`).toISOString();
@@ -134,10 +124,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const { data: dayReservations } = useQuery({
     queryKey: ['reservations-day', date],
     queryFn: () => api.getActiveReservations(startDayUtc, endDayUtc),
+    refetchInterval: 15000,
   });
 
   const orderedStations = useMemo(() => {
-    const source = allStations && allStations.length > 0 ? allStations : FALLBACK_STATIONS;
+    const source = allStations || [];
     return [...source].sort((a, b) => {
       const idxA = DISPLAY_ORDER.indexOf(a.name);
       const idxB = DISPLAY_ORDER.indexOf(b.name);
@@ -232,6 +223,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       return;
     }
 
+    const selectedDate = new Date(`${date}T12:00:00`);
+    const dayOfWeek = selectedDate.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      setGeneralError(
+        isEn
+          ? 'The Game Room is open Mon–Fri only. Please choose a weekday.'
+          : 'Pelihuone on avoinna vain arkisin (ma–pe). Valitse arkipäivä.'
+      );
+      return;
+    }
+
     if (endDateTime <= startDateTime) {
       setGeneralError('Loppuajan on oltava alkuajan jälkeen.');
       return;
@@ -288,7 +290,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
   const applyMatrixRange = useCallback((minIdx: number, maxIdx: number) => {
     const startH = MATRIX_HOURS[minIdx];
-    const endHNum = Math.min(19, parseInt(MATRIX_HOURS[maxIdx].split(':')[0], 10) + 1);
+    const endHNum = Math.min(18, parseInt(MATRIX_HOURS[maxIdx].split(':')[0], 10) + 1);
     const endH = `${String(endHNum).padStart(2, '0')}:00`;
     setStartHour(startH);
     setEndHour(endH);
@@ -547,7 +549,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     '16:30',
                     '17:00',
                     '17:30',
-                    '18:00',
                   ].map((time) => (
                     <option key={time} value={time}>
                       {time}
@@ -590,8 +591,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     '17:00',
                     '17:30',
                     '18:00',
-                    '18:30',
-                    '19:00',
                   ].map((time) => (
                     <option key={time} value={time}>
                       {isEn ? `End time ${time}` : `Päättymisaika ${time}`}
@@ -630,7 +629,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             <Button
               type="submit"
               variant="pill"
-              disabled={reservationMutation.isPending}
+              disabled={reservationMutation.isPending || (reservationType === 1 && !effectiveStationId)}
             >
               <span>
                 {reservationMutation.isPending
@@ -677,11 +676,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             <thead>
               <tr>
                 <th className="matrix-station-th">{t('schedule.station')}</th>
-                {MATRIX_HOURS.map((h, hourIdx) => (
-                  <th key={h} data-hour-index={hourIdx} className="matrix-hour-th">
-                    {h}
-                  </th>
-                ))}
+                {MATRIX_HOURS.map((h, hourIdx) => {
+                  const startNum = h.split(':')[0];
+                  const endNum = String(parseInt(startNum, 10) + 1).padStart(2, '0');
+                  return (
+                    <th
+                      key={h}
+                      data-hour-index={hourIdx}
+                      className="matrix-hour-th"
+                      title={`${h}–${endNum}:00`}
+                    >
+                      {`${startNum}–${endNum}`}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>

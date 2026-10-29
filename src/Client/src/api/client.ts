@@ -212,15 +212,19 @@ export const api = {
   },
 
   // Users (Admin)
-  async getAllUsers(): Promise<User[]> {
-    const res = await fetch('/api/users');
+  async getAllUsers(adminUserId?: string): Promise<User[]> {
+    const res = await fetch('/api/users', {
+      headers: adminUserId ? { 'X-User-Id': adminUserId } : {},
+    });
     return handleResponse<User[]>(res);
   },
 
-  async updateUserRole(userId: string, role: string): Promise<User> {
+  async updateUserRole(userId: string, role: string, adminUserId?: string): Promise<User> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUserId) headers['X-User-Id'] = adminUserId;
     const res = await fetch(`/api/users/${userId}/role`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ role }),
     });
     return handleResponse<User>(res);
@@ -238,10 +242,12 @@ export const api = {
     return handleResponse<SiteSettingsResponse>(res);
   },
 
-  async updateSettings(request: UpdateSiteSettingsRequest): Promise<SiteSettingsResponse> {
+  async updateSettings(request: UpdateSiteSettingsRequest, adminUserId?: string): Promise<SiteSettingsResponse> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUserId) headers['X-User-Id'] = adminUserId;
     const res = await fetch('/api/settings', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(request),
     });
     return handleResponse<SiteSettingsResponse>(res);

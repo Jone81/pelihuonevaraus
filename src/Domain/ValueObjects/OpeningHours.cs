@@ -9,7 +9,7 @@ public sealed record OpeningHours
 
     public TimeOnly OpenTime { get; init; } = DefaultOpenTime;
     public TimeOnly CloseTime { get; init; } = DefaultCloseTime;
-    public bool OnlyWeekdays { get; init; } = false;
+    public bool OnlyWeekdays { get; init; } = true;
 
     public static OpeningHours WeekdayOpeningHours => new() { OnlyWeekdays = true };
 

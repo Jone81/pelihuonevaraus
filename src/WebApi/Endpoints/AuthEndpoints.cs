@@ -67,10 +67,22 @@ public static class AuthEndpoints
 
         // Kaikki käyttäjät (Admin)
         group.MapGet("/users", async (
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
             IUserService userService,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            var userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
+            {
+                return Results.Forbid();
+            }
+
             var result = await userService.GetAllUsersAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -90,14 +102,26 @@ public static class AuthEndpoints
         .WithName("GetUserById")
         .WithSummary("Hae käyttäjän profiilitiedot");
 
-        // Käyttäjän roolin päivitys (Admin)
+        // Käyttäjän roolin päivitys (SuperAdmin)
         group.MapPut("/users/{id:guid}/role", async (
             Guid id,
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
             [FromBody] UpdateUserRoleRequest request,
             IUserService userService,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            var authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            if (!authUserResult.IsSuccess || authUserResult.Value.Role != "SuperAdmin")
+            {
+                return Results.Forbid();
+            }
+
             if (!Enum.TryParse<UserRole>(request.Role, true, out var newRole))
             {
                 return Results.BadRequest(new { error = "Tuntematon rooli. Sallitut: User, Admin, SuperAdmin." });
