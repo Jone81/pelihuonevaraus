@@ -147,7 +147,7 @@ public sealed class UserService : IUserService
         }
 
         // Generoidaan 6-numeroinen varmistuskoodi (testaus-/kehitystilassa myös kiinteä koodi 123456 hyväksytään)
-        string code = Random.Shared.Next(100000, 999999).ToString();
+        string code = Random.Shared.Next(100000, 999999).ToString(System.Globalization.CultureInfo.InvariantCulture);
         DateTimeOffset expiresAt = _dateTimeProvider.UtcNow.AddMinutes(15);
         VerificationCodes[email.Trim().ToLowerInvariant()] = (code, expiresAt);
 

@@ -153,29 +153,32 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     return new Set(availableStations.map((s) => s.id));
   }, [availableStations]);
 
-  const isStationHourBusy = (station: GamingStation, hourStr: string): boolean => {
-    if (!dayReservations || dayReservations.length === 0) return false;
-    const h = parseInt(hourStr.split(':')[0], 10);
-    const slotStartMin = h * 60;
-    const slotEndMin = (h + 1) * 60;
+  const isStationHourBusy = useCallback(
+    (station: GamingStation, hourStr: string): boolean => {
+      if (!dayReservations || dayReservations.length === 0) return false;
+      const h = parseInt(hourStr.split(':')[0] ?? '0', 10);
+      const slotStartMin = h * 60;
+      const slotEndMin = (h + 1) * 60;
 
-    return dayReservations.some((r) => {
-      const sDate = new Date(r.startUtc);
-      const eDate = new Date(r.endUtc);
-      const rStart = sDate.getHours() * 60 + sDate.getMinutes();
-      const rEnd = eDate.getHours() * 60 + eDate.getMinutes();
-      const overlaps = rStart < slotEndMin && rEnd > slotStartMin;
-      if (!overlaps) return false;
+      return dayReservations.some((r) => {
+        const sDate = new Date(r.startUtc);
+        const eDate = new Date(r.endUtc);
+        const rStart = sDate.getHours() * 60 + sDate.getMinutes();
+        const rEnd = eDate.getHours() * 60 + eDate.getMinutes();
+        const overlaps = rStart < slotEndMin && rEnd > slotStartMin;
+        if (!overlaps) return false;
 
-      if (r.reservationType === 'Room' || r.reservationType === 'Event') return true;
-      if (r.gamingStationId === station.id) return true;
-      if (station.usesSharedTv && r.gamingStationId) {
-        const other = orderedStations.find((st) => st.id === r.gamingStationId);
-        if (other?.usesSharedTv) return true;
-      }
-      return false;
-    });
-  };
+        if (r.reservationType === 'Room' || r.reservationType === 'Event') return true;
+        if (r.gamingStationId === station.id) return true;
+        if (station.usesSharedTv && r.gamingStationId) {
+          const other = orderedStations.find((st) => st.id === r.gamingStationId);
+          if (other?.usesSharedTv) return true;
+        }
+        return false;
+      });
+    },
+    [dayReservations, orderedStations]
+  );
 
   const reservationMutation = useMutation({
     mutationFn: (req: CreateReservationRequest) => api.createReservation(req),
@@ -332,7 +335,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       const maxIdx = Math.max(anchorIndex, clampedIdx);
       applyMatrixRange(minIdx, maxIdx);
     },
-    [orderedStations, reservationType, isAdmin, applyMatrixRange]
+    [orderedStations, reservationType, isAdmin, applyMatrixRange, isStationHourBusy]
   );
 
   const updateSelectionAtPoint = useCallback(

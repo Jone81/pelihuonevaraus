@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -46,7 +46,7 @@ export const AdminPanel: React.FC = () => {
   const [userSearch, setUserSearch] = useState('');
 
   // Asetukset
-  const [discordWebhookUrl, setDiscordWebhookUrl] = useState('');
+  const [discordWebhookUrlDraft, setDiscordWebhookUrl] = useState<string | null>(null);
 
   // Vikailmoitusten suodatus & kuittausmuistiinpanot
   const [issueFilter, setIssueFilter] = useState<'ALL' | 'OPEN' | 'RESOLVED'>('ALL');
@@ -83,11 +83,7 @@ export const AdminPanel: React.FC = () => {
     enabled: isAdmin && activeSubTab === 'settings',
   });
 
-  useEffect(() => {
-    if (settings?.discordWebhookUrl !== undefined) {
-      setDiscordWebhookUrl(settings.discordWebhookUrl || '');
-    }
-  }, [settings?.discordWebhookUrl]);
+  const discordWebhookUrl = discordWebhookUrlDraft ?? settings?.discordWebhookUrl ?? '';
 
   const { data: statistics } = useQuery({
     queryKey: ['statistics'],

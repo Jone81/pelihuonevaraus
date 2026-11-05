@@ -9,6 +9,7 @@ namespace Pelihuone.Application.Settings;
 public sealed class SettingsService : ISettingsService
 {
     private static readonly string SettingsFilePath = Path.Combine(AppContext.BaseDirectory, "site_settings.json");
+    private static readonly JsonSerializerOptions IndentedJsonOptions = new() { WriteIndented = true };
     private static string _discordWebhookUrl = string.Empty;
     private readonly ILogger<SettingsService> _logger;
 
@@ -54,7 +55,7 @@ public sealed class SettingsService : ISettingsService
 
         try
         {
-            var json = JsonSerializer.Serialize(new { discordWebhookUrl = _discordWebhookUrl }, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(new { discordWebhookUrl = _discordWebhookUrl }, IndentedJsonOptions);
             File.WriteAllText(SettingsFilePath, json);
         }
         catch (Exception ex)

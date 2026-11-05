@@ -27,10 +27,10 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
-            services.RemoveAll(typeof(DbContextOptions));
-            services.RemoveAll(typeof(ApplicationDbContext));
-            services.RemoveAll(typeof(IUnitOfWork));
+            services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
+            services.RemoveAll<DbContextOptions>();
+            services.RemoveAll<ApplicationDbContext>();
+            services.RemoveAll<IUnitOfWork>();
 
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
