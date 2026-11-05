@@ -1,38 +1,73 @@
+/**
+ * @file DailyScheduleViewer.tsx
+ * @description Monipuolinen päiväkohtaisen aikataulun tarkastelukomponentti.
+ * Tarjoaa kolme esitystapaa:
+ * 1) Visuaalinen aikajana (`timeline`) klo 08:00–18:00
+ * 2) Pelipistekohtaiset varauskortit (`cards`)
+ * 3) Taulukkoyhteenveto kaikista päivän varauksista (`summary`)
+ */
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 import type { GamingStation, Reservation } from '../types';
 
+/**
+ * DailyScheduleViewer-komponentin ominaisuudet (props).
+ */
 export interface DailyScheduleViewerProps {
+  /** Tarkasteltava päivämäärä muodossa 'YYYY-MM-DD' */
   selectedDate: string; // 'YYYY-MM-DD'
+  /** Valinnainen takaisinkutsu päivämäärän vaihtuessa */
   onDateChange?: (newDate: string) => void;
+  /** Valinnainen takaisinkutsu, kun käyttäjä klikkaa vapaata aikaväliä */
   onSelectSlot?: (stationId: string, startHour: string, endHour: string) => void;
+  /** Näytetäänkö päivämäärän valintapalkki (oletus `true`) */
   showDateSelector?: boolean;
 }
 
+/**
+ * Yksittäinen aikavälilohko pelipisteen päiväaikajanalla.
+ */
 interface TimeInterval {
+  /** Alkamisaika minuutteina keskiyöstä (esim. 480 = klo 08:00) */
   startMin: number; // minutes from midnight (e.g. 480 for 08:00)
+  /** Päättymisaika minuutteina keskiyöstä (esim. 1080 = klo 18:00) */
   endMin: number;   // minutes from midnight (e.g. 1080 for 18:00)
+  /** Alkamisaika merkkijonona (esim. '08:00') */
   startStr: string; // '08:00'
+  /** Päättymisaika merkkijonona (esim. '10:00') */
   endStr: string;   // '10:00'
+  /** Lohkon tila: vapaa, varattu, yhteisen TV:n lukitsema tai tilavarauksen lukitsema */
   type: 'free' | 'busy' | 'tv-locked' | 'room-locked';
+  /** Lohkoon liittyvä varausobjekti (jos varattu) */
   reservation?: Reservation;
+  /** Seliteteksti työkaluvihjettä (tooltip) varten */
   title: string;
 }
 
+/** Aukioloajan alkaminen minuutteina (klo 08:00 = 480 min) */
 const OPEN_MIN = 8 * 60;   // 08:00 = 480 min
+/** Aukioloajan päättyminen minuutteina (klo 18:00 = 1080 min) */
 const CLOSE_MIN = 18 * 60; // 18:00 = 1080 min
+/** Aukioloajan kokonaispituus minuutteina (600 min = 10 tuntia) */
 const TOTAL_MIN = CLOSE_MIN - OPEN_MIN; // 600 min
 
+/** Aikajanan tuntiasteikon merkinnät */
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
+/**
+ * Muuntaa keskiyöstä lasketut minuutit kellonaikamerkkijonoksi `HH:MM`.
+ */
 function minToTimeStr(min: number): string {
   const h = Math.floor(min / 60);
   const m = min % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+/**
+ * Jäsentää ISO-aikaleiman paikalliseksi kellonajaksi ja minuuteiksi keskiyöstä.
+ */
 function parseTimeToMinutes(isoString: string): { totalMinutes: number; timeStr: string } {
   const d = new Date(isoString);
   const h = d.getHours();
@@ -43,6 +78,9 @@ function parseTimeToMinutes(isoString: string): { totalMinutes: number; timeStr:
   };
 }
 
+/**
+ * Päivän varaustilanteen ja aikajanan esittävä komponentti.
+ */
 export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
   selectedDate,
   onDateChange,
@@ -73,7 +111,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
     refetchInterval: 30000,
   });
 
-  // Päivämäärän navigaatio
+  // Päivämäärän navigaatio: siirtyy edelliseen päivään
   const handlePrevDay = () => {
     if (!onDateChange) return;
     const d = new Date(selectedDate);
@@ -81,6 +119,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
     onDateChange(d.toISOString().split('T')[0]);
   };
 
+  // Siirtyy seuraavaan päivään
   const handleNextDay = () => {
     if (!onDateChange) return;
     const d = new Date(selectedDate);
@@ -88,12 +127,14 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
     onDateChange(d.toISOString().split('T')[0]);
   };
 
+  // Valitsee kuluvan päivän
   const handleSetToday = () => {
     if (!onDateChange) return;
     const today = new Date().toISOString().split('T')[0];
     onDateChange(today);
   };
 
+  // Valitsee huomisen päivän
   const handleSetTomorrow = () => {
     if (!onDateChange) return;
     const d = new Date();
@@ -121,7 +162,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
     (r) => r.reservationType === 'Room' || r.reservationType === 'Event'
   );
 
-  // Lasketaan kullekin laitteelle aikajanaintervallit (varatut ja vapaat)
+  /**
+   * Lasketaan kullekin laitteelle aikajanaintervallit (varatut ja vapaat) klo 08:00–18:00 välille.
+   */
   const computeStationIntervals = (station: GamingStation): TimeInterval[] => {
     if (!dayReservations) return [];
 
@@ -236,6 +279,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
     return result;
   };
 
+  /**
+   * Käsittelee vapaan aikavälilohkon klikkauksen ja välittää valitun oletusajan `onSelectSlot`-funktiolle.
+   */
   const handleSlotClick = (stationId: string, interval: TimeInterval) => {
     if (interval.type !== 'free' || !onSelectSlot) return;
 

@@ -7,17 +7,27 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Tests;
 
+/// <summary>
+/// Yksikkötestit <see cref="GamingStationService"/>-palveluluokalle ja pelipisteiden reaaliaikaiselle saatavuuslaskennalle.
+/// </summary>
 public class GamingStationServiceTests
 {
     private readonly IGamingStationRepository _stationRepository = Substitute.For<IGamingStationRepository>();
     private readonly IReservationRepository _reservationRepository = Substitute.For<IReservationRepository>();
     private readonly GamingStationService _service;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="GamingStationServiceTests"/>-testiluokan ja luo testattavan palvelun mock-riippuvuuksilla.
+    /// </summary>
     public GamingStationServiceTests()
     {
+        // Alustetaan palvelu korvatuilla repositorioilla
         _service = new GamingStationService(_stationRepository, _reservationRepository);
     }
 
+    /// <summary>
+    /// Varmistaa, että kun PlayStation 5 on varattuna, sekä PS5 että saman TV:n jakava Nintendo Switch suodatetaan pois vapaiden laitteiden listalta.
+    /// </summary>
     [Fact]
     public async Task GetAvailableStationsAsync_WhenPS5IsReserved_BothPS5AndSwitchAreExcluded()
     {
@@ -43,15 +53,18 @@ public class GamingStationServiceTests
         _reservationRepository.GetActiveReservationsInWindowAsync(Arg.Any<TimeWindow>(), Arg.Any<CancellationToken>())
             .Returns([ps5Reservation]);
 
-        // Act
+        // Act: Haetaan vapaat pelipisteet kyseiselle aikaikkunalle
         var result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
 
-        // Assert
+        // Assert: Sekä PS5 että Switch ovat poissa, joten vain PC 1 on vapaana
         Assert.True(result.IsSuccess);
         Assert.Single(result.Value); // Vain PC 1 on vapaana!
         Assert.Equal(pcStation.Id.Value, result.Value[0].Id);
     }
 
+    /// <summary>
+    /// Varmistaa, että kun koko pelihuoneelle on voimassa oleva tilavaraus, yksikään yksittäinen pelipiste ei ole vapaana.
+    /// </summary>
     [Fact]
     public async Task GetAvailableStationsAsync_WhenRoomReservationActive_ReturnsEmptyList()
     {
@@ -63,6 +76,7 @@ public class GamingStationServiceTests
         var baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
         var queryWindow = TimeWindow.Create(baseTime.AddHours(2), baseTime.AddHours(4), ReservationType.Individual, baseTime);
 
+        // Luodaan koko huoneen kattava tilavaraus
         var roomReservation = Reservation.CreateRoom(
             ReservationId.New(),
             UserId.New(),
@@ -72,10 +86,10 @@ public class GamingStationServiceTests
         _reservationRepository.GetActiveReservationsInWindowAsync(Arg.Any<TimeWindow>(), Arg.Any<CancellationToken>())
             .Returns([roomReservation]);
 
-        // Act
+        // Act: Tarkistetaan vapaat pelipisteet tilavarauksen ajalta
         var result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
 
-        // Assert
+        // Assert: Vapaiden pelipisteiden listan tulee olla tyhjä
         Assert.True(result.IsSuccess);
         Assert.Empty(result.Value);
     }

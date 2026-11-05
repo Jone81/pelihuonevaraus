@@ -10,21 +10,32 @@ using Pelihuone.Infrastructure.Persistence;
 
 namespace Pelihuone.WebApi.Tests;
 
+/// <summary>
+/// Integraatiotestit varauspäätepisteille (<c>/api/reservations</c>) ja niiden virheenkäsittelylle.
+/// </summary>
 public class ReservationEndpointsTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private readonly TestWebApplicationFactory _factory;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="ReservationEndpointsTests"/>-testiluokan ja luo HTTP-asiakkaan testisovellukseen.
+    /// </summary>
+    /// <param name="factory">Testisovelluksen tehdasluokka.</param>
     public ReservationEndpointsTests(TestWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.CreateClient();
     }
 
+    /// <summary>
+    /// Varmistaa, että virheellisellä aikavälillä (alkamisaika päättymisajan jälkeen) lähetetty varauspyyntö
+    /// palauttaa HTTP 400 Bad Request ja ProblemDetails-vastauksen.
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WithInvalidTimes_Returns400BadRequestProblemDetails()
     {
-        // Arrange
+        // Arrange: Luodaan varauspyyntö, jossa alkuaika on loppuajan jälkeen
         var now = DateTimeOffset.UtcNow;
         var request = new CreateReservationRequest(
             "test-idem-key",
@@ -34,10 +45,10 @@ public class ReservationEndpointsTests : IClassFixture<TestWebApplicationFactory
             now.AddHours(2),
             now.AddHours(1)); // Start > End virhe
 
-        // Act
+        // Act: Lähetetään virheellinen varauspyyntö
         var response = await _client.PostAsJsonAsync("/api/reservations", request);
 
-        // Assert
+        // Assert: Varmistetaan 400 Bad Request ja ProblemDetails-sisältötyyppi
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
 
@@ -46,6 +57,9 @@ public class ReservationEndpointsTests : IClassFixture<TestWebApplicationFactory
         Assert.Equal(400, problem.Status);
     }
 
+    /// <summary>
+    /// Varmistaa, että päällekkäinen varauspyyntö jo varatulle pelipisteelle palauttaa HTTP 409 Conflict ja ProblemDetails-vastauksen.
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WhenStationAlreadyBooked_Returns409ConflictProblemDetails()
     {
@@ -94,10 +108,10 @@ public class ReservationEndpointsTests : IClassFixture<TestWebApplicationFactory
                 baseTime.AddHours(3), // 11:00 - 13:00 (päällekkäinen)
                 baseTime.AddHours(5));
 
-            // Act
+            // Act: Lähetetään päällekkäinen varauspyyntö
             var response = await _client.PostAsJsonAsync("/api/reservations", request);
 
-            // Assert
+            // Assert: Varmistetaan 409 Conflict ja ProblemDetails-vastaus otsikolla "Ristiriita"
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
 

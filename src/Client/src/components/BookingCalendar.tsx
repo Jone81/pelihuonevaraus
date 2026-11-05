@@ -1,3 +1,10 @@
+/**
+ * @file BookingCalendar.tsx
+ * @description Pelitilan ensisijainen varausnäkymä ja interaktiivinen tuntimatriisi.
+ * Vasemmalla puolella on varauslomake (yksittäinen laite, koko tila tai admin-tapahtuma)
+ * ja oikealla puolella kaikkien pelipisteiden reaaliaikainen tuntimatriisi (08:00–18:00),
+ * jossa aikavälin voi maalata hiirellä tai kosketuksella (drag-to-select).
+ */
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
@@ -9,13 +16,23 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { CreateReservationRequest, GamingStation, ReservationType } from '../types';
 
+/**
+ * BookingCalendar-komponentin ominaisuudet (props).
+ */
 interface BookingCalendarProps {
+  /** Funktio kirjautumismodaalin avaamiseen, jos käyttäjä ei ole kirjautunut */
   onRequireLogin: () => void;
+  /** Funktio, jota kutsutaan onnistuneen varauksen jälkeen (esim. siirtyminen omiin varauksiin) */
   onSuccessBooking: () => void;
+  /** Funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan: () => void;
+  /** Valinnainen funktio Omat varaukset -välilehdelle siirtymiseen */
   onNavigateMyBookings?: () => void;
 }
 
+/**
+ * Pelipisteiden kiinteä esitysjärjestys aikataulumatriisissa ja laitekorteissa.
+ */
 const DISPLAY_ORDER = [
   'Nintendo Switch',
   'PC 1',
@@ -27,8 +44,14 @@ const DISPLAY_ORDER = [
   'PlayStation 5',
 ];
 
+/**
+ * Tuntimatriisin alkamistunnit aukioloajan (08:00–18:00) puitteissa.
+ */
 const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
+/**
+ * Palauttaa pelipisteen tyypin tai nimen mukaisen laiteikonin.
+ */
 const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) => {
   if (type === 'NintendoSwitch' || name.includes('Switch')) {
     return (
@@ -51,6 +74,9 @@ const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) =
   );
 };
 
+/**
+ * Varauslomakkeen ja interaktiivisen aikataulumatriisin yhdistävä pääkomponentti.
+ */
 export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   onRequireLogin,
   onSuccessBooking,
@@ -61,17 +87,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const isEn = lang === 'en';
   const queryClient = useQueryClient();
 
+  // Idempotenssiavain estää saman varauksen vahinkotuplalähetyksen
   const [idempotencyKey, setIdempotencyKey] = useState<string>(() =>
     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
       ? crypto.randomUUID()
       : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`
   );
 
+  // Lasketaan sallitut päivämäärärajat (tänään .. +2 kuukautta) sekä oletusarkipäivä
   const [dateBounds] = useState(() => {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
     const d = new Date();
+    // Jos kello on yli 17 tai on viikonloppu, siirretään oletuspäivä seuraavaan arkipäivään
     if (d.getHours() >= 17 || d.getDay() === 0 || d.getDay() === 6) {
       d.setDate(d.getDate() + 1);
       while (d.getDay() === 0 || d.getDay() === 6) {
@@ -86,6 +115,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     return { today: todayStr, defaultDate: defaultDateStr, maxDateStr: maxStr };
   });
 
+  // Lomakkeen ja maalauksen (drag-to-select) tilat
   const [date, setDate] = useState(dateBounds.defaultDate);
   const [startHour, setStartHour] = useState('08:00');
   const [endHour, setEndHour] = useState('10:00');
@@ -106,11 +136,13 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const startUtc = startDateTime.toISOString();
   const endUtc = endDateTime.toISOString();
 
+  // Haetaan kaikki pelipisteet
   const { data: allStations } = useQuery({
     queryKey: ['stations'],
     queryFn: () => api.getAllStations(),
   });
 
+  // Haetaan valitulla aikavälillä vapaana olevat pelipisteet
   const { data: availableStations } = useQuery({
     queryKey: ['available-stations', startUtc, endUtc],
     queryFn: () => api.getAvailableStations(startUtc, endUtc),
@@ -121,12 +153,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const startDayUtc = new Date(`${date}T00:00:00`).toISOString();
   const endDayUtc = new Date(`${date}T23:59:59`).toISOString();
 
+  // Haetaan valitun päivän kaikki aktiiviset varaukset matriisin renderöintiin
   const { data: dayReservations } = useQuery({
     queryKey: ['reservations-day', date],
     queryFn: () => api.getActiveReservations(startDayUtc, endDayUtc),
     refetchInterval: 15000,
   });
 
+  // Järjestetään pelipisteet määritellyn DISPLAY_ORDER-taulukon mukaisesti
   const orderedStations = useMemo(() => {
     const source = allStations || [];
     return [...source].sort((a, b) => {
@@ -138,6 +172,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     });
   }, [allStations]);
 
+  // Selvitetään aktiiviseksi valittu pelipiste (tai oletuksena ensimmäinen laite)
   const activeStation = useMemo(() => {
     if (selectedStationId) {
       const found = orderedStations.find((s) => s.id === selectedStationId);
@@ -148,11 +183,16 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
   const effectiveStationId = selectedStationId || activeStation?.id || '';
 
+  // Kokoelma vapaiden pelipisteiden tunnisteista nopeaa hakua varten
   const availableIdSet = useMemo(() => {
     if (!availableStations) return null;
     return new Set(availableStations.map((s) => s.id));
   }, [availableStations]);
 
+  /**
+   * Tarkistaa onko tietty pelipiste varattuna (tai lukittuna tilavarauksen / SharedTV:n vuoksi)
+   * annetun tunnin (`hourStr`, esim. '10:00') aikana.
+   */
   const isStationHourBusy = useCallback(
     (station: GamingStation, hourStr: string): boolean => {
       if (!dayReservations || dayReservations.length === 0) return false;
@@ -168,8 +208,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         const overlaps = rStart < slotEndMin && rEnd > slotStartMin;
         if (!overlaps) return false;
 
+        // Koko tilan tai tapahtuman varaus lukitsee kaikki laitteet
         if (r.reservationType === 'Room' || r.reservationType === 'Event') return true;
+        // Suora varaus kyseiselle laitteelle
         if (r.gamingStationId === station.id) return true;
+        // SharedTV-lukko: jos toinen yhteistä TV:tä käyttävä konsoli on varattu
         if (station.usesSharedTv && r.gamingStationId) {
           const other = orderedStations.find((st) => st.id === r.gamingStationId);
           if (other?.usesSharedTv) return true;
@@ -180,11 +223,13 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     [dayReservations, orderedStations]
   );
 
+  // Mutaatio uuden varauksen lähettämiseen palvelimelle
   const reservationMutation = useMutation({
     mutationFn: (req: CreateReservationRequest) => api.createReservation(req),
     onSuccess: () => {
       setConflictMessage(null);
       setGeneralError(null);
+      // Generoidaan uusi idempotenssiavain seuraavaa varausta varten
       setIdempotencyKey(
         typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
           ? crypto.randomUUID()
@@ -199,6 +244,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     },
     onError: (err: unknown) => {
       if (err instanceof ApiError) {
+        // Käsitellään 409 Conflict -tilanne (kilpajuoksu kahden varaajan välillä)
         if (err.status === 409 || err.problem?.status === 409) {
           setConflictMessage(
             '⚠️ 409 Ristiriita: Valittu pelipiste tai konsolien yhteinen TV ehdittiin varata toisen käyttäjän toimesta hetki sitten! Välimuisti on päivitetty, valitse toinen laite tai aikaväli.'
@@ -216,6 +262,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     },
   });
 
+  /**
+   * Validoi varauslomakkeen tiedot (aukioloajat, arkipäivät, kestorajat) ja lähettää varauksen.
+   */
   const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
     setConflictMessage(null);
@@ -226,6 +275,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       return;
     }
 
+    // Tarkistetaan, että valittu päivä on arkipäivä (ma–pe)
     const selectedDate = new Date(`${date}T12:00:00`);
     const dayOfWeek = selectedDate.getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -242,6 +292,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       return;
     }
 
+    // Estetään menneisyydessä olevan ajan varaaminen (5 min puskurilla)
     if (startDateTime.getTime() < Date.now() - 5 * 60 * 1000) {
       setGeneralError(
         'Valittu alkamisaika on jo menneisyydessä. Valitse kuluvaa kellonaikaa myöhäisempi aika tai toinen päivä.'
@@ -257,6 +308,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
     const stationToBook = effectiveStationId;
 
+    // Tarkistetaan varaustyypin mukaiset enimmäiskestorajat (4 h opiskelijoille, 10 h admineille)
     if (reservationType === 1) {
       if (!stationToBook) {
         setGeneralError('Valitse haluamasi pelipiste.');
@@ -291,6 +343,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     reservationMutation.mutate(request);
   };
 
+  /**
+   * Asettaa lomakkeen alkamis- ja päättymistunnin matriisin maalattujen tuntien indeksien perusteella.
+   */
   const applyMatrixRange = useCallback((minIdx: number, maxIdx: number) => {
     const startH = MATRIX_HOURS[minIdx];
     const endHNum = Math.min(18, parseInt(MATRIX_HOURS[maxIdx].split(':')[0], 10) + 1);
@@ -299,6 +354,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     setEndHour(endH);
   }, []);
 
+  /**
+   * Päivittää maalattavan aikavälin päätepisteen ottaen huomioon enimmäiskeston (4h/10h)
+   * ja pysähtyen mahdollisiin välissä oleviin varattuihin tunteihin.
+   */
   const updateSelectionAtIndex = useCallback(
     (hourIdx: number) => {
       const currentDrag = dragSelectionRef.current;
@@ -338,6 +397,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     [orderedStations, reservationType, isAdmin, applyMatrixRange, isStationHourBusy]
   );
 
+  /**
+   * Selvittää kursorin tai kosketuspisteen alla olevan tuntisolun ja päivittää maalauksen.
+   */
   const updateSelectionAtPoint = useCallback(
     (clientX: number, clientY: number) => {
       if (!dragSelectionRef.current) return;
@@ -367,6 +429,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     [updateSelectionAtIndex]
   );
 
+  /**
+   * Aloittaa aikavälin maalaamisen (drag-to-select) vapaasta tuntisolusta.
+   */
   const startDrag = useCallback(
     (station: GamingStation, hourIdx: number, busy: boolean) => {
       if (busy) return;
@@ -383,11 +448,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     [applyMatrixRange]
   );
 
+  /**
+   * Lopettaa aikavälin maalaamisen.
+   */
   const stopDrag = useCallback(() => {
     setDragSelection(null);
     dragSelectionRef.current = null;
   }, []);
 
+  // Kuunnellaan ikkunatason osoitin- ja kosketustapahtumia maalaamisen aikana
   useEffect(() => {
     if (!dragSelection) return;
 
@@ -425,6 +494,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     };
   }, [dragSelection, updateSelectionAtPoint, stopDrag]);
 
+  /**
+   * Mahdollistaa tuntisolun valitsemisen näppäimistöllä (Enter tai välilyönti).
+   */
   const handleCellKeyDown = (
     e: React.KeyboardEvent,
     station: GamingStation,
@@ -439,6 +511,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     }
   };
 
+  // Muunnetaan valitut kellonajat minuuteiksi vuorokauden alusta solujen korostusta varten
   const startMinutes = useMemo(() => {
     const [h, m] = startHour.split(':').map(Number);
     return h * 60 + (m || 0);

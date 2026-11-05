@@ -7,8 +7,12 @@ using Pelihuone.Infrastructure.Persistence;
 
 namespace Pelihuone.Infrastructure.Tests;
 
+/// <summary>
+/// Yksikkötestit <see cref="OutboxInterceptor"/>-siepparille, joka muuntaa entiteettien toimialuetapahtumat Outbox-viesteiksi tallennuksen yhteydessä.
+/// </summary>
 public class OutboxInterceptorTests
 {
+    // Luo uuden muistinsisäisen tietokantakontekstin, johon on kytketty OutboxInterceptor
     private static ApplicationDbContext CreateDbContext()
     {
         var interceptor = new OutboxInterceptor();
@@ -21,10 +25,13 @@ public class OutboxInterceptorTests
         return new ApplicationDbContext(options);
     }
 
+    /// <summary>
+    /// Varmistaa, että <c>SaveChangesAsync</c> tallentaa entiteetin toimialuetapahtumat <c>OutboxMessages</c>-tauluun ja tyhjentää entiteetin tapahtumalistan.
+    /// </summary>
     [Fact]
     public async Task SaveChangesAsync_WhenEntityHasDomainEvents_InsertsOutboxMessagesAndClearsEntityEvents()
     {
-        // Arrange
+        // Arrange: Luodaan uusi varaus, joka nostaa ReservationCreatedDomainEvent-toimialuetapahtuman
         using var context = CreateDbContext();
 
         var userId = UserId.New();
@@ -49,10 +56,10 @@ public class OutboxInterceptorTests
 
         await context.Reservations.AddAsync(reservation);
 
-        // Act
+        // Act: Tallennetaan muutokset tietokantaan, jolloin OutboxInterceptor aktivoituu
         await context.SaveChangesAsync();
 
-        // Assert
+        // Assert: Entiteetin tapahtumalista on tyhjennetty ja Outbox-viesti löytyy tietokannasta
         Assert.Empty(reservation.DomainEvents);
 
         var outboxMessage = await context.OutboxMessages.FirstOrDefaultAsync();

@@ -1,12 +1,25 @@
+/**
+ * @file RulesAndGuide.tsx
+ * @description Pelitilan säännöt, laiteohjeet ja visuaalinen tilakatsaus.
+ * Esittää yleiset käyttösäännöt, PC-koneiden ja Steamin ohjeet, konsolikaapin ja
+ * yhteisen 4K TV:n (SharedTV) toimintaperiaatteet sekä linkit Discord-yhteisöön.
+ */
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+/**
+ * RulesAndGuide-komponentin ominaisuudet (props).
+ */
 interface RulesAndGuideProps {
+  /** Funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan: () => void;
 }
 
+/**
+ * Pelitilan säännöt ja ohjeet -näkymäkomponentti.
+ */
 export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan }) => {
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
@@ -14,6 +27,7 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
   return (
     <div className="rules-container">
       {/* Hero header */}
+      {/* Yläosan otsikkoalue ja pikatoiminnot */}
       <div className="rules-hero">
         <div className="rules-hero-content">
           <Badge variant="status" className="mb-2">XAMK GAME ROOM</Badge>

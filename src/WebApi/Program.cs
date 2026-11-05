@@ -118,4 +118,7 @@ using (var scope = app.Services.CreateScope())
 app.Run();
 
 // Tehdään Program-luokasta julkinen WebApplicationFactory-integraatiotestejä varten
+/// <summary>
+/// WebApi-sovelluksen käynnistyspiste, jota käytetään myös integraatiotestien <c>WebApplicationFactory&lt;Program&gt;</c>-alustuksessa.
+/// </summary>
 public partial class Program { }

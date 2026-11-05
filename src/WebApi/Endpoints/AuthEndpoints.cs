@@ -6,10 +6,19 @@ using Pelihuone.WebApi.Extensions;
 
 namespace Pelihuone.WebApi.Endpoints;
 
+/// <summary>
+/// Sisältää autentikaatioon, kaksivaiheiseen sähköpostivarmistukseen (OTP) sekä käyttäjähallintaan liittyvät HTTP-päätepisteet.
+/// </summary>
 public static class AuthEndpoints
 {
+    /// <summary>
+    /// Rekisteröi kirjautumis- ja käyttäjähallintapäätepisteet reititykseen.
+    /// </summary>
+    /// <param name="app">Sovelluksen päätepisteiden reititysrakentaja.</param>
+    /// <returns>Päivitetty reititysrakentaja ketjutusta varten.</returns>
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
+        // Luodaan yhteinen reittiryhmä autentikoinnille ja käyttäjille
         var group = app.MapGroup("/api")
             .WithTags("Authentication & Users");
 
@@ -20,11 +29,13 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Tunnistetaan olemassa oleva käyttäjä tai luodaan uusi oppilaitossähköpostin perusteella
             var result = await userService.AuthenticateOrCreateUserAsync(
                 request.Email,
                 request.DisplayName ?? string.Empty,
                 cancellationToken);
 
+            // Muunnetaan palvelukerroksen tulos RFC 9457 -yhteensopivaksi HTTP-vastaukseksi
             return result.ToHttpResult(httpContext);
         })
         .RequireRateLimiting("AuthPolicy")
@@ -38,7 +49,10 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Generoidaan ja lähetetään kertakäyttöinen vahvistuskoodi käyttäjän sähköpostiin
             var result = await userService.SendVerificationCodeAsync(request.Email, cancellationToken);
+
+            // Palautetaan onnistumisviesti sekä kehitysympäristöä varten generoitu koodi
             return result.ToHttpResult(httpContext, code =>
                 Results.Ok(new { message = "Vahvistuskoodi lähetetty sähköpostiin.", devCode = code }));
         })
@@ -53,6 +67,7 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Tarkistetaan vahvistuskoodin oikeellisuus ja voimassaolo sekä kirjataan käyttäjä sisään
             var result = await userService.VerifyCodeAndLoginAsync(
                 request.Email,
                 request.Code,
@@ -72,17 +87,20 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Varmistetaan, että kutsujan käyttäjätunniste on mukana otsikkotiedoissa
             if (!headerUserId.HasValue)
             {
                 return Results.Unauthorized();
             }
 
+            // Tarkistetaan, että kutsujalla on ylläpitäjän (Admin tai SuperAdmin) oikeudet
             var userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
                 return Results.Forbid();
             }
 
+            // Haetaan ja palautetaan kaikki järjestelmän käyttäjät
             var result = await userService.GetAllUsersAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -96,6 +114,7 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Haetaan yksittäisen käyttäjän profiilitiedot tunnisteen perusteella
             var result = await userService.GetUserByIdAsync(id, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -111,22 +130,26 @@ public static class AuthEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Varmistetaan, että pyynnön tekijä on tunnistautunut
             if (!headerUserId.HasValue)
             {
                 return Results.Unauthorized();
             }
 
+            // Vain SuperAdmin-roolissa oleva käyttäjä saa muuttaa muiden käyttäjien rooleja
             var authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!authUserResult.IsSuccess || authUserResult.Value.Role != "SuperAdmin")
             {
                 return Results.Forbid();
             }
 
+            // Jäsennetään ja validoidaan pyydetty uusi käyttäjärooli
             if (!Enum.TryParse<UserRole>(request.Role, true, out var newRole))
             {
                 return Results.BadRequest(new { error = "Tuntematon rooli. Sallitut: User, Admin, SuperAdmin." });
             }
 
+            // Päivitetään kohdekäyttäjän rooli tietokantaan
             var result = await userService.UpdateUserRoleAsync(id, newRole, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -137,4 +160,9 @@ public static class AuthEndpoints
     }
 }
 
+/// <summary>
+/// Pyynnön tietomalli perinteiselle sähköpostipohjaiselle kirjautumiselle.
+/// </summary>
+/// <param name="Email">Käyttäjän oppilaitossähköpostiosoite (@edu.xamk.fi tai @xamk.fi).</param>
+/// <param name="DisplayName">Valinnainen näyttönimi uutta käyttäjää luotaessa.</param>
 public sealed record LoginRequest(string Email, string? DisplayName = null);

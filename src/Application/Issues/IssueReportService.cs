@@ -11,6 +11,9 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Issues;
 
+/// <summary>
+/// Toteuttaa vikailmoitusten luomisen, listauksen ja kuittaamisen liiketoimintalogiikan.
+/// </summary>
 public sealed class IssueReportService : IIssueReportService
 {
     private readonly IIssueReportRepository _issueReportRepository;
@@ -20,6 +23,9 @@ public sealed class IssueReportService : IIssueReportService
     private readonly IDiscordNotificationService _discordNotificationService;
     private readonly ILogger<IssueReportService> _logger;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="IssueReportService"/>-instanssin.
+    /// </summary>
     public IssueReportService(
         IIssueReportRepository issueReportRepository,
         IUserRepository userRepository,
@@ -36,10 +42,14 @@ public sealed class IssueReportService : IIssueReportService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Luo uuden vikailmoituksen, tallentaa sen tietokantaan ja välittää ilmoituksen Discord-webhookiin.
+    /// </summary>
     public async Task<Result<IssueReportResponse>> CreateIssueReportAsync(
         CreateIssueReportRequest request,
         CancellationToken cancellationToken = default)
     {
+        // Tarkistetaan pakolliset kentät ennen toimialueolion luontia
         if (string.IsNullOrWhiteSpace(request.Target))
         {
             return Result.Failure<IssueReportResponse>(Error.Validation("Issue.MissingTarget", "Kohteen (esim. laite tai tila) määrittely on pakollinen."));
@@ -57,6 +67,7 @@ public sealed class IssueReportService : IIssueReportService
 
         try
         {
+            // Luodaan vikailmoitus nykyisellä UTC-aikaleimalla ja tallennetaan tietovarastoon
             var now = _dateTimeProvider.UtcNow;
             var report = IssueReport.Create(
                 IssueReportId.New(),
@@ -85,6 +96,7 @@ public sealed class IssueReportService : IIssueReportService
             }
             catch (Exception ex)
             {
+                // Discord-virhe ei saa kaataa itse vikailmoituksen tallennusta
                 _logger.LogWarning(ex, "Virhe lähetettäessä vikailmoituksen Discord-notifikaatiota.");
             }
 
@@ -96,10 +108,14 @@ public sealed class IssueReportService : IIssueReportService
         }
     }
 
+    /// <summary>
+    /// Hakee kaikki vikailmoitukset ylläpitäjän tarkasteltavaksi.
+    /// </summary>
     public async Task<Result<IReadOnlyList<IssueReportResponse>>> GetAllIssueReportsAsync(
         Guid adminUserId,
         CancellationToken cancellationToken = default)
     {
+        // Varmistetaan, että kutsujalla on ylläpitäjän oikeudet
         var user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
@@ -112,12 +128,16 @@ public sealed class IssueReportService : IIssueReportService
         return Result.Success<IReadOnlyList<IssueReportResponse>>(responses);
     }
 
+    /// <summary>
+    /// Merkitsee vikailmoituksen ratkaistuksi ja tallentaa ylläpitäjän kuittauskommentin.
+    /// </summary>
     public async Task<Result<IssueReportResponse>> ResolveIssueReportAsync(
         Guid issueId,
         ResolveIssueReportRequest request,
         Guid adminUserId,
         CancellationToken cancellationToken = default)
     {
+        // Tarkistetaan ylläpitäjäoikeudet
         var user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
@@ -125,6 +145,7 @@ public sealed class IssueReportService : IIssueReportService
                 Error.Forbidden("Issue.Forbidden", "Vain ylläpitäjät voivat kuitata vikailmoituksia."));
         }
 
+        // Haetaan kuitattava vikailmoitus
         var report = await _issueReportRepository.GetByIdAsync(new IssueReportId(issueId), cancellationToken);
         if (report is null)
         {
@@ -132,6 +153,7 @@ public sealed class IssueReportService : IIssueReportService
                 Error.NotFound("Issue.NotFound", "Vikailmoitusta ei löytynyt."));
         }
 
+        // Kuitataan vikailmoitus ratkaistuksi ja tallennetaan muutokset
         report.Resolve(request.AdminNotes, _dateTimeProvider.UtcNow);
         await _issueReportRepository.UpdateAsync(report, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -141,6 +163,7 @@ public sealed class IssueReportService : IIssueReportService
         return Result.Success(MapToResponse(report));
     }
 
+    // Muuntaa IssueReport-entiteetin vastausmalliksi
     private static IssueReportResponse MapToResponse(IssueReport report)
     {
         return new IssueReportResponse(

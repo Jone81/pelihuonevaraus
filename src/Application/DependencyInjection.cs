@@ -12,12 +12,22 @@ using Pelihuone.Application.Users;
 
 namespace Pelihuone.Application;
 
+/// <summary>
+/// Sisältää laajennusmetodit sovelluskerroksen palveluiden ja validaattoreiden rekisteröimiseen riippuvuuksien injektointikonttiin (DI).
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Rekisteröi sovelluskerroksen käyttötapauspalvelut ja FluentValidation-validaattorit.
+    /// </summary>
+    /// <param name="services">Palvelukokoelma, johon riippuvuudet rekisteröidään.</param>
+    /// <returns>Päivitetty palvelukokoelma ketjutusta varten.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        // Rekisteröidään kaikki tämän assemblyn FluentValidation-validaattorit automaattisesti
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
+        // Rekisteröidään sovelluskerroksen liiketoimintapalvelut
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<IGamingStationService, GamingStationService>();
         services.AddScoped<IUserService, UserService>();

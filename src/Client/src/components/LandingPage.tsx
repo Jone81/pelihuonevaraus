@@ -1,3 +1,10 @@
+/**
+ * @file LandingPage.tsx
+ * @description Kirjautumattoman käyttäjän julkinen laskeutumissivu (Landing Page).
+ * Sisältää ylänavigaation, tervetulobannerin, neljän pikalinkin infopalkin,
+ * mahdollisuuden tarkastella reaaliaikaista tilannetta (`RealtimeStatus`),
+ * upotetun OTP-kirjautumislomakkeen, pikatunnukset sekä ajankohtaiset uutiset ja pelisäännöt.
+ */
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
@@ -11,12 +18,21 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { NewsItem } from '../types';
 
+/**
+ * LandingPage-komponentin ominaisuudet (props).
+ */
 interface LandingPageProps {
+  /** Valinnainen funktio kirjautumismodaalin avaamiseen */
   onOpenLogin?: () => void;
+  /** Valinnainen funktio vikailmoitusmodaalin avaamiseen */
   onOpenIssueModal?: () => void;
+  /** Valinnainen funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan?: () => void;
 }
 
+/**
+ * Xamkin visuaalinen X-tunnusmerkki (SVG) laskeutumissivun Hero-laatikossa.
+ */
 const XamkXEmblem: React.FC = () => (
   <svg
     viewBox="0 0 64 64"
@@ -35,6 +51,9 @@ const XamkXEmblem: React.FC = () => (
   </svg>
 );
 
+/**
+ * Julkinen laskeutumissivu ennen sisäänkirjautumista.
+ */
 export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenLogin,
   onOpenIssueModal,
@@ -44,6 +63,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
+  // Upotetun kirjautumislomakkeen ja esikatselun tilat
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -54,16 +74,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [showRealtimeStatus, setShowRealtimeStatus] = useState(false);
 
+  // Haetaan uutiset ja tiedotteet julkista näkymää varten
   const { data: newsItems, isLoading: isNewsLoading } = useQuery<NewsItem[]>({
     queryKey: ['news'],
     queryFn: () => api.getNews(),
   });
 
+  // Poimitaan kiinnitetty tai uusin tiedote Hero-laatikon alaotsikoksi
   const pinnedOrLatestNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
     return newsItems.find((n) => n.isPinned) || newsItems[0];
   }, [newsItems]);
 
+  /**
+   * Vierittää sivun pehmeästi kirjautumisen sähköpostikenttään ja asettaa siihen fokuksen.
+   */
   const focusLoginInput = () => {
     const el = document.getElementById('landing-email');
     if (el) {
@@ -74,11 +99,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
+  /**
+   * Vierittää sivun annetun HTML-tunnisteen (`id`) mukaiseen osioon.
+   */
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  /**
+   * Vaihe 1: Lähettää OTP-vahvistuskoodin syötettyyn oppilaitoksen sähköpostiosoitteeseen.
+   */
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -115,6 +146,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
+  /**
+   * Vaihe 2: Vahvistaa 6-numeroisen OTP-koodin ja kirjaa käyttäjän sisään.
+   */
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
@@ -144,12 +178,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
+  /**
+   * Suorittaa pikakirjautumisen kehitystilan pikatunnuksilla (Opiskelija / SuperAdmin).
+   */
   const handleInstantLogin = async (testEmail: string, testName: string) => {
     setErrorMessage(null);
     setIsLoading(true);
     try {
       await login(testEmail, testName);
     } catch {
+      // Jos suora kirjautuminen ei onnistu, esitäytetään OTP-vaihe oletuskoodilla
       setEmail(testEmail);
       setDisplayName(testName);
       setCode('123456');
@@ -163,6 +201,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div className="xamk-app-shell">
       {/* 1. Single-Row Top Navigation Bar (Only Brand, LanguageSwitcher, and Login Button when not logged in) */}
+      {/* 1. Ylätunniste: Brändilogo, kielivalitsin ja kirjautumispainike */}
       <header className="xamk-topbar">
         <div className="xamk-topbar-inner">
           <button
@@ -204,6 +243,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </header>
 
       {/* 2. Hero Banner */}
+      {/* 2. Tervetulobanneri ja aukioloaikojen infolaatikko */}
       <section className="xamk-hero-banner" aria-label={t('landing.welcome')}>
         <div className="xamk-hero-overlay">
           <div className="xamk-hero-container">
@@ -249,6 +289,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* 3. Main Content Surface (#232323) */}
+      {/* 3. Pääsisältöalue: pikakortit, valinnainen tilannetaulu, kirjautumislomake ja tiedotteet */}
       <main className="xamk-main-surface">
         <div className="xamk-main-container">
           {/* 4-Column Quick Highlights Bar */}
@@ -315,6 +356,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
+          {/* Esikatseltava reaaliaikainen tilannetaulu */}
           {showRealtimeStatus && (
             <div className="mb-10">
               <RealtimeStatus
@@ -612,6 +654,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </main>
 
       {/* 4. Dark Band + Gold Top Line + 6-Column Xamk Footer */}
+      {/* 4. Alatunniste linkkeineen ja yhteystietoineen */}
       <div className="xamk-footer-gold-line" aria-hidden="true" />
 
       <footer className="xamk-footer">

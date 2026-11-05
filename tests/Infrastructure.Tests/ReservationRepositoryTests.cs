@@ -8,8 +8,12 @@ using Pelihuone.Infrastructure.Repositories;
 
 namespace Pelihuone.Infrastructure.Tests;
 
+/// <summary>
+/// Yksikkö- ja integraatiotestit <see cref="ReservationRepository"/>-tietovarastoluokalle ja varauskonfliktikyselyille.
+/// </summary>
 public class ReservationRepositoryTests
 {
+    // Luo eristetyn muistinsisäisen tietokantakontekstin kutakin testiä varten
     private static ApplicationDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -20,10 +24,13 @@ public class ReservationRepositoryTests
         return new ApplicationDbContext(options);
     }
 
+    /// <summary>
+    /// Varmistaa, että <see cref="ReservationRepository.HasConflictForStationAsync"/> tunnistaa päällekkäisen aktiivisen varauksen samalle pelipisteelle.
+    /// </summary>
     [Fact]
     public async Task HasConflictForStationAsync_WhenOverlappingActiveReservationExists_ReturnsTrue()
     {
-        // Arrange
+        // Arrange: Tallennetaan kantaan varaus klo 10:00 - 12:00
         using var context = CreateDbContext();
         var repository = new ReservationRepository(context);
 
@@ -47,23 +54,27 @@ public class ReservationRepositoryTests
         await repository.AddAsync(existingReservation);
         await context.SaveChangesAsync();
 
+        // Luodaan päällekkäinen aikaikkuna klo 11:00 - 13:00
         var overlappingWindow = TimeWindow.Create(
             baseTime.AddHours(3), // 11:00
             baseTime.AddHours(5), // 13:00
             ReservationType.Individual,
             baseTime);
 
-        // Act
+        // Act: Tarkistetaan, onko pelipisteellä konfliktia
         bool hasConflict = await repository.HasConflictForStationAsync(stationId, overlappingWindow);
 
-        // Assert
+        // Assert: Konfliktin tulee löytyä
         Assert.True(hasConflict);
     }
 
+    /// <summary>
+    /// Varmistaa, että PlayStation 5:n voimassa oleva varaus aiheuttaa jaetun TV:n konfliktin Nintendo Switchin varausyritykselle samalla aikavälillä (Sääntö 6).
+    /// </summary>
     [Fact]
     public async Task HasSharedTvConflictAsync_WhenPS5IsBooked_SwitchCannotBeBookedAtSameTime()
     {
-        // Arrange (Sääntö 6)
+        // Arrange (Sääntö 6): Lisätään PS5 ja Switch sekä varataan PS5 klo 10:00 - 12:00
         using var context = CreateDbContext();
         var repository = new ReservationRepository(context);
 
@@ -97,17 +108,20 @@ public class ReservationRepositoryTests
             ReservationType.Individual,
             baseTime);
 
-        // Act
+        // Act: Tarkistetaan jaetun TV:n konflikti päällekkäiselle ajalle
         bool hasConflict = await repository.HasSharedTvConflictAsync(switchRequestWindow);
 
-        // Assert
+        // Assert: Jaetun TV:n konfliktin tulee olla tosi
         Assert.True(hasConflict);
     }
 
+    /// <summary>
+    /// Varmistaa, että koko tilan kattava huonevaraus estää yksittäisen pelipisteen varaamisen samanaikaisesti (Sääntö 4).
+    /// </summary>
     [Fact]
     public async Task HasConflictForStationAsync_WhenRoomReservationExists_PreventsIndividualBooking()
     {
-        // Arrange (Sääntö 4)
+        // Arrange (Sääntö 4): Luodaan koko pelihuoneen tilavaraus klo 09:00 - 15:00
         using var context = CreateDbContext();
         var repository = new ReservationRepository(context);
 
@@ -136,13 +150,16 @@ public class ReservationRepositoryTests
             ReservationType.Individual,
             baseTime);
 
-        // Act
+        // Act: Tarkistetaan yksittäisen PC-pisteen konflikti tilavarauksen aikana
         bool hasConflict = await repository.HasConflictForStationAsync(pcStationId, pcRequestWindow);
 
-        // Assert
+        // Assert: Tilavarauksen tulee estää yksittäisen pelipisteen varaus
         Assert.True(hasConflict);
     }
 
+    /// <summary>
+    /// Varmistaa, että peruutettu varaus ei aiheuta konfliktia uudelle varaukselle samalle aikavälille (Sääntö 5).
+    /// </summary>
     [Fact]
     public async Task HasConflictForStationAsync_WhenReservationIsCancelled_DoesNotCauseConflict()
     {
@@ -167,15 +184,16 @@ public class ReservationRepositoryTests
             window,
             baseTime);
 
+        // Peruutetaan varaus ennen sen alkamista
         reservation.Cancel(baseTime.AddHours(1), userId, UserRole.User);
 
         await repository.AddAsync(reservation);
         await context.SaveChangesAsync();
 
-        // Act
+        // Act: Tarkistetaan konflikti samalle aikaikkunalle
         bool hasConflict = await repository.HasConflictForStationAsync(stationId, window);
 
-        // Assert
+        // Assert: Peruutetun varauksen ei tule aiheuttaa konfliktia
         Assert.False(hasConflict);
     }
 }

@@ -5,19 +5,30 @@ using Pelihuone.WebApi.Endpoints;
 
 namespace Pelihuone.WebApi.Tests;
 
+/// <summary>
+/// Integraatiotestit API-päätepisteiden pyyntörajoituksille (Rate Limiting).
+/// </summary>
 public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="RateLimitingTests"/>-testiluokan ja luo HTTP-asiakkaan testisovellukseen.
+    /// </summary>
+    /// <param name="factory">Testisovelluksen tehdasluokka.</param>
     public RateLimitingTests(TestWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }
 
+    /// <summary>
+    /// Varmistaa, että autentikointipäätepisteen pyyntörajan (<c>AuthPolicy</c>: 5 pyyntöä minuutissa) ylittäminen
+    /// palauttaa HTTP 429 Too Many Requests ja ProblemDetails-vastauksen.
+    /// </summary>
     [Fact]
     public async Task AuthEndpoint_WhenExceedingRateLimit_Returns429TooManyRequestsWithProblemDetails()
     {
-        // Arrange
+        // Arrange: Valmistellaan toistettava kirjautumispyyntö
         var request = new LoginRequest("limittest@edu.xamk.fi", "Limit Tester");
         HttpResponseMessage? lastResponse = null;
 
@@ -31,7 +42,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
             }
         }
 
-        // Assert
+        // Assert: Varmistetaan, että raja-arvon ylitys palauttaa 429 Too Many Requests ja ProblemDetails-objektin
         Assert.NotNull(lastResponse);
         Assert.Equal(HttpStatusCode.TooManyRequests, lastResponse.StatusCode);
         Assert.Equal("application/problem+json", lastResponse.Content.Headers.ContentType?.MediaType);

@@ -15,6 +15,10 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Tests;
 
+/// <summary>
+/// Yksikkötestit <see cref="ReservationService"/>-palveluluokalle, joka vastaa varausjärjestelmän liiketoimintasäännöistä,
+/// päällekkäisyystarkistuksista, kiintiöistä ja käyttöoikeuksista.
+/// </summary>
 public class ReservationServiceTests
 {
     private readonly IReservationRepository _reservationRepository = Substitute.For<IReservationRepository>();
@@ -25,8 +29,12 @@ public class ReservationServiceTests
     private readonly FakeTimeProvider _fakeTimeProvider = new();
     private readonly ReservationService _service;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="ReservationServiceTests"/>-testiluokan kiinteällä testiajalla, validaattoreilla ja mock-repositorioilla.
+    /// </summary>
     public ReservationServiceTests()
     {
+        // Asetetaan kiinteä aika (1.11.2026 klo 08:00 EET) determinististä aikaikkunoiden testausta varten
         var fixedTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
         _fakeTimeProvider.SetUtcNow(fixedTime);
         _dateTimeProvider.UtcNow.Returns(_fakeTimeProvider.GetUtcNow());
@@ -42,6 +50,9 @@ public class ReservationServiceTests
             NullLogger<ReservationService>.Instance);
     }
 
+    /// <summary>
+    /// Varmistaa, että päällekkäinen varaus samalle pelipisteelle hylätään <c>Reservation.StationConflict</c>-virheellä (Sääntö 1).
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WhenStationConflict_ReturnsConflictResult()
     {
@@ -70,15 +81,18 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(2), // 10:00
             _dateTimeProvider.UtcNow.AddHours(4)); // 12:00
 
-        // Act
+        // Act: Yritetään varata jo varattu pelipiste
         var result = await _service.CreateReservationAsync(request);
 
-        // Assert
+        // Assert: Varmistetaan, että palautetaan ristiriitavirhe
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Conflict, result.Error.Type);
         Assert.Equal("Reservation.StationConflict", result.Error.Code);
     }
 
+    /// <summary>
+    /// Varmistaa, että Nintendo Switchiä ei voi varata, jos saman television jakava PlayStation 5 on jo varattuna samalle ajalle (Sääntö 6).
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WhenSharedTvInUse_ReturnsConflict()
     {
@@ -106,14 +120,17 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(2),
             _dateTimeProvider.UtcNow.AddHours(4));
 
-        // Act
+        // Act: Yritetään luoda varaus Nintendo Switchille
         var result = await _service.CreateReservationAsync(request);
 
-        // Assert
+        // Assert: Varmistetaan, että jaetun TV:n konflikti estää varauksen
         Assert.True(result.IsFailure);
         Assert.Equal("Reservation.SharedTvConflict", result.Error.Code);
     }
 
+    /// <summary>
+    /// Varmistaa, että toinen tavallinen opiskelijakäyttäjä ei voi peruuttaa toisen käyttäjän varausta (Anti-IDOR).
+    /// </summary>
     [Fact]
     public async Task CancelReservation_WhenUserIsNotOwnerAndNotStaff_ReturnsForbidden()
     {
@@ -143,14 +160,17 @@ public class ReservationServiceTests
 
         var cancelRequest = new CancelReservationRequest(hackerId, "Yritän perua toisen varauksen");
 
-        // Act
+        // Act: Yritetään peruuttaa toisen käyttäjän varaus
         var result = await _service.CancelReservationAsync(resId, cancelRequest);
 
-        // Assert
+        // Assert: Varmistetaan, että operaatio estetään Forbidden-virheellä
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Forbidden, result.Error.Type);
     }
 
+    /// <summary>
+    /// Varmistaa, että SuperAdmin voi jyrätä päällekkäiset opiskelijavaraukset ja luoda tapahtumavarauksen (Sääntö 8).
+    /// </summary>
     [Fact]
     public async Task OverrideAndCreateEvent_WhenSuperAdmin_CancelsExistingReservationsAndCreatesEvent()
     {
@@ -185,10 +205,10 @@ public class ReservationServiceTests
             window.StartUtc,
             window.EndUtc);
 
-        // Act
+        // Act: Suoritetaan jyräys ja tapahtuman luonti SuperAdmin-oikeuksilla
         var result = await _service.OverrideAndCreateEventAsync(request, "Turnaus pelihuoneessa");
 
-        // Assert
+        // Assert: Varmistetaan, että aiempi varaus peruuntui perusteluineen ja uusi tapahtuma tallennettiin
         Assert.True(result.IsSuccess);
         Assert.Equal(ReservationStatus.Cancelled, existingRes.Status);
         Assert.Contains("Turnaus pelihuoneessa", existingRes.CancellationReason);
@@ -197,6 +217,9 @@ public class ReservationServiceTests
         await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Varmistaa, että tavallinen käyttäjä ei voi käyttää SuperAdmin-jyräystoimintoa tapahtuman luomiseen (Sääntö 8).
+    /// </summary>
     [Fact]
     public async Task OverrideAndCreateEvent_WhenNormalUser_ReturnsForbidden()
     {
@@ -214,14 +237,17 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(2),
             _dateTimeProvider.UtcNow.AddHours(6));
 
-        // Act
+        // Act: Yritetään jyrätä varaukset tavallisena opiskelijana
         var result = await _service.OverrideAndCreateEventAsync(request, "Oma lanitapahtuma");
 
-        // Assert
+        // Assert: Varmistetaan, että kutsu palauttaa Forbidden-virheen
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Forbidden, result.Error.Type);
     }
 
+    /// <summary>
+    /// Varmistaa, että opiskelijan yrittäessä varata koko pelihuonetta yli 4 tunniksi varaus hylätään kestorajoituksen vuoksi.
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WhenStudentBooksRoomForMoreThan4Hours_ReturnsValidationFailure()
     {
@@ -241,14 +267,17 @@ public class ReservationServiceTests
             startUtc,
             endUtc);
 
-        // Act
+        // Act: Yritetään luoda yli 4 tunnin tilavaraus
         var result = await _service.CreateReservationAsync(request);
 
-        // Assert
+        // Assert: Varmistetaan, että varaus epäonnistuu RoomDurationExceeded-virhekoodilla
         Assert.True(result.IsFailure);
         Assert.Equal("Reservation.RoomDurationExceeded", result.Error.Code);
     }
 
+    /// <summary>
+    /// Varmistaa, että opiskelija ei voi ylittää päivittäistä 4 tunnin enimmäisvarauskiintiötä useilla erillisillä varauksilla.
+    /// </summary>
     [Fact]
     public async Task CreateReservation_WhenStudentExceedsDaily4HoursQuota_ReturnsValidationFailure()
     {
@@ -278,10 +307,10 @@ public class ReservationServiceTests
             startUtc,
             endUtc);
 
-        // Act
+        // Act: Yritetään luoda toinen varaus, joka nostaa päivän kokonaisajan 5 tuntiin
         var result = await _service.CreateReservationAsync(request);
 
-        // Assert
+        // Assert: Varmistetaan, että päiväkiintiön ylitys estää varauksen
         Assert.True(result.IsFailure);
         Assert.Equal("Reservation.DailyLimitExceeded", result.Error.Code);
     }

@@ -1,3 +1,9 @@
+/**
+ * @file GamesCatalog.tsx
+ * @description Pelivalikoima- ja opiskelijoiden toivelistanäkymä.
+ * Mahdollistaa asennettujen pelien suodattamisen alustan mukaan (PC, PS5, Switch),
+ * toivelistan selaamisen ja äänestämisen sekä uusien pelitoiveiden ehdottamisen modaalissa.
+ */
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
@@ -20,11 +26,15 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { Label } from '@/components/ui/label';
 import type { WishGameRequest } from '../types';
 
+/**
+ * Pelivalikoima ja toivelista -komponentti.
+ */
 export const GamesCatalog: React.FC = () => {
   const queryClient = useQueryClient();
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
+  // Suodatinvälilehden ja peliehdotusmodaalin tilat
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'PC' | 'PlayStation5' | 'NintendoSwitch' | 'WISHLIST'>('ALL');
   const [isWishModalOpen, setIsWishModalOpen] = useState(false);
   const [wishName, setWishName] = useState('');
@@ -32,13 +42,17 @@ export const GamesCatalog: React.FC = () => {
   const [wishDesc, setWishDesc] = useState('');
   const [wishSuccess, setWishSuccess] = useState<string | null>(null);
   const [wishError, setWishError] = useState<string | null>(null);
+
+  // Pidetään kirjaa istunnon aikana äänestetyistä peleistä tuplaäänten estämiseksi
   const [votedGameIds, setVotedGameIds] = useState<Set<string>>(() => new Set());
 
+  // Haetaan kaikki pelit (sekä asennetut että toivelistan pelit)
   const { data: allGames, isLoading } = useQuery({
     queryKey: ['games'],
     queryFn: () => api.getGames(),
   });
 
+  // Mutaatio uuden pelitoiveen lähettämiseen
   const wishMutation = useMutation({
     mutationFn: (req: WishGameRequest) => api.addWishlistGame(req),
     onSuccess: (createdGame) => {
@@ -65,6 +79,7 @@ export const GamesCatalog: React.FC = () => {
     },
   });
 
+  // Mutaatio toivelistan pelin äänestämiseen
   const voteMutation = useMutation({
     mutationFn: (gameId: string) => api.voteGame(gameId),
     onSuccess: (updatedGame) => {
@@ -73,6 +88,9 @@ export const GamesCatalog: React.FC = () => {
     },
   });
 
+  /**
+   * Käsittelee uuden pelitoivelomakkeen lähetyksen.
+   */
   const handleWishSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!wishName.trim()) {
@@ -87,11 +105,15 @@ export const GamesCatalog: React.FC = () => {
     });
   };
 
+  /**
+   * Antaa äänen valitulle toivelistapelille, jos käyttäjä ei ole vielä äänestänyt sitä.
+   */
   const handleVote = (gameId: string) => {
     if (votedGameIds.has(gameId)) return;
     voteMutation.mutate(gameId);
   };
 
+  // Suodatetaan ja järjestetään pelit valitun välilehden mukaan (toivelista äänimäärän mukaan, muut aakkosjärjestyksessä)
   const filteredGames = (allGames ?? [])
     .filter((game) => {
       if (selectedFilter === 'ALL') return !game.isWishlist;

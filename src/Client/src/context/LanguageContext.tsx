@@ -1,13 +1,29 @@
+/**
+ * @file LanguageContext.tsx
+ * @description Sovelluksen kaksikielisyydestä (suomi `fi` ja englanti `en`) vastaava konteksti.
+ * Sisältää käännössanakirjan, kielivalinnan tallennuksen `localStorage`-muistiin sekä
+ * `t`-käännösfunktion tekstien hakemiseen avaimen perusteella.
+ */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+/** Tuetut käyttöliittymäkielet: suomi ('fi') ja englanti ('en') */
 export type Language = 'fi' | 'en';
 
+/**
+ * Kielikontekstin tarjoama rajapinta komponenteille.
+ */
 interface LanguageContextType {
+  /** Aktiivinen kielikoodi ('fi' tai 'en') */
   lang: Language;
+  /** Funktio käyttöliittymäkielen vaihtamiseen */
   setLang: (lang: Language) => void;
+  /** Käännösfunktio, joka palauttaa avainta vastaavan tekstin valitulla kielellä */
   t: (key: string) => string;
 }
 
+/**
+ * Käännössanakirja suomen- ja englanninkielisille käyttöliittymäteksteille.
+ */
 const translations: Record<Language, Record<string, string>> = {
   fi: {
     // Common / Generic
@@ -509,23 +525,31 @@ const translations: Record<Language, Record<string, string>> = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+/** LocalStorage-avain valitun kielen tallentamiseen */
 const STORAGE_KEY = 'pelihuone_lang';
 
+/**
+ * Kielikontekstin tarjoajakomponentti (Provider).
+ * Lataa tallennetun kielen oletuksena ('fi') ja päivittää myös HTML-juurielementin `lang`-attribuutin.
+ */
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<Language>(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as Language | null;
     return saved === 'en' || saved === 'fi' ? saved : 'fi';
   });
 
+  // Vaihtaa kielen ja tallentaa valinnan selaimen muistiin
   const setLang = (newLang: Language) => {
     setLangState(newLang);
     localStorage.setItem(STORAGE_KEY, newLang);
   };
 
+  // Palauttaa käännöstekstin valitulla kielellä (tai suomeksi/avaimena, jos käännös puuttuu)
   const t = (key: string): string => {
     return translations[lang]?.[key] || translations['fi']?.[key] || key;
   };
 
+  // Päivitetään dokumentin lang-attribuutti saavutettavuutta ja ruudunlukijoita varten
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
@@ -537,6 +561,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
+/**
+ * Hook kielikontekstin ja `t`-käännösfunktion käyttämiseen komponenteissa.
+ * Heittää virheen, jos sitä kutsutaan `LanguageProvider`-komponentin ulkopuolella.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);

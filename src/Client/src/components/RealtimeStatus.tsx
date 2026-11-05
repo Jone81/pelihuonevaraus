@@ -1,3 +1,9 @@
+/**
+ * @file RealtimeStatus.tsx
+ * @description Pelihuoneen reaaliaikainen tilannetaulu (Live Status) ja laitekohtainen päiväkatsaus.
+ * Näyttää kunkin pelipisteen nykyisen saatavuuden seuraavalle tunnille, konsolikaapin yhteisen
+ * television (SharedTV) lukitustilan sekä interaktiivisen `DailyScheduleViewer`-päiväkalenterin.
+ */
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
@@ -6,11 +12,19 @@ import { DailyScheduleViewer } from './DailyScheduleViewer';
 import { Button } from '@/components/ui/button';
 import type { GamingStation } from '../types';
 
+/**
+ * RealtimeStatus-komponentin ominaisuudet (props).
+ */
 interface RealtimeStatusProps {
+  /** Valinnainen funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan?: () => void;
+  /** Valinnainen funktio, jolla siirrytään suoraan varausnäkymään valitulla ajalla/laitteella */
   onNavigateToBooking?: (stationId?: string, startHour?: string, endHour?: string) => void;
 }
 
+/**
+ * Reaaliaikaisen tilanteen ja päiväaikataulun näyttävä komponentti.
+ */
 export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
   onOpenFloorPlan,
   onNavigateToBooking,
@@ -21,6 +35,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
 
   const isToday = selectedDate === todayStr;
 
+  // Haetaan kaikki tilan pelipisteet
   const { data: stations, isLoading: loadingStations } = useQuery({
     queryKey: ['stations'],
     queryFn: () => api.getAllStations(),
@@ -37,6 +52,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
     refetchInterval: 30000,
   });
 
+  // Haetaan kuluvan tunnin aktiiviset varaukset mahdollisten tilavarausten tunnistamiseksi
   const { data: activeReservations } = useQuery({
     queryKey: ['active-reservations-now'],
     queryFn: () => {
@@ -56,6 +72,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
     refetchInterval: 30000,
   });
 
+  // Tarkistetaan onko koko tila varattu juuri nyt
   const activeRoomReservation = activeReservations?.find(
     (r) => r.reservationType === 'Room' || r.reservationType === 'Event'
   );
@@ -71,7 +88,9 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
 
   const isSharedTvInUse = ps5 && switchSt && (!ps5Available || !switchAvailable);
 
-  // Apufunktio laitekohtaisten päivävarausten hakemiseen
+  /**
+   * Apufunktio laitekohtaisten päivävarausten (suorat varaukset, tilavaraukset, SharedTV-lukot) hakemiseen.
+   */
   const getStationBookingsSummary = (station: GamingStation) => {
     if (!dayReservations || dayReservations.length === 0) return null;
 

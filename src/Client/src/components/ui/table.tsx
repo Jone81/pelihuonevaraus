@@ -1,6 +1,14 @@
+/**
+ * @file table.tsx
+ * @description Responsiiviset taulukkokomponentit (Table, TableHeader, TableBody,
+ * TableRow, TableHead, TableCell) ylläpitopaneelin ja varausnäkymien listauksiin.
+ */
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
+/**
+ * Taulukon juurikomponentti, joka käärii `<table>`-elementin vieritettävään kehykseen.
+ */
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & { wrapperClassName?: string }
@@ -15,6 +23,9 @@ const Table = React.forwardRef<
 ))
 Table.displayName = 'Table'
 
+/**
+ * Taulukon otsakerivien osio (`<thead>`).
+ */
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -23,6 +34,9 @@ const TableHeader = React.forwardRef<
 ))
 TableHeader.displayName = 'TableHeader'
 
+/**
+ * Taulukon sisältörivien osio (`<tbody>`).
+ */
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -31,6 +45,9 @@ const TableBody = React.forwardRef<
 ))
 TableBody.displayName = 'TableBody'
 
+/**
+ * Yksittäinen taulukkorivi (`<tr>`).
+ */
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
@@ -39,6 +56,9 @@ const TableRow = React.forwardRef<
 ))
 TableRow.displayName = 'TableRow'
 
+/**
+ * Taulukon sarakeotsikkosolu (`<th>`).
+ */
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -47,6 +67,9 @@ const TableHead = React.forwardRef<
 ))
 TableHead.displayName = 'TableHead'
 
+/**
+ * Taulukon tavallinen datasolu (`<td>`).
+ */
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
@@ -63,4 +86,3 @@ export {
   TableRow,
   TableCell,
 }
-

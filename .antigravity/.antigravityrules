@@ -16,11 +16,14 @@ Toimit osana rinnakkaista moniagenttiympäristöä (Git Worktrees). Tunnista roo
    - ÄLÄ KOSKAAN kirjoita lokitiedostoihin asiakkaan henkilötietoja (nimi, sähköposti, puhelinnumero, varauksen lisätiedot). Lokita vain `CustomerId` (Guid) ja `BookingId` (Guid).
 4. **AIKA, VIRHEET JA LOKITUS:**
    - Kaikki ajat palvelimella ovat `DateTimeOffset` (UTC) ja haetaan `TimeProvider`/`IDateTimeProvider`-abstraktion kautta.
-   - `Directory.Build.props` pakottaa `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true` ja `AnalysisLevel=latest-recommended`. Koodissa ei saa olla yhtäkään kääntäjävaroitusta, `// TODO`-kommenttia, käyttämätöntä muuttujaa tai `#pragma warning disable` / `eslint-disable` -ohitusta.
-5. **ASYNKRONISUUS JA SUORITUSKYKY:**
+   - `Directory.Build.props` pakottaa `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest-recommended` ja `GenerateDocumentationFile=true`. Koodissa ei saa olla yhtäkään kääntäjävaroitusta, puuttuvaa XML-kommenttia (`CS1591`), `// TODO`-kommenttia, käyttämätöntä muuttujaa tai `#pragma warning disable` / `eslint-disable` -ohitusta.
+5. **KAIKKI KOODI KOMMENTOITAVA (PAKOLLINEN DOKUMENTOINTI):**
+   - Jokainen luokka, rajapinta, tietue (`record`), enum, julkinen jäsen (metodi, konstruktori, ominaisuus), React-komponentti ja funktio on dokumentoitava kattavilla suomenkielisillä kommenteilla (`/// <summary>` C#-koodissa, `/** ... */` JSDoc-kommentit TypeScript/React-koodissa) sekä selittävillä rivikommenteilla monimutkaisissa logiikkalohkoissa.
+   - `Directory.Build.props` sisältää asetuksen `<GenerateDocumentationFile>true</GenerateDocumentationFile>`, joka muuttaa puuttuvat dokumentaatiokommentit (`CS1591`) käännöksen kaataviksi virheiksi.
+6. **ASYNKRONISUUS JA SUORITUSKYKY:**
    - Jokainen asynkroninen metodi (`Task` / `ValueTask`) Endpoint-, Service- ja Repository-tasolla ottaa vastaan `CancellationToken cancellationToken = default` ja välittää sen eteenpäin tietokanta- ja I/O-kutsuille.
    - ÄLÄ KOSKAAN käytä synkronista blokkausta (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`) tai `async void` -metodeja.
-6. **TYYPPITURVALLISUUS JA KONFIGURAATIO:**
+7. **TYYPPITURVALLISUUS JA KONFIGURAATIO:**
    - Frontendissä `tsconfig.app.json` pakottaa `"strict": true` ja ESLint `--max-warnings 0`. Eksplisiittisen `any`-tyypin käyttö on kielletty.
    - Älä koskaan kovakoodaa salaisuuksia, API-avaimia tai ympäristökohtaisia osoitteita lähdekoodiin.
 

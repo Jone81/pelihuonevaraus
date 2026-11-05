@@ -1,9 +1,18 @@
+/**
+ * @file tabs.tsx
+ * @description Segmentoidut välilehtikomponentit (`@radix-ui/react-tabs`),
+ * joilla vaihdetaan näkymiä esimerkiksi pelivalikoiman, aikataulun ja ylläpitopaneelin sisällä.
+ */
 import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { cn } from '@/lib/utils'
 
+/** Välilehtikokonaisuuden tilaa hallitseva juuri */
 const Tabs = TabsPrimitive.Root
 
+/**
+ * Välilehtipainikkeiden palkki (`xamk-segmented-bar`).
+ */
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
@@ -16,6 +25,9 @@ const TabsList = React.forwardRef<
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
 
+/**
+ * Yksittäinen välilehtipainike, joka korostuu aktiivisena (`data-[state=active]`).
+ */
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
@@ -31,6 +43,9 @@ const TabsTrigger = React.forwardRef<
 ))
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
+/**
+ * Valitun välilehden sisältöpaneeli.
+ */
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>

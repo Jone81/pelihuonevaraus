@@ -5,10 +5,19 @@ using Pelihuone.WebApi.Extensions;
 
 namespace Pelihuone.WebApi.Endpoints;
 
+/// <summary>
+/// Sisältää pelihuoneen uutisiin ja tiedotteisiin liittyvät HTTP-päätepisteet.
+/// </summary>
 public static class NewsEndpoints
 {
+    /// <summary>
+    /// Rekisteröi tiedotteiden hakuun, julkaisuun ja poistamiseen liittyvät päätepisteet reititykseen.
+    /// </summary>
+    /// <param name="app">Sovelluksen päätepisteiden reititysrakentaja.</param>
+    /// <returns>Päivitetty reititysrakentaja ketjutusta varten.</returns>
     public static IEndpointRouteBuilder MapNewsEndpoints(this IEndpointRouteBuilder app)
     {
+        // Luodaan reittiryhmä uutisille ja tiedotteille
         var group = app.MapGroup("/api/news")
             .WithTags("News & Announcements");
 
@@ -18,6 +27,7 @@ public static class NewsEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Haetaan kaikki julkaistut uutiset ja tiedotteet aikajärjestyksessä
             var result = await newsService.GetAllNewsAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -32,6 +42,7 @@ public static class NewsEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Käytetään otsikossa välitettyä käyttäjätunnistetta tai pyynnön tekijätunnistetta
             Guid userId = headerUserId ?? request.AuthorUserId;
             var result = await newsService.CreateNewsAsync(request, userId, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/news/{val.Id}", val));
@@ -47,6 +58,7 @@ public static class NewsEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Poistetaan tiedote tunnisteen perusteella (vaatii Admin-oikeudet)
             Guid userId = headerUserId ?? Guid.Empty;
             var result = await newsService.DeleteNewsAsync(id, userId, cancellationToken);
             return result.ToHttpResult(httpContext);

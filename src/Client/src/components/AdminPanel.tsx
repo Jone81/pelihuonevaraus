@@ -1,3 +1,14 @@
+/**
+ * @file AdminPanel.tsx
+ * @description Ylläpitäjän (Admin ja SuperAdmin) monivälilehtinen hallintapaneeli.
+ * Sisältää kuusi alavälilehteä (`AdminSubTab`):
+ * 1) Pelit & Toivelista (`games`)
+ * 2) Uutiset & Tiedotteet (`news`)
+ * 3) Käyttäjät & Roolit (`users`)
+ * 4) Asetukset & Discord Webhook (`settings`)
+ * 5) Tilastot & Käyttöaste (`statistics`)
+ * 6) Vikailmoitukset (`issues`)
+ */
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
@@ -22,6 +33,9 @@ import {
 } from '@/components/ui/table';
 import type { CreateGameRequest, CreateNewsRequest, UpdateSiteSettingsRequest } from '../types';
 
+/**
+ * Ylläpitäjän hallintapaneelikomponentti.
+ */
 export const AdminPanel: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
@@ -52,13 +66,14 @@ export const AdminPanel: React.FC = () => {
   const [issueFilter, setIssueFilter] = useState<'ALL' | 'OPEN' | 'RESOLVED'>('ALL');
   const [resolveNotes, setResolveNotes] = useState<Record<string, string>>({});
 
+  // Yleiset onnistumis- ja virheviestit
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [testWebhookStatus, setTestWebhookStatus] = useState<string | null>(null);
 
-  // Kyselyt
+  // Kyselyt: haetaan ylläpitopaneelin tarvitsemat tiedot taustajärjestelmästä
   const { data: allGames } = useQuery({
     queryKey: ['games'],
     queryFn: () => api.getGames(),
@@ -83,6 +98,7 @@ export const AdminPanel: React.FC = () => {
     enabled: isAdmin && activeSubTab === 'settings',
   });
 
+  // Käytetään joko muokattavaa luonnosta tai palvelimelta ladattua Discord Webhook -osoitetta
   const discordWebhookUrl = discordWebhookUrlDraft ?? settings?.discordWebhookUrl ?? '';
 
   const { data: statistics } = useQuery({
@@ -99,7 +115,7 @@ export const AdminPanel: React.FC = () => {
     refetchInterval: 10000,
   });
 
-  // Lisää peli
+  // Lisää peli suoraan asennettuun pelivalikoimaan
   const addGameMutation = useMutation({
     mutationFn: (req: CreateGameRequest) => api.createGame(req, user?.id ?? ''),
     onSuccess: (game) => {
@@ -124,7 +140,7 @@ export const AdminPanel: React.FC = () => {
     },
   });
 
-  // Hyväksy / vaihda toivelistan tila
+  // Hyväksy / vaihda toivelistan tila (Toivelista <-> Asennettu)
   const toggleWishlistMutation = useMutation({
     mutationFn: (gameId: string) => api.toggleWishlistStatus(gameId, user?.id ?? ''),
     onSuccess: (game) => {
@@ -198,7 +214,7 @@ export const AdminPanel: React.FC = () => {
     },
   });
 
-  // Päivitä käyttäjän rooli
+  // Päivitä käyttäjän rooli (User / Admin)
   const updateUserRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
       api.updateUserRole(userId, role, user?.id ?? ''),
@@ -269,6 +285,7 @@ export const AdminPanel: React.FC = () => {
     },
   });
 
+  // Lasketaan KPI-korttien ja suodattimien lukumäärät
   const installedGamesCount = useMemo(
     () => (allGames ?? []).filter((g) => !g.isWishlist).length,
     [allGames]
@@ -282,6 +299,7 @@ export const AdminPanel: React.FC = () => {
     [allIssues]
   );
 
+  // Suodatetaan pelit valitun tilan (kaikki, asennetut, toivelista) ja hakusanan perusteella
   const filteredGames = useMemo(() => {
     const q = gameSearch.trim().toLowerCase();
     return (allGames ?? []).filter((g) => {
@@ -294,6 +312,7 @@ export const AdminPanel: React.FC = () => {
     });
   }, [allGames, gameFilter, gameSearch]);
 
+  // Suodatetaan käyttäjät hakusanan (nimi, sähköposti tai rooli) perusteella
   const filteredUsers = useMemo(() => {
     const q = userSearch.trim().toLowerCase();
     if (!q) return allUsers ?? [];
@@ -305,6 +324,7 @@ export const AdminPanel: React.FC = () => {
     );
   }, [allUsers, userSearch]);
 
+  // Suodatetaan vikailmoitukset tilan (kaikki, avoimet, ratkaistut) mukaan
   const filteredIssues = useMemo(() => {
     return (allIssues ?? []).filter((issue) => {
       if (issueFilter === 'OPEN') return !issue.isResolved;
@@ -313,6 +333,7 @@ export const AdminPanel: React.FC = () => {
     });
   }, [allIssues, issueFilter]);
 
+  // Varmistetaan, että vain Admin- tai SuperAdmin-käyttäjät näkevät paneelin
   if (!isAdmin) {
     return (
       <div className="alert alert-error">
@@ -323,6 +344,9 @@ export const AdminPanel: React.FC = () => {
     );
   }
 
+  /**
+   * Käsittelee uuden pelin lisäämisen lomakkeelta.
+   */
   const handleAddGame = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGameName.trim()) return;
@@ -333,6 +357,9 @@ export const AdminPanel: React.FC = () => {
     });
   };
 
+  /**
+   * Käsittelee uuden uutistiedotteen julkaisemisen lomakkeelta.
+   */
   const handleCreateNews = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsTitle.trim() || !newsContent.trim()) return;
@@ -344,6 +371,9 @@ export const AdminPanel: React.FC = () => {
     });
   };
 
+  /**
+   * Tallentaa sivuston asetukset (Discord Webhook URL).
+   */
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     setSettingsSuccess(null);
@@ -354,6 +384,9 @@ export const AdminPanel: React.FC = () => {
     });
   };
 
+  /**
+   * Lähettää testi-ilmoituksen annettuun Discord Webhook -osoitteeseen yhteyden varmistamiseksi.
+   */
   const handleTestWebhook = async () => {
     const trimmed = discordWebhookUrl.trim();
     if (!trimmed) {
@@ -395,6 +428,7 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  // Ylläpitopaneelin alavälilehtien konfiguraatio
   const subTabs: { id: AdminSubTab; icon: string; labelFi: string; labelEn: string; badge?: number }[] = [
     {
       id: 'games',

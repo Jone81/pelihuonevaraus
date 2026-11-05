@@ -6,11 +6,17 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.GamingStations;
 
+/// <summary>
+/// Toteuttaa pelipisteiden listauksen ja saatavuuslaskennan liiketoimintalogiikan.
+/// </summary>
 public sealed class GamingStationService : IGamingStationService
 {
     private readonly IGamingStationRepository _stationRepository;
     private readonly IReservationRepository _reservationRepository;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="GamingStationService"/>-instanssin.
+    /// </summary>
     public GamingStationService(
         IGamingStationRepository stationRepository,
         IReservationRepository reservationRepository)
@@ -19,9 +25,13 @@ public sealed class GamingStationService : IGamingStationService
         _reservationRepository = reservationRepository;
     }
 
+    /// <summary>
+    /// Hakee kaikki käytössä olevat pelipisteet.
+    /// </summary>
     public async Task<Result<IReadOnlyList<GamingStationResponse>>> GetAllStationsAsync(
         CancellationToken cancellationToken = default)
     {
+        // Haetaan aktiiviset pelipisteet ja muunnetaan ne vastausmalleiksi
         var stations = await _stationRepository.GetAllActiveAsync(cancellationToken);
 
         var responses = stations.Select(s => new GamingStationResponse(
@@ -34,17 +44,22 @@ public sealed class GamingStationService : IGamingStationService
         return Result.Success<IReadOnlyList<GamingStationResponse>>(responses);
     }
 
+    /// <summary>
+    /// Hakee vapaat pelipisteet annetulle aikavälille huomioiden koko tilan varaukset ja SharedTV-säännöt.
+    /// </summary>
     public async Task<Result<IReadOnlyList<GamingStationResponse>>> GetAvailableStationsAsync(
         DateTimeOffset startUtc,
         DateTimeOffset endUtc,
         CancellationToken cancellationToken = default)
     {
+        // Validoidaan, että aikaväli on looginen
         if (startUtc >= endUtc)
         {
             return Result.Failure<IReadOnlyList<GamingStationResponse>>(
                 Error.Validation("TimeWindow.Invalid", "Alkuajan on oltava ennen loppuaikaa."));
         }
 
+        // Haetaan tarkasteltavan aikaikkunan aktiiviset pelipisteet ja päällekkäiset varaukset
         var window = TimeWindow.FromExact(startUtc, endUtc);
         var stations = await _stationRepository.GetAllActiveAsync(cancellationToken);
         var activeReservations = await _reservationRepository.GetActiveReservationsInWindowAsync(window, cancellationToken);
@@ -56,6 +71,7 @@ public sealed class GamingStationService : IGamingStationService
             return Result.Success<IReadOnlyList<GamingStationResponse>>([]);
         }
 
+        // Kerätään suoraan varattujen pelipisteiden tunnisteet
         var reservedStationIds = activeReservations
             .Where(r => r.GamingStationId.HasValue)
             .Select(r => r.GamingStationId!.Value)
@@ -66,6 +82,7 @@ public sealed class GamingStationService : IGamingStationService
             .Where(s => s.UsesSharedTv && reservedStationIds.Contains(s.Id))
             .Any();
 
+        // Suodatetaan jäljelle vain ne pelipisteet, joita ei ole varattu ja joiden näyttölaite on vapaana
         var availableStations = stations
             .Where(s => !reservedStationIds.Contains(s.Id))
             .Where(s => !s.UsesSharedTv || !isSharedTvInUse)

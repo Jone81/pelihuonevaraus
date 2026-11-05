@@ -8,8 +8,12 @@ using Pelihuone.Infrastructure.Repositories;
 
 namespace Pelihuone.Infrastructure.Tests;
 
+/// <summary>
+/// Yksikkö- ja integraatiotestit <see cref="GamingStationRepository"/>-tietovarastoluokalle EF Core InMemory -tietokantaa käyttäen.
+/// </summary>
 public class GamingStationRepositoryTests
 {
+    // Luo eristetyn muistinsisäisen tietokantakontekstin kutakin testiä varten
     private static ApplicationDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -20,10 +24,13 @@ public class GamingStationRepositoryTests
         return new ApplicationDbContext(options);
     }
 
+    /// <summary>
+    /// Varmistaa, että <see cref="GamingStationRepository.GetAllActiveAsync"/> palauttaa vain aktiiviset pelipisteet aakkosjärjestyksessä nimen mukaan.
+    /// </summary>
     [Fact]
     public async Task GetAllActiveAsync_ReturnsOnlyActiveStationsOrderedByName()
     {
-        // Arrange
+        // Arrange: Lisätään kantaan kaksi aktiivista ja yksi epäaktiivinen pelipiste
         using var context = CreateDbContext();
         var repository = new GamingStationRepository(context);
 
@@ -36,10 +43,10 @@ public class GamingStationRepositoryTests
         await repository.AddAsync(inactiveStation);
         await context.SaveChangesAsync();
 
-        // Act
+        // Act: Haetaan kaikki aktiiviset pelipisteet
         var result = await repository.GetAllActiveAsync();
 
-        // Assert
+        // Assert: Vain aktiiviset pisteet palautetaan ja ne ovat nimen mukaisessa järjestyksessä
         Assert.Equal(2, result.Count);
         Assert.Equal("Station A", result[0].Name);
         Assert.Equal("Station B", result[1].Name);

@@ -1,3 +1,9 @@
+/**
+ * @file MyReservations.tsx
+ * @description Kirjautuneen käyttäjän omien varausten hallintanäkymä.
+ * Listaa käyttäjän varaukset (aktiiviset ja perutut) ja mahdollistaa tulevien
+ * varausten peruuttamisen.
+ */
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
@@ -7,12 +13,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { CancelReservationRequest, Reservation } from '../types';
 
+/**
+ * Omat varaukset -näkymäkomponentti.
+ */
 export const MyReservations: React.FC = () => {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const queryClient = useQueryClient();
   const [cancelError, setCancelError] = useState<string | null>(null);
 
+  // Haetaan varaukset viimeisen 7 päivän ja tulevan 60 päivän aikaväliltä
   const { data: allReservations, isLoading } = useQuery({
     queryKey: ['my-reservations'],
     queryFn: () => {
@@ -24,11 +34,13 @@ export const MyReservations: React.FC = () => {
     enabled: !!user,
   });
 
+  // Haetaan pelipisteiden tiedot laitenimien näyttämistä varten
   const { data: stations } = useQuery({
     queryKey: ['stations'],
     queryFn: () => api.getAllStations(),
   });
 
+  // Mutaatio varauksen peruuttamiseen ja välimuistin päivittämiseen
   const cancelMutation = useMutation({
     mutationFn: ({ id, req }: { id: string; req: CancelReservationRequest }) =>
       api.cancelReservation(id, req),
@@ -47,6 +59,7 @@ export const MyReservations: React.FC = () => {
     },
   });
 
+  // Jos käyttäjä ei ole kirjautunut, näytetään huomautus
   if (!user) {
     return (
       <div className="alert alert-info">
@@ -55,9 +68,13 @@ export const MyReservations: React.FC = () => {
     );
   }
 
+  // Suodatetaan vain kirjautuneen käyttäjän omat varaukset
   const myBookings = allReservations?.filter((r) => r.userId === user.id) ?? [];
   const now = new Date();
 
+  /**
+   * Varmistaa peruutuksen käyttäjältä ja käynnistää peruutusmutaation.
+   */
   const handleCancel = (reservation: Reservation) => {
     if (!confirm(t('myBookings.cancelConfirm'))) {
       return;
@@ -91,6 +108,7 @@ export const MyReservations: React.FC = () => {
           {myBookings.map((booking) => {
             const start = new Date(booking.startUtc);
             const end = new Date(booking.endUtc);
+            // Tarkistetaan onko varaus jo alkanut (alkanutta varausta ei voi perua)
             const hasStarted = now >= start;
             const station = stations?.find((s) => s.id === booking.gamingStationId);
 

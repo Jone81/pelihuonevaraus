@@ -13,6 +13,9 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Tests;
 
+/// <summary>
+/// Yksikkötestit <see cref="IssueReportService"/>-palveluluokalle, joka käsittelee laite- ja vikailmoituksia sekä Discord-ilmoituksia.
+/// </summary>
 public class IssueReportServiceTests
 {
     private readonly IIssueReportRepository _issueReportRepository = Substitute.For<IIssueReportRepository>();
@@ -22,8 +25,12 @@ public class IssueReportServiceTests
     private readonly IDiscordNotificationService _discordNotificationService = Substitute.For<IDiscordNotificationService>();
     private readonly IssueReportService _service;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="IssueReportServiceTests"/>-testiluokan kiinteällä testiajalla ja mock-riippuvuuksilla.
+    /// </summary>
     public IssueReportServiceTests()
     {
+        // Kiinnitetään nykyhetki deterministisiä testejä varten
         _dateTimeProvider.UtcNow.Returns(new DateTimeOffset(2026, 10, 20, 12, 0, 0, TimeSpan.Zero));
 
         _service = new IssueReportService(
@@ -35,10 +42,13 @@ public class IssueReportServiceTests
             NullLogger<IssueReportService>.Instance);
     }
 
+    /// <summary>
+    /// Varmistaa, että kelvollisilla tiedoilla luotu vikailmoitus tallennetaan tietokantaan ja välitetään Discord-ilmoituspalvelulle.
+    /// </summary>
     [Fact]
     public async Task CreateIssueReport_WithValidData_CreatesReportAndNotifiesDiscord()
     {
-        // Arrange
+        // Arrange: Muodostetaan kelvollinen vikailmoituspyyntö
         var request = new CreateIssueReportRequest(
             "student@edu.xamk.fi",
             "Matti Meikäläinen",
@@ -46,10 +56,10 @@ public class IssueReportServiceTests
             "Näyttö vilkkuu",
             "Näyttö sammuilee satunnaisesti pelatessa");
 
-        // Act
+        // Act: Lähetetään vikailmoitus palvelulle
         var result = await _service.CreateIssueReportAsync(request);
 
-        // Assert
+        // Assert: Tarkistetaan tallennus, paluuarvon tila sekä Discord-webhookin kutsuminen
         Assert.True(result.IsSuccess);
         Assert.Equal("PC 3", result.Value.Target);
         Assert.Equal("Näyttö vilkkuu", result.Value.Title);
@@ -66,24 +76,30 @@ public class IssueReportServiceTests
             Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Varmistaa, että vikailmoituksen luominen epäonnistuu validointivirheeseen, jos kohdelaite puuttuu.
+    /// </summary>
     [Fact]
     public async Task CreateIssueReport_WhenTargetIsMissing_ReturnsValidationFailure()
     {
-        // Arrange
+        // Arrange: Luodaan puutteellinen pyyntö tyhjällä Target-arvolla
         var request = new CreateIssueReportRequest("student@edu.xamk.fi", "Matti", "", "Otsikko", "Kuvaus");
 
-        // Act
+        // Act: Yritetään tallentaa virheellinen vikailmoitus
         var result = await _service.CreateIssueReportAsync(request);
 
-        // Assert
+        // Assert: Varmistetaan, että palautetaan validointivirhe
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorType.Validation, result.Error.Type);
     }
 
+    /// <summary>
+    /// Varmistaa, että Admin-käyttäjä voi merkitä avoimen vikailmoituksen ratkaistuksi muistiinpanojen kera.
+    /// </summary>
     [Fact]
     public async Task ResolveIssueReport_WhenUserIsAdmin_ResolvesSuccessfully()
     {
-        // Arrange
+        // Arrange: Alustetaan Admin-käyttäjä sekä avoin vikailmoitus
         var adminId = Guid.NewGuid();
         var adminUser = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
         _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(adminUser);
@@ -101,10 +117,10 @@ public class IssueReportServiceTests
 
         var resolveRequest = new ResolveIssueReportRequest("Ohjain vaihdettu uuteen.");
 
-        // Act
+        // Act: Merkitään vikailmoitus ratkaistuksi ylläpitäjän toimesta
         var result = await _service.ResolveIssueReportAsync(report.Id.Value, resolveRequest, adminId);
 
-        // Assert
+        // Assert: Tarkistetaan, että tila päivittyi ratkaistuksi ja muistiinpanot tallentuivat
         Assert.True(result.IsSuccess);
         Assert.True(result.Value.IsResolved);
         Assert.Equal("Ohjain vaihdettu uuteen.", result.Value.AdminNotes);

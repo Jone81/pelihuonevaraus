@@ -1,7 +1,16 @@
+/**
+ * @file badge.tsx
+ * @description Uudelleenkäytettävä tilatunniste- ja merkkikomponentti (Badge).
+ * Käyttää `class-variance-authority`-kirjastoa erilaisten visuaalisten tilojen
+ * (esim. vapaa, varattu, asennettu, toivelistalla) esittämiseen.
+ */
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
+/**
+ * Badge-komponentin tyylivariantit Xamk-ulkoasujärjestelmässä.
+ */
 const badgeVariants = cva(
   'xamk-station-status-pill transition-colors focus:outline-none',
   {
@@ -26,10 +35,16 @@ const badgeVariants = cva(
   }
 )
 
+/**
+ * Badge-komponentin ominaisuudet (props), laajentaen HTML `span`-elementin ominaisuuksia.
+ */
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
+/**
+ * Pieni pillerimäinen tunniste tilan, kategorian tai roolin korostamiseen.
+ */
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
     <span className={cn(badgeVariants({ variant }), className)} {...props} />

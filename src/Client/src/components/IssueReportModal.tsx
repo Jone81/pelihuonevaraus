@@ -1,3 +1,9 @@
+/**
+ * @file IssueReportModal.tsx
+ * @description Vikailmoituslomakkeen sisältävä modaali-ikkuna.
+ * Mahdollistaa laitevikojen, verkkohäiriöiden tai tilan puutteiden raportoimisen
+ * suoraan ylläpidolle.
+ */
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -16,16 +22,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Label } from '@/components/ui/label';
 
+/**
+ * IssueReportModal-komponentin ominaisuudet (props).
+ */
 interface IssueReportModalProps {
+  /** Onko vikailmoitusmodaali avoinna */
   isOpen: boolean;
+  /** Funktio modaalin sulkemiseen */
   onClose: () => void;
 }
 
+/**
+ * Modaali-ikkuna laite- tai tilavikojen ilmoittamiseen.
+ */
 export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
+  // Muodostetaan valittavissa olevat laite- ja tilakohteet valitulla kielellä
   const targetOptions = useMemo(
     () => [
       'PC 1',
@@ -44,16 +59,21 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
     [t]
   );
 
+  // Lomakekenttien tilat (esitäytetään kirjautuneen käyttäjän tiedoilla, jos saatavilla)
   const [target, setTarget] = useState('PC 1');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [reporterName, setReporterName] = useState(user?.displayName || '');
   const [reporterEmail, setReporterEmail] = useState(user?.email || '');
 
+  // Lähetyksen ja palauteviestien tilat
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  /**
+   * Käsittelee vikailmoituslomakkeen lähetyksen palvelimelle.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) {
@@ -73,6 +93,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
         reporterEmail: reporterEmail.trim() || undefined,
       });
 
+      // Näytetään onnistumisviesti ja suljetaan modaali automaattisesti pienen viiveen jälkeen
       setSuccessMessage(t('issue.success'));
       setTitle('');
       setDescription('');

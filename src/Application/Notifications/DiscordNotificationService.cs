@@ -4,12 +4,18 @@ using Pelihuone.Application.Settings;
 
 namespace Pelihuone.Application.Notifications;
 
+/// <summary>
+/// Toteuttaa Discord-webhook-ilmoitusten lähettämisen tapahtumista ja vikailmoituksista.
+/// </summary>
 public sealed class DiscordNotificationService : IDiscordNotificationService
 {
     private static readonly HttpClient HttpClient = new();
     private readonly ISettingsService _settingsService;
     private readonly ILogger<DiscordNotificationService> _logger;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="DiscordNotificationService"/>-instanssin.
+    /// </summary>
     public DiscordNotificationService(
         ISettingsService settingsService,
         ILogger<DiscordNotificationService> logger)
@@ -18,6 +24,9 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Lähettää Discord-kanavalle viestin uudesta tapahtumavarauksesta, mikäli Webhook URL on asetettu.
+    /// </summary>
     public async Task SendEventNotificationAsync(
         string eventTitle,
         string description,
@@ -26,9 +35,11 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         string organizer,
         CancellationToken cancellationToken = default)
     {
+        // Haetaan tallennettu Discord Webhook -osoite asetuksista
         var settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
         string webhookUrl = settingsResult.Value.DiscordWebhookUrl;
 
+        // Ohitetaan lähetys hiljaisesti, jos webhookia ei ole määritelty
         if (string.IsNullOrWhiteSpace(webhookUrl))
         {
             _logger.LogInformation("Discord-ilmoitusta ei lähetetty: Webhook URL ei ole konfiguroitu.");
@@ -37,6 +48,7 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
 
         try
         {
+            // Muodostetaan Discord-viestin sisältö
             var payload = new
             {
                 content = $"🏆 **UUSI TAPAHTUMA XAMK GAME ROOMISSA!**\n\n" +
@@ -59,10 +71,14 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         }
         catch (Exception ex)
         {
+            // Verkko- tai HTTP-virheet lokitetaan kaatamatta kutsuvaa prosessia
             _logger.LogError(ex, "Virhe lähetettäessä ilmoitusta Discord Webhookiin.");
         }
     }
 
+    /// <summary>
+    /// Lähettää Discord-kanavalle ilmoituksen uudesta vikailmoituksesta ylläpidolle.
+    /// </summary>
     public async Task SendIssueReportNotificationAsync(
         string target,
         string title,
@@ -71,6 +87,7 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         string reporterName,
         CancellationToken cancellationToken = default)
     {
+        // Haetaan tallennettu Discord Webhook -osoite asetuksista
         var settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
         string webhookUrl = settingsResult.Value.DiscordWebhookUrl;
 
@@ -82,6 +99,7 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
 
         try
         {
+            // Näytetään ilmoittajan tiedot tai merkintä anonyymistä opiskelijasta
             string reporterInfo = string.IsNullOrWhiteSpace(reporterName) && string.IsNullOrWhiteSpace(reporterEmail)
                 ? "Anonyymi opiskelija"
                 : $"{reporterName} ({reporterEmail})".Trim();

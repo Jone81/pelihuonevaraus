@@ -6,12 +6,24 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Infrastructure.Persistence;
 
+/// <summary>
+/// Vastaa tietokannan rakenteen varmistamisesta ja oletustietojen (pelitila, pelipisteet,
+/// oletuskäyttäjät, pelit, uutiset ja vikailmoitukset) alustamisesta sovelluksen käynnistyessä.
+/// </summary>
 public static class DatabaseSeeder
 {
+    /// <summary>
+    /// Varmistaa, että tietokanta on luotu, ja syöttää puuttuvat oletustiedot tietokantaan,
+    /// mikäli taulut ovat tyhjiä.
+    /// </summary>
+    /// <param name="context">Sovelluksen tietokantakonteksti.</param>
+    /// <param name="logger">Lokittaja alustusvaiheiden ja mahdollisten virheiden kirjaamiseen.</param>
+    /// <returns>Tehtävä, joka edustaa asynkronista alustusoperaatiota.</returns>
     public static async Task SeedAsync(ApplicationDbContext context, ILogger logger)
     {
         try
         {
+            // Varmistetaan, että tietokanta ja taulut ovat olemassa ennen alustusta
             await context.Database.EnsureCreatedAsync();
 
             // 1. Pelitila
@@ -147,6 +159,7 @@ public static class DatabaseSeeder
         }
         catch (Exception ex)
         {
+            // Kirjataan virhe lokiin kaatamatta koko sovelluksen käynnistystä
             logger.LogError(ex, "Virhe tietokannan varmistuksessa tai alustuksessa.");
         }
     }

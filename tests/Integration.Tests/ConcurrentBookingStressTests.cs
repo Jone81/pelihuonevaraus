@@ -11,15 +11,26 @@ using Xunit;
 
 namespace Pelihuone.Integration.Tests;
 
+/// <summary>
+/// Rinnakkaisuus- ja kuormitustestit varausjärjestelmälle oikeaa PostgreSQL Testcontainers -tietokantaa vasten.
+/// </summary>
 public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontainersFixture>
 {
     private readonly PostgreSqlTestcontainersFixture _fixture;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="ConcurrentBookingStressTests"/>-testiluokan jaetulla PostgreSQL-konttiympäristöllä.
+    /// </summary>
+    /// <param name="fixture">Jaettu Testcontainers-pohjainen PostgreSQL-testiympäristö.</param>
     public ConcurrentBookingStressTests(PostgreSqlTestcontainersFixture fixture)
     {
         _fixture = fixture;
     }
 
+    /// <summary>
+    /// Varmistaa, että kun 10 rinnakkaista varauspyyntöä lähetetään täsmälleen samalle aikavälille ja pelipisteelle,
+    /// vain tasan yksi varaus onnistuu (201 Created) ja loput yhdeksän hylätään (409 Conflict).
+    /// </summary>
     [Fact]
     public async Task ConcurrentBooking_With10SimultaneousRequests_ExactlyOneSucceedsAndNineFailWith409Conflict()
     {

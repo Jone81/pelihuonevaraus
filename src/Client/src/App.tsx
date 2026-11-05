@@ -1,3 +1,9 @@
+/**
+ * @file App.tsx
+ * @description Sovelluksen juurikomponentti ja päänäkymärakenne (AppShell).
+ * Käärii sovelluksen virherajaan (ErrorBoundary), React Query -välimuistiin,
+ * kielikontekstiin, autentikaatiokontekstiin sekä reitittimeen.
+ */
 import React, { useState, useEffect, Component, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -17,6 +23,10 @@ import { RulesAndGuide } from './components/RulesAndGuide';
 import { LandingPage } from './components/LandingPage';
 import { IssueReportModal } from './components/IssueReportModal';
 
+/**
+ * React Query -asiakasinstanssi palvelinpyyntöjen välimuistitukseen ja hallintaan.
+ * Asettaa oletuksena 10 sekunnin vanhenemisajan (staleTime) ja yhden uudelleenyrityksen.
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -26,21 +36,33 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * Virherajakomponentin sisäinen tila.
+ */
 interface ErrorBoundaryState {
+  /** Ilmaiseeko tila, että lapsikomponentissa on tapahtunut renderöintivirhe */
   hasError: boolean;
 }
 
+/**
+ * Sovellustason virherajakomponentti (Error Boundary), joka nappaa odottamattomat
+ * renderöintivirheet ja näyttää käyttäjäystävällisen virhenäkymän kaatumisen sijaan.
+ */
 class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
   constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
 
+  /**
+   * Päivittää tilan virheelliseksi, kun lapsikomponentti heittää poikkeuksen.
+   */
   static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 
   render() {
+    // Jos virhe on havaittu, näytetään palautumisnäkymä ja uudelleenlatauspainike
     if (this.state.hasError) {
       return (
         <div className="p-8 text-center text-white bg-[#151618] min-h-screen flex flex-col items-center justify-center gap-4" role="alert">
@@ -59,25 +81,35 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
   }
 }
 
+/**
+ * Sovelluksen varsinainen sisältökomponentti, joka päättää näytetäänkö
+ * kirjautumattoman käyttäjän laskeutumissivu (LandingPage) vai kirjautuneen
+ * käyttäjän päänäkymä välilehtineen, modaaleineen ja alatunnisteineen.
+ */
 export const AppContent: React.FC = () => {
   const { user } = useAuth();
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
   const { pathname, activeTab, setActiveTab, navigate } = useRouter();
+
+  // Modaali-ikkunoiden aukiolotilat
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 
   // Sync root '/' to '/book' when authenticated so every view has an explicit path
+  // Ohjataan juuripolku '/' automaattisesti '/book'-reitille kirjautuneilla käyttäjillä
   useEffect(() => {
     if (user && (pathname === '/' || pathname === '')) {
       navigate('/book', { replace: true });
     }
   }, [user, pathname, navigate]);
 
+  // Käyttäjän näyttönimi ja rooli alatunnistetta varten
   const displayName = user?.displayName || 'Matti Meikäläinen';
   const displayRole = user?.role ? user.role.toUpperCase() : 'USER';
 
+  // Kirjautumattomalle käyttäjälle näytetään julkinen laskeutumissivu ja tarvittavat modaalit
   if (!user) {
     return (
       <>
@@ -105,6 +137,7 @@ export const AppContent: React.FC = () => {
     );
   }
 
+  // Kirjautuneen käyttäjän sovelluskehikko: navigaatio, tiedotebanneri, aktiivinen välilehti ja alatunniste
   return (
     <div className="xamk-app-shell">
       <Navbar
@@ -116,9 +149,11 @@ export const AppContent: React.FC = () => {
       />
 
       {/* Hero Banner directly below Navbar */}
+      {/* Tiedotebanneri heti ylänavigaation alapuolella */}
       <NewsBanner />
 
       {/* Main Content Surface */}
+      {/* Pääsisältöalue, joka renderöidään aktiivisen välilehden (activeTab) perusteella */}
       <main className="xamk-main-surface">
         <div className="xamk-main-container">
           {activeTab === 'book' && (
@@ -152,6 +187,7 @@ export const AppContent: React.FC = () => {
       </main>
 
       {/* Dark Separator Band + Gold Top Line + Multi-Column Xamk Footer */}
+      {/* Koristeellinen kultainen erotinviiva ja monisarakkeinen Xamk-alatunniste */}
       <div className="xamk-footer-gold-line" aria-hidden="true" />
 
       <footer className="xamk-footer">
@@ -313,6 +349,7 @@ export const AppContent: React.FC = () => {
         </div>
       </footer>
 
+      {/* Globaalit modaali-ikkunat kirjautumiselle, pohjakuvalle ja vikailmoituksille */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
@@ -331,6 +368,10 @@ export const AppContent: React.FC = () => {
   );
 };
 
+/**
+ * Sovelluksen pääkomponentti, joka yhdistää kaikki kontekstitarjoajat (Provider)
+ * ja virherajan yhtenäiseksi kokonaisuudeksi.
+ */
 export const App: React.FC = () => {
   return (
     <AppErrorBoundary>

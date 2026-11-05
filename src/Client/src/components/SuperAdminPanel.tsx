@@ -1,3 +1,9 @@
+/**
+ * @file SuperAdminPanel.tsx
+ * @description Pääkäyttäjän (SuperAdmin) tapahtumajyräysnäkymä (Sääntö #8).
+ * Mahdollistaa virallisen oppilaitostapahtuman luomisen, joka lukitsee koko pelitilan
+ * valitulle aikavälille ja peruuttaa automaattisesti päällekkäiset opiskelijavaraukset.
+ */
 import React, { useState, useId } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError } from '../api/client';
@@ -20,6 +26,9 @@ import {
 } from '@/components/ui/dialog';
 import type { OverrideReservationRequest } from '../types';
 
+/**
+ * SuperAdmin-jyräyspaneelikomponentti.
+ */
 export const SuperAdminPanel: React.FC = () => {
   const { user, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
@@ -28,6 +37,7 @@ export const SuperAdminPanel: React.FC = () => {
   const queryClient = useQueryClient();
   const formInstanceId = useId();
 
+  // Lomakekenttien ja vahvistusmodaalin tilat
   const [today] = useState(() => new Date().toISOString().split('T')[0]);
   const [date, setDate] = useState(today);
   const [startHour, setStartHour] = useState('10:00');
@@ -40,6 +50,7 @@ export const SuperAdminPanel: React.FC = () => {
   const startDateTime = new Date(`${date}T${startHour}:00`);
   const endDateTime = new Date(`${date}T${endHour}:00`);
 
+  // Mutaatio tapahtumajyräyksen suorittamiseen palvelimella
   const overrideMutation = useMutation({
     mutationFn: (req: OverrideReservationRequest) => api.overrideReservation(req),
     onSuccess: (createdEvent) => {
@@ -50,6 +61,7 @@ export const SuperAdminPanel: React.FC = () => {
           ? `✅ Official event created (ID: ${createdEvent.id.slice(0, 8)}...). All overlapping bookings were overridden.`
           : `✅ Tapahtuma luotu onnistuneesti (ID: ${createdEvent.id.slice(0, 8)}...). Kaikki päällekkäiset varaukset jyrätty.`
       );
+      // Päivitetään kaikki varauslistat ja saatavuustiedot välimuistista
       queryClient.invalidateQueries({ queryKey: ['available-stations'] });
       queryClient.invalidateQueries({ queryKey: ['available-now'] });
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
@@ -65,6 +77,7 @@ export const SuperAdminPanel: React.FC = () => {
     },
   });
 
+  // Varmistetaan, että vain SuperAdmin pääsee käsiksi näkymään
   if (!isSuperAdmin) {
     return (
       <div className="alert alert-error">
@@ -75,6 +88,9 @@ export const SuperAdminPanel: React.FC = () => {
     );
   }
 
+  /**
+   * Tarkistaa syötetyt ajat ja perustelun sekä avaa vahvistusmodaalin.
+   */
   const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(null);
@@ -99,6 +115,9 @@ export const SuperAdminPanel: React.FC = () => {
     setIsConfirmModalOpen(true);
   };
 
+  /**
+   * Lähettää vahvistetun tapahtumajyräyspyynnön backendille.
+   */
   const executeOverride = () => {
     if (!user) return;
     const request: OverrideReservationRequest = {
@@ -118,6 +137,7 @@ export const SuperAdminPanel: React.FC = () => {
   return (
     <div className="xamk-admin-page">
       {/* Header Row with Switcher */}
+      {/* Ylätunniste ja pikavaihtaja tavallisen Admin-paneelin ja SuperAdmin-näkymän välillä */}
       <div className="xamk-admin-header">
         <div className="xamk-admin-header-titles">
           <div className="xamk-admin-kicker">XAMK GAME ROOM • SUPERADMIN AUTHORITY</div>
@@ -168,6 +188,7 @@ export const SuperAdminPanel: React.FC = () => {
 
       <div className="xamk-admin-2col">
         {/* Left Column: Override Form */}
+        {/* Vasen sarake: Tapahtuma-ajan ja jyräysperusteen syöttölomake */}
         <Card>
           <CardHeader>
             <CardTitle>
@@ -279,6 +300,7 @@ export const SuperAdminPanel: React.FC = () => {
         </Card>
 
         {/* Right Column: Override Summary & Impact Preview */}
+        {/* Oikea sarake: Yhteenveto valitusta aikaikkunasta ja jyräyksen vaikutuksista */}
         <Card>
           <CardHeader>
             <CardTitle>
@@ -354,6 +376,7 @@ export const SuperAdminPanel: React.FC = () => {
       </div>
 
       {/* Confirmation Dialog Modal */}
+      {/* Vahvistusmodaali ennen peruuttamattoman jyräyksen suorittamista */}
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
         <DialogContent className="xamk-modal-md">
           <DialogHeader>

@@ -11,6 +11,9 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Tests;
 
+/// <summary>
+/// Yksikkötestit <see cref="UserService"/>-palveluluokalle ja oppilaitossähköpostien validoinnille.
+/// </summary>
 public class UserServiceTests
 {
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
@@ -18,8 +21,12 @@ public class UserServiceTests
     private readonly IDateTimeProvider _dateTimeProvider = Substitute.For<IDateTimeProvider>();
     private readonly UserService _service;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="UserServiceTests"/>-testiluokan ja luo testattavan käyttäjäpalvelun.
+    /// </summary>
     public UserServiceTests()
     {
+        // Asetetaan aikapalvelu palauttamaan nykyinen UTC-aika
         _dateTimeProvider.UtcNow.Returns(DateTimeOffset.UtcNow);
 
         _service = new UserService(
@@ -30,6 +37,10 @@ public class UserServiceTests
             NullLogger<UserService>.Instance);
     }
 
+    /// <summary>
+    /// Varmistaa, että ulkopuolisilla sähköpostiosoitteilla kirjautuminen hylätään validointivirheellä (Sääntö 7).
+    /// </summary>
+    /// <param name="invalidEmail">Testattava ei-hyväksyttävä sähköpostiosoite.</param>
     [Theory]
     [InlineData("test@gmail.com")]
     [InlineData("user@hotmail.com")]
@@ -39,25 +50,29 @@ public class UserServiceTests
         // Arrange & Act (Sääntö 7)
         var result = await _service.AuthenticateOrCreateUserAsync(invalidEmail, "Testaaja");
 
-        // Assert
+        // Assert: Ulkopuolisen sähköpostin tulee tuottaa User.InvalidEmail-validointivirhe
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Validation, result.Error.Type);
         Assert.Equal("User.InvalidEmail", result.Error.Code);
     }
 
+    /// <summary>
+    /// Varmistaa, että XAMK:n oppilaitossähköposteilla (<c>@edu.xamk.fi</c> ja <c>@xamk.fi</c>) kirjautuminen onnistuu ja luo uuden käyttäjän (Sääntö 7).
+    /// </summary>
+    /// <param name="validEmail">Testattava kelvollinen oppilaitossähköpostiosoite.</param>
     [Theory]
     [InlineData("opiskelija@edu.xamk.fi")]
     [InlineData("opettaja@xamk.fi")]
     public async Task AuthenticateOrCreateUserAsync_WithSchoolEmail_ReturnsSuccess(string validEmail)
     {
-        // Arrange (Sääntö 7)
+        // Arrange (Sääntö 7): Käyttäjää ei vielä löydy tietokannasta
         _userRepository.GetByEmailAsync(Arg.Any<SchoolEmail>(), Arg.Any<CancellationToken>())
             .Returns((User?)null);
 
-        // Act
+        // Act: Tunnistaudutaan kelvollisella oppilaitossähköpostilla
         var result = await _service.AuthenticateOrCreateUserAsync(validEmail, "Opiskelija");
 
-        // Assert
+        // Assert: Varmistetaan, että uusi käyttäjä luotiin ja tallennettiin tietokantaan
         Assert.True(result.IsSuccess);
         Assert.Equal(validEmail.ToLowerInvariant(), result.Value.Email);
 

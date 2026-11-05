@@ -1,3 +1,8 @@
+/**
+ * @file FloorPlanModal.tsx
+ * @description Pelitilan pohjakuvan ja laitesijoittelun esittävä modaali-ikkuna.
+ * Havainnollistaa 6 PC-pelipisteen sekä konsolikaapin (PS5, Switch ja yhteinen 4K TV) sijainnin.
+ */
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -11,11 +16,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+/**
+ * FloorPlanModal-komponentin ominaisuudet (props).
+ */
 interface FloorPlanModalProps {
+  /** Onko pohjakuvamodaali avoinna */
   isOpen: boolean;
+  /** Funktio modaalin sulkemiseen */
   onClose: () => void;
 }
 
+/**
+ * Modaali-ikkuna pelitilan pohjapiirroksen tarkasteluun.
+ */
 export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose }) => {
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';

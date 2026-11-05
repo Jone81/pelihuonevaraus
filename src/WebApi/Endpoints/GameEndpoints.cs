@@ -6,10 +6,19 @@ using Pelihuone.WebApi.Extensions;
 
 namespace Pelihuone.WebApi.Endpoints;
 
+/// <summary>
+/// Sisältää pelivalikoimaan ja opiskelijoiden pelitoivelistaan liittyvät HTTP-päätepisteet.
+/// </summary>
 public static class GameEndpoints
 {
+    /// <summary>
+    /// Rekisteröi pelien ja toivelistan hallintaan liittyvät päätepisteet reititykseen.
+    /// </summary>
+    /// <param name="app">Sovelluksen päätepisteiden reititysrakentaja.</param>
+    /// <returns>Päivitetty reititysrakentaja ketjutusta varten.</returns>
     public static IEndpointRouteBuilder MapGameEndpoints(this IEndpointRouteBuilder app)
     {
+        // Ryhmitellään kaikki peleihin liittyvät päätepisteet /api/games -polun alle
         var group = app.MapGroup("/api/games")
             .WithTags("Games & Wishlist");
 
@@ -20,12 +29,14 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Jos kyselyparametrina on annettu kelvollinen pelialusta, suodatetaan pelit sen mukaan
             if (!string.IsNullOrWhiteSpace(platform) && Enum.TryParse<GamingPlatform>(platform, true, out var parsedPlatform))
             {
                 var result = await gameService.GetGamesByPlatformAsync(parsedPlatform, cancellationToken);
                 return result.ToHttpResult(httpContext);
             }
 
+            // Muussa tapauksessa palautetaan kaikki virallisessa valikoimassa olevat pelit
             var allResult = await gameService.GetAllGamesAsync(cancellationToken);
             return allResult.ToHttpResult(httpContext);
         })
@@ -38,6 +49,7 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Haetaan kaikki opiskelijoiden ehdottamat toivelistapelit äänimäärineen
             var result = await gameService.GetWishlistAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
@@ -51,6 +63,7 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Lisätään uusi pelitoive toivelistalle ja palautetaan 201 Created
             var result = await gameService.AddWishlistGameAsync(request, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/games/wishlist", val));
         })
@@ -65,6 +78,7 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Poimitaan kutsujan tunniste otsikosta käyttöoikeustarkistusta varten
             Guid userId = headerUserId ?? Guid.Empty;
             var result = await gameService.CreateGameAsync(request, userId, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/games/{val.Id}", val));
@@ -80,6 +94,7 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Siirretään peli toivelistalta viralliseen valikoimaan tai päinvastoin (vaatii Admin-oikeudet)
             Guid userId = headerUserId ?? Guid.Empty;
             var result = await gameService.ToggleWishlistStatusAsync(id, userId, cancellationToken);
             return result.ToHttpResult(httpContext);
@@ -94,6 +109,7 @@ public static class GameEndpoints
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
+            // Kasvatetaan toivelistalla olevan pelin äänimäärää yhdellä
             var result = await gameService.UpvoteWishlistGameAsync(id, cancellationToken);
             return result.ToHttpResult(httpContext);
         })

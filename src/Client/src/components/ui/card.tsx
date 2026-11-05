@@ -1,6 +1,14 @@
+/**
+ * @file card.tsx
+ * @description Korttikomponenttiperhe (Card, CardHeader, CardTitle, CardDescription,
+ * CardContent, CardFooter) sisällön ryhmittelyyn Xamk-paneelityylillä.
+ */
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
+/**
+ * Kortin juurielementti, joka luo kehystetyn paneelitaustan.
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -13,6 +21,9 @@ const Card = React.forwardRef<
 ))
 Card.displayName = 'Card'
 
+/**
+ * Kortin ylätunnisteosio otsikolle ja kuvaukselle.
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -25,6 +36,9 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = 'CardHeader'
 
+/**
+ * Kortin pääotsikko (`h3`).
+ */
 const CardTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
@@ -37,6 +51,9 @@ const CardTitle = React.forwardRef<
 ))
 CardTitle.displayName = 'CardTitle'
 
+/**
+ * Kortin tarkentava kuvausteksti otsikon alla.
+ */
 const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -49,6 +66,9 @@ const CardDescription = React.forwardRef<
 ))
 CardDescription.displayName = 'CardDescription'
 
+/**
+ * Kortin varsinainen sisältöalue.
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -57,6 +77,9 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = 'CardContent'
 
+/**
+ * Kortin alatunnisteosio esimerkiksi toimintopainikkeille.
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

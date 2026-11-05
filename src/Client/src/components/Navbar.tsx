@@ -1,3 +1,9 @@
+/**
+ * @file Navbar.tsx
+ * @description Sovelluksen päänavigaatiopalkki (ylätunniste) työpöytä- ja mobiilinäkymille.
+ * Sisältää Xamk-logon, päävälilehtien linkit, Admin-pudotusvalikon, kielivalitsimen,
+ * käyttäjävalikon sekä mobiililaitteiden sivuvalikon (Drawer).
+ */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -14,14 +20,25 @@ import {
 
 export type { AppTab };
 
+/**
+ * Navbar-komponentin ominaisuudet (props).
+ */
 interface NavbarProps {
+  /** Funktio kirjautumismodaalin avaamiseen */
   onOpenLogin: () => void;
+  /** Funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan: () => void;
+  /** Valinnainen funktio vikailmoitusmodaalin avaamiseen */
   onOpenIssueModal?: () => void;
+  /** Nykyinen aktiivinen päävälilehti */
   activeTab: AppTab;
+  /** Funktio päävälilehden vaihtamiseen */
   setActiveTab: (tab: AppTab) => void;
 }
 
+/**
+ * Responsiivinen ylänavigaatiopalkki.
+ */
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenLogin,
   onOpenFloorPlan,
@@ -33,8 +50,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { lang, t } = useLanguage();
   const { adminSubTab, setAdminSubTab } = useRouter();
   const isEn = lang === 'en';
+
+  // Mobiilivalikon (hampurilaisvalikko) aukiolotila
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Suljetaan mobiilivalikko Escape-näppäimellä
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isMobileMenuOpen) {
@@ -45,6 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMobileMenuOpen]);
 
+  // Lukitaan taustasivun vieritys, kun mobiilivalikko on auki
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.classList.add('mobile-menu-lock');
@@ -56,26 +77,31 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
   }, [isMobileMenuOpen]);
 
+  // Vaihtaa päävälilehteä ja sulkee mobiilivalikon
   const handleTabClick = (tab: AppTab) => {
     setActiveTab(tab);
     setIsMobileMenuOpen(false);
   };
 
+  // Vaihtaa ylläpitopaneelin alavälilehteä ja sulkee mobiilivalikon
   const handleAdminSubTabClick = (subTab: AdminSubTab) => {
     setAdminSubTab(subTab);
     setIsMobileMenuOpen(false);
   };
 
+  // Avaa pohjakuvamodaalin ja sulkee mobiilivalikon
   const handleFloorPlanClick = () => {
     setIsMobileMenuOpen(false);
     onOpenFloorPlan();
   };
 
+  // Avaa vikailmoitusmodaalin ja sulkee mobiilivalikon
   const handleIssueClick = () => {
     setIsMobileMenuOpen(false);
     onOpenIssueModal?.();
   };
 
+  // Kirjaa käyttäjän ulos ja sulkee mobiilivalikon
   const handleLogout = () => {
     setIsMobileMenuOpen(false);
     logout();
@@ -88,6 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="xamk-topbar">
       <div className="xamk-topbar-inner">
         {/* Left: Xamk Brand Logo & Title */}
+        {/* Vasen reuna: Xamk-brändilogo ja sovelluksen otsikko */}
         <button
           type="button"
           className="xamk-brand-btn min-w-0 flex-shrink"
@@ -110,6 +137,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         {/* Center: Inline Desktop Navigation Links (Only when logged in) */}
+        {/* Keskiosa: Työpöytänäkymän välilehtipainikkeet (näytetään kirjautuneille) */}
         {user && (
           <nav className="xamk-nav-center desktop-tabs-only" aria-label="Päävalikko">
             <button
@@ -177,6 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>{isEn ? 'My Bookings' : 'Omat varaukset'}</span>
             </button>
 
+            {/* Admin-pudotusvalikko ylläpitäjille ja pääkäyttäjille */}
             {isAdmin && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -270,6 +299,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {/* Right: Report Issue + Language Switcher + User Profile */}
+        {/* Oikea reuna: Vikailmoituslinkki, kielivalitsin ja käyttäjäprofiilin valikko */}
         <div className="xamk-topbar-right navbar-desktop-actions">
           {user && onOpenIssueModal && (
             <button
@@ -337,6 +367,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Actions */}
+        {/* Mobiilinäkymän pikatoiminnot ja hampurilaisvalikkopainike */}
         <div className="navbar-mobile-actions">
           <LanguageSwitcher className="mobile-lang-switcher" />
           {user ? (
@@ -369,6 +400,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Mobile Drawer */}
+      {/* Mobiilinäkymän sivuvalikko (Drawer) */}
       {isMobileMenuOpen && (
         <div className="mobile-menu-backdrop" onClick={() => setIsMobileMenuOpen(false)}>
           <div

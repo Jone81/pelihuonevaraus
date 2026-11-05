@@ -1,13 +1,26 @@
+/**
+ * @file dialog.tsx
+ * @description Saavutettava modaali- ja dialogikomponenttiperhe, joka pohjautuu
+ * `@radix-ui/react-dialog`-primitiiveihin. Sisältää automaattisen fokuksen hallinnan,
+ * taustahimmennyksen (Overlay) ja sulkemispainikkeen.
+ */
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/** Dialogin tilaa hallitseva juurikomponentti */
 const Dialog = DialogPrimitive.Root
+/** Elementti, joka avaa dialogin klikattaessa */
 const DialogTrigger = DialogPrimitive.Trigger
+/** Portaali, joka renderöi dialogin DOM-puun juureen */
 const DialogPortal = DialogPrimitive.Portal
+/** Painike tai elementti dialogin sulkemiseen */
 const DialogClose = DialogPrimitive.Close
 
+/**
+ * Dialogin taustan tummennuskerros (Overlay).
+ */
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -20,6 +33,9 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+/**
+ * Dialogin varsinainen sisältölaatikko, joka sisältää myös oikean yläkulman sulkemisrastin.
+ */
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -32,6 +48,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
+      {/* Oikean yläkulman sulkupainike ruudunlukijatekstillä */}
       <DialogPrimitive.Close className="xamk-dialog-close" aria-label="Sulje">
         <X className="h-4 w-4" />
         <span className="sr-only">Sulje</span>
@@ -41,6 +58,9 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+/**
+ * Dialogin ylätunnisteosio otsikolle ja kuvaustekstille.
+ */
 const DialogHeader = ({
   className,
   ...props
@@ -52,6 +72,9 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = 'DialogHeader'
 
+/**
+ * Dialogin alatunnisteosio toimintopainikkeille (esim. Peruuta / Vahvista).
+ */
 const DialogFooter = ({
   className,
   ...props
@@ -63,6 +86,9 @@ const DialogFooter = ({
 )
 DialogFooter.displayName = 'DialogFooter'
 
+/**
+ * Dialogin saavutettava otsikkokomponentti.
+ */
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -75,6 +101,9 @@ const DialogTitle = React.forwardRef<
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+/**
+ * Dialogin saavutettava kuvaustekstikomponentti.
+ */
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>

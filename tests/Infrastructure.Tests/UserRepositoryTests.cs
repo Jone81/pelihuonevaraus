@@ -8,8 +8,12 @@ using Pelihuone.Infrastructure.Repositories;
 
 namespace Pelihuone.Infrastructure.Tests;
 
+/// <summary>
+/// Yksikkö- ja integraatiotestit <see cref="UserRepository"/>-tietovarastoluokalle.
+/// </summary>
 public class UserRepositoryTests
 {
+    // Luo eristetyn muistinsisäisen tietokantakontekstin kutakin testiä varten
     private static ApplicationDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -20,10 +24,13 @@ public class UserRepositoryTests
         return new ApplicationDbContext(options);
     }
 
+    /// <summary>
+    /// Varmistaa, että käyttäjän lisääminen ja hakeminen oppilaitossähköpostilla toimii odotetusti.
+    /// </summary>
     [Fact]
     public async Task AddAndGetByEmailAsync_FindsUserCorrectly()
     {
-        // Arrange
+        // Arrange: Luodaan ja tallennetaan uusi käyttäjä tietokantaan
         using var context = CreateDbContext();
         var repository = new UserRepository(context);
 
@@ -36,10 +43,10 @@ public class UserRepositoryTests
         await repository.AddAsync(user);
         await context.SaveChangesAsync();
 
-        // Act
+        // Act: Haetaan tallennettu käyttäjä sähköpostiosoitteen perusteella
         var result = await repository.GetByEmailAsync(email);
 
-        // Assert
+        // Assert: Varmistetaan, että käyttäjä löytyi ja tiedot täsmäävät
         Assert.NotNull(result);
         Assert.Equal(userId, result.Id);
         Assert.Equal("Matti Meikäläinen", result.DisplayName);

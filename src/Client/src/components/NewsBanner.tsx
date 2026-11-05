@@ -1,8 +1,17 @@
+/**
+ * @file NewsBanner.tsx
+ * @description Ylänavigaation alapuolella näytettävä Xamk-henkinen Hero- ja tiedotebanneri.
+ * Hakee viimeisimmät tiedotteet palvelimelta ja nostaa kiinnitetyn (`isPinned`) tai
+ * uusimman tiedotteen esiin aukioloaikojen yhteyteen.
+ */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 
+/**
+ * Xamkin visuaalisen ilmeen mukainen keltainen X-tunnusmerkki (SVG).
+ */
 const XamkXEmblem: React.FC = () => (
   <svg
     viewBox="0 0 100 100"
@@ -21,15 +30,20 @@ const XamkXEmblem: React.FC = () => (
   </svg>
 );
 
+/**
+ * Tervetulo- ja uutisbannerikomponentti.
+ */
 export const NewsBanner: React.FC = () => {
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
+  // Haetaan uutis- ja tiedotelista taustajärjestelmästä
   const { data: newsList } = useQuery({
     queryKey: ['news'],
     queryFn: () => api.getNews(),
   });
 
+  // Valitaan ensisijaisesti kiinnitetty tiedote tai listan ensimmäinen tiedote
   const pinnedNews = newsList?.find((n) => n.isPinned) || newsList?.[0];
 
   return (
@@ -37,6 +51,7 @@ export const NewsBanner: React.FC = () => {
       <div className="xamk-hero-overlay">
         <div className="xamk-hero-container">
           {/* Left: Xamk Highlighted Headline Strips */}
+          {/* Vasen puoli: Xamk-korostuspalkit pääotsikolle */}
           <div className="xamk-hero-headline-group">
             <h1 className="xamk-hero-title">
               <span className="xamk-highlight-strip">
@@ -49,6 +64,7 @@ export const NewsBanner: React.FC = () => {
           </div>
 
           {/* Right: Black Floating Info Box with Xamk X Emblem */}
+          {/* Oikea puoli: kelluva musta infolaatikko X-logolla, aukioloajoilla ja tiedotteella */}
           <div className="xamk-hero-info-box">
             <div className="xamk-hero-emblem-wrap">
               <XamkXEmblem />

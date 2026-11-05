@@ -1,3 +1,8 @@
+/**
+ * @file LoginModal.tsx
+ * @description Kirjautumismodaali-ikkuna, joka tukee kaksivaiheista koulusähköpostin
+ * OTP-vahvistuskoodikirjautumista (`@edu.xamk.fi` ja `@xamk.fi`) sekä kehitystilan pikatunnuksia.
+ */
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -15,16 +20,25 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+/**
+ * LoginModal-komponentin ominaisuudet (props).
+ */
 interface LoginModalProps {
+  /** Onko kirjautumismodaali avoinna */
   isOpen: boolean;
+  /** Funktio modaalin sulkemiseen */
   onClose: () => void;
 }
 
+/**
+ * Modaali-ikkuna käyttäjän sisäänkirjautumiseen ja tilin vaihtamiseen.
+ */
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { login, sendVerificationCode, verifyCodeAndLogin } = useAuth();
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
 
+  // Kirjautumisvaihe: 1 = sähköpostin syöttö, 2 = 6-numeroisen vahvistuskoodin syöttö
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -33,6 +47,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Vaihe 1: Validoi oppilaitoksen sähköpostipäätteen ja pyytää OTP-vahvistuskoodin lähettämistä.
+   */
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -46,6 +63,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setLoading(true);
     try {
       const res = await sendVerificationCode(trimmedEmail);
+      // Kehitysympäristössä näytetään apukoodi suoraan käyttöliittymässä testausta varten
       if (res.devCode) {
         setDevCodeHint(res.devCode);
       }
@@ -61,6 +79,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  /**
+   * Vaihe 2: Tarkistaa syötetyn 6-numeroisen koodin ja kirjaa käyttäjän sisään.
+   */
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -85,6 +106,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  /**
+   * Käsittelee pikakirjautumisen esiasetetuilla testitunnuksilla (Opiskelija / SuperAdmin).
+   */
   const handleQuickLogin = async (quickEmail: string, quickName: string) => {
     setError(null);
     setLoading(true);

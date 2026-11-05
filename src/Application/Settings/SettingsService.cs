@@ -6,6 +6,9 @@ using Pelihuone.Contracts.Settings;
 
 namespace Pelihuone.Application.Settings;
 
+/// <summary>
+/// Toteuttaa sivustoasetusten hallinnan ja pysyväistallennuksen paikalliseen JSON-tiedostoon.
+/// </summary>
 public sealed class SettingsService : ISettingsService
 {
     private static readonly string SettingsFilePath = Path.Combine(AppContext.BaseDirectory, "site_settings.json");
@@ -13,11 +16,15 @@ public sealed class SettingsService : ISettingsService
     private static string _discordWebhookUrl = string.Empty;
     private readonly ILogger<SettingsService> _logger;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="SettingsService"/>-instanssin ja lataa mahdolliset tallennetut asetukset levyltä.
+    /// </summary>
     public SettingsService(ILogger<SettingsService> logger)
     {
         _logger = logger;
         try
         {
+            // Luetaan aiemmin tallennettu Discord Webhook -osoite JSON-tiedostosta, jos tiedosto on olemassa
             if (File.Exists(SettingsFilePath))
             {
                 var content = File.ReadAllText(SettingsFilePath);
@@ -34,8 +41,12 @@ public sealed class SettingsService : ISettingsService
         }
     }
 
+    /// <summary>
+    /// Palauttaa nykyiset sivustoasetukset ja varausrajoitusten metatiedot.
+    /// </summary>
     public Task<Result<SiteSettingsResponse>> GetSettingsAsync(CancellationToken cancellationToken = default)
     {
+        // Koostetaan vastaus nykyisestä webhook-osoitteesta ja kiinteistä varaussäännöistä
         var response = new SiteSettingsResponse(
             DiscordWebhookUrl: _discordWebhookUrl,
             OpeningHoursText: "08:00 – 18:00 (Ma–Pe)",
@@ -46,15 +57,20 @@ public sealed class SettingsService : ISettingsService
         return Task.FromResult(Result.Success(response));
     }
 
+    /// <summary>
+    /// Päivittää sivustoasetukset muistiin ja tallentaa ne JSON-tiedostoon.
+    /// </summary>
     public Task<Result<SiteSettingsResponse>> UpdateSettingsAsync(
         UpdateSiteSettingsRequest request,
         CancellationToken cancellationToken = default)
     {
+        // Siistitään ja päivitetään Discord Webhook -osoite
         _discordWebhookUrl = request.DiscordWebhookUrl?.Trim() ?? string.Empty;
         _logger.LogInformation("Sivustoasetukset päivitetty onnistuneesti: {Url}", _discordWebhookUrl);
 
         try
         {
+            // Kirjoitetaan päivitetyt asetukset levylle JSON-muodossa
             var json = JsonSerializer.Serialize(new { discordWebhookUrl = _discordWebhookUrl }, IndentedJsonOptions);
             File.WriteAllText(SettingsFilePath, json);
         }

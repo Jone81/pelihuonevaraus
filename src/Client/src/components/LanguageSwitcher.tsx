@@ -1,10 +1,22 @@
+/**
+ * @file LanguageSwitcher.tsx
+ * @description Kompakti kielivalitsinkomponentti (Suomi / English), joka näyttää
+ * valitun kielen lipun (SVG) ja tekstin sekä vaihtaa kielen klikattaessa.
+ */
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
+/**
+ * LanguageSwitcher-komponentin ominaisuudet (props).
+ */
 interface LanguageSwitcherProps {
+  /** Valinnainen CSS-lisäluokka ulommalle ryhmäelementille */
   className?: string;
 }
 
+/**
+ * Suomen lipun SVG-ikonikomponentti.
+ */
 const FinlandFlag: React.FC = () => (
   <svg
     viewBox="0 0 18 11"
@@ -20,6 +32,9 @@ const FinlandFlag: React.FC = () => (
   </svg>
 );
 
+/**
+ * Yhdistyneen kuningaskunnan (UK) lipun SVG-ikonikomponentti englannin kielelle.
+ */
 const UKFlag: React.FC = () => (
   <svg
     viewBox="0 0 60 30"
@@ -42,9 +57,13 @@ const UKFlag: React.FC = () => (
   </svg>
 );
 
+/**
+ * Kielivalitsin, joka vaihtaa sovelluksen kielen suomen ('fi') ja englannin ('en') välillä.
+ */
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
   const { lang, setLang } = useLanguage();
 
+  // Vaihtaa kielen vastakkaiseksi nykyisestä valinnasta
   const toggleLanguage = () => {
     setLang(lang === 'fi' ? 'en' : 'fi');
   };

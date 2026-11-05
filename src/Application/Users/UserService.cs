@@ -14,8 +14,12 @@ using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Application.Users;
 
+/// <summary>
+/// Toteuttaa käyttäjien kirjautumisen, vahvistuskoodien tarkistuksen ja roolien hallinnan liiketoimintalogiikan.
+/// </summary>
 public sealed class UserService : IUserService
 {
+    // Säilyttää väliaikaiset sähköpostikohtaiset vahvistuskoodit ja niiden vanhenemisajat muistissa
     private static readonly ConcurrentDictionary<string, (string Code, DateTimeOffset ExpiresAtUtc)> VerificationCodes = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly IUserRepository _userRepository;
@@ -24,6 +28,9 @@ public sealed class UserService : IUserService
     private readonly IValidator<string> _emailValidator;
     private readonly ILogger<UserService> _logger;
 
+    /// <summary>
+    /// Alustaa uuden <see cref="UserService"/>-instanssin.
+    /// </summary>
     public UserService(
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
@@ -38,11 +45,15 @@ public sealed class UserService : IUserService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Validoi oppilaitoksen sähköpostin ja palauttaa olemassa olevan käyttäjän tai rekisteröi uuden käyttäjän.
+    /// </summary>
     public async Task<Result<UserResponse>> AuthenticateOrCreateUserAsync(
         string email,
         string displayName,
         CancellationToken cancellationToken = default)
     {
+        // Tarkistetaan sähköpostiosoite FluentValidation-säännöillä
         var validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
         if (!validationResult.IsValid)
         {
@@ -50,6 +61,7 @@ public sealed class UserService : IUserService
             return Result.Failure<UserResponse>(Error.Validation("User.InvalidEmail", errorMessage));
         }
 
+        // Luodaan toimialueen arvo-objekti sähköpostille
         SchoolEmail schoolEmail;
         try
         {
@@ -60,6 +72,7 @@ public sealed class UserService : IUserService
             return Result.Failure<UserResponse>(Error.Validation("User.InvalidEmail", ex.Message));
         }
 
+        // Jos käyttäjä löytyy jo tietokannasta, palautetaan hänen tietonsa suoraan
         var existingUser = await _userRepository.GetByEmailAsync(schoolEmail, cancellationToken);
         if (existingUser is not null)
         {
@@ -67,6 +80,7 @@ public sealed class UserService : IUserService
             return Result.Success(MapToResponse(existingUser));
         }
 
+        // Muodostetaan näyttönimi joko annetusta nimestä tai sähköpostin alkuosasta
         DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
         string resolvedDisplayName = !string.IsNullOrWhiteSpace(displayName)
             ? displayName.Trim()
@@ -75,6 +89,7 @@ public sealed class UserService : IUserService
         User newUser;
         try
         {
+            // Luodaan uusi peruskäyttäjä (UserRole.User)
             newUser = User.Create(
                 UserId.New(),
                 schoolEmail,
@@ -95,6 +110,9 @@ public sealed class UserService : IUserService
         return Result.Success(MapToResponse(newUser));
     }
 
+    /// <summary>
+    /// Hakee käyttäjän tiedot tunnisteen perusteella.
+    /// </summary>
     public async Task<Result<UserResponse>> GetUserByIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
@@ -108,6 +126,9 @@ public sealed class UserService : IUserService
         return Result.Success(MapToResponse(user));
     }
 
+    /// <summary>
+    /// Hakee kaikki järjestelmän käyttäjät.
+    /// </summary>
     public async Task<Result<IReadOnlyList<UserResponse>>> GetAllUsersAsync(
         CancellationToken cancellationToken = default)
     {
@@ -116,17 +137,22 @@ public sealed class UserService : IUserService
         return Result.Success<IReadOnlyList<UserResponse>>(responses);
     }
 
+    /// <summary>
+    /// Päivittää käyttäjän roolin ja tallentaa muutoksen tietokantaan.
+    /// </summary>
     public async Task<Result<UserResponse>> UpdateUserRoleAsync(
         Guid userId,
         UserRole newRole,
         CancellationToken cancellationToken = default)
     {
+        // Haetaan muokattava käyttäjä
         var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null)
         {
             return Result.Failure<UserResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
         }
 
+        // Vaihdetaan käyttäjän rooli ja tallennetaan tietokantaan
         user.ChangeRole(newRole);
         await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -135,10 +161,14 @@ public sealed class UserService : IUserService
         return Result.Success(MapToResponse(user));
     }
 
+    /// <summary>
+    /// Luo 6-numeroisen kertakäyttöisen vahvistuskoodin, joka on voimassa 15 minuuttia.
+    /// </summary>
     public async Task<Result<string>> SendVerificationCodeAsync(
         string email,
         CancellationToken cancellationToken = default)
     {
+        // Varmistetaan, että sähköposti kuuluu sallittuun Xamk-verkkotunnukseen
         var validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
         if (!validationResult.IsValid)
         {
@@ -156,6 +186,9 @@ public sealed class UserService : IUserService
         return Result.Success(code);
     }
 
+    /// <summary>
+    /// Varmistaa käyttäjän syöttämän vahvistuskoodin ja suorittaa kirjautumisen tai rekisteröinnin.
+    /// </summary>
     public async Task<Result<UserResponse>> VerifyCodeAndLoginAsync(
         string email,
         string code,
@@ -182,6 +215,7 @@ public sealed class UserService : IUserService
         return await AuthenticateOrCreateUserAsync(email, displayName ?? string.Empty, cancellationToken);
     }
 
+    // Muuntaa User-entiteetin UserResponse-tiedonsiirto-olioksi
     private static UserResponse MapToResponse(User user)
     {
         return new UserResponse(
