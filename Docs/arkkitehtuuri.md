@@ -1,0 +1,149 @@
+# 🏛️ Järjestelmäarkkitehtuuri (`arkkitehtuuri.md`)
+
+Tämä dokumentti kuvaa **Pelihuonevaraus (Xamk Game Room)** -järjestelmän ohjelmistoarkkitehtuurin, kerrosjaon, suunnittelumallit (Design Patterns), tietokantatason rinnakkaisuudenhallinnan, virheenkäsittelyn, tietoturvan sekä käännösaikaiset laatupalomuurit.
+
+---
+
+## 1. Arkkitehtuuriperiaatteet
+
+Järjestelmä on toteutettu **Clean Architecture** (Onion / Ports & Adapters) ja **Taktinen Domain-Driven Design (DDD)** -periaatteilla.
+
+1. **Riippuvuuksien kääntäminen (Dependency Inversion Principle):**
+   - Sisemmät kerrokset (`Domain`, `Application`) määrittelevät abstraktiot (`IReservationRepository`, `IUnitOfWork`, `IDateTimeProvider`), ja ulompi `Infrastructure`-kerros toteuttaa ne.
+   - `Domain`-kerroksella on **0 ulkoista NuGet- tai kehysriippuvuutta**.
+2. **Kerroskohtainen DI-eristys (Dependency Injection Isolation):**
+   - Jokainen kerros rekisteröi omat palvelunsa omaan laajennusmetodiinsa:
+     - [`src/Application/DependencyInjection.cs`](../src/Application/DependencyInjection.cs) → `services.AddApplication()`
+     - [`src/Infrastructure/DependencyInjection.cs`](../src/Infrastructure/DependencyInjection.cs) → `services.AddInfrastructure(configuration)`
+   - Esityskerros ([`src/WebApi/Program.cs`](../src/WebApi/Program.cs)) vain kutsuu näitä laajennusmetodeja sekä kytkee HTTP-putken.
+3. **Poikkeukseton ohjausrakenne (`Result<T>`-malli):**
+   - Liiketoimintavirheitä (validointi, päällekkäinen varaus, käyttöesto, puuttuva resurssi) ei käsitellä kalliilla `try/catch`-poikkeuksilla, vaan tyyppiturvallisella [`Result<T>`](../src/Application/Common/Result.cs)- ja [`Error`](../src/Application/Common/Error.cs)-rakenteella.
+
+---
+
+## 2. Projektirakenne ja Kerrosten Vastuut
+
+```mermaid
+flowchart TB
+    subgraph Presentation ["1. Esityskerros & Käyttöliittymä"]
+        Client["📱 src/Client\n(React 19 + TypeScript + Vite + TanStack Query)"]
+        WebApi["🌐 src/WebApi\n(ASP.NET Core 10 Minimal APIs, RateLimiter,\nGlobalExceptionHandler, ResultExtensions)"]
+    end
+
+    subgraph SharedContracts ["2. Jaetut Tietosopimukset"]
+        Contracts["📦 src/Contracts\n(Muuttumattomat C# record -DTO:t:\nRequest, Response, PagedResult<T>)"]
+    end
+
+    subgraph Core ["3. Sovellus- ja Toimialueydin (Core)"]
+        Application["⚙️ src/Application\n(Käyttötapauspalvelut, FluentValidation,\nResult<T>, Repository- ja Time-abstraktiot)"]
+        Domain["🏛️ src/Domain\n(Aggregaatit, Entiteetit, Value Objectit,\nDomain Events, Domain Exceptions)"]
+    end
+
+    subgraph Infra ["4. Infrastruktuurikerros"]
+        Infrastructure["🗄️ src/Infrastructure\n(EF Core ApplicationDbContext, PostgreSQL / InMemory,\nOutboxInterceptor, Repositoriot, DatabaseSeeder)"]
+    end
+
+    Client == "REST / JSON\n(HTTP)" ==> WebApi
+    WebApi --> Application
+    WebApi --> Infrastructure
+    WebApi --> Contracts
+    Application --> Domain
+    Application --> Contracts
+    Infrastructure --> Application
+    Infrastructure --> Domain
+```
+
+### Kerroskohtainen erittely
+
+| Projekti / Kansio | Sijainti | Sallitut riippuvuudet | Keskeinen vastuu |
+| :--- | :--- | :--- | :--- |
+| **`Pelihuone.Domain`** | `src/Domain/` | *Ei yhtään* | Liiketoimintainvariantit, vahvasti tyypitetyt ID:t (`UserId`, `ReservationId`, `GamingStationId`, `GameRoomId`), arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`), juurientiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja domain-tapahtumat (`IDomainEvent`). |
+| **`Pelihuone.Contracts`** | `src/Contracts/` | *Ei yhtään* | Julkisen REST-rajapinnan ja sovelluspalveluiden väliset syöte- ja vastaustietueet (`record`) sekä sivutusmalli [`PagedResult<T>`](../src/Contracts/Common/PagedResult.cs). |
+| **`Pelihuone.Application`** | `src/Application/` | `Domain`, `Contracts`, `FluentValidation` | Käyttötapauskohtainen orkestrointi (`ReservationService`, `UserService`, `GamingStationService`, `GameService`, `NewsService`, `SettingsService`, `StatisticsService`, `IssueReportService`, `DiscordNotificationService`), syötteiden validointi ja repositorioiden rajapinnat (`Abstractions/Repositories/`). |
+| **`Pelihuone.Infrastructure`** | `src/Infrastructure/` | `Application`, `Domain`, `EF Core`, `Npgsql` | Tietokantakonteksti ([`ApplicationDbContext`](../src/Infrastructure/Persistence/ApplicationDbContext.cs)), EF Core Fluent API -määritykset (`Configurations/`), `OutboxInterceptor`, repositoriototeutukset, `SystemDateTimeProvider` ja `DatabaseSeeder`. |
+| **`Pelihuone.WebApi`** | `src/WebApi/` | `Application`, `Infrastructure`, `Contracts` | HTTP-reititys (`Endpoints/`), Rate Limiting, CORS, globaali virheenkäsittely ([`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs)) ja `Result<T>`-tulosten muuntaminen RFC 9457 `ProblemDetails` -vastauksiksi. |
+| **`Client` (Frontend)** | `src/Client/` | React 19, TanStack Query, Tailwind, Radix UI | Mobiilioptimoitu (Mobile-First) yksisivuinen web-sovellus (SPA), interaktiivinen varauskalenteri (`Drag-to-Select`), reaaliaikainen tilanäkymä, pelikatalogi ja 6-välilehtinen Admin-hallintapaneeli. |
+
+---
+
+## 3. Taktinen Domain-Driven Design (DDD) `src/Domain`-kerroksessa
+
+### 3.1 Juurientiteetit (`AggregateRoot<TId>`) ja Entiteetit (`Entity<TId>`)
+Kaikki entiteetit perivät [`Entity<TId>`](../src/Domain/Common/Entity.cs)-perusluokan ja aggregaattijuuret [`AggregateRoot<TId>`](../src/Domain/Common/AggregateRoot.cs)-luokan, joka ylläpitää listaa julkaisemattomista domain-tapahtumista (`IReadOnlyCollection<IDomainEvent> DomainEvents`).
+
+- **[`Reservation`](../src/Domain/Models/Reservation.cs):** Varausjärjestelmän keskeisin aggregaatti. Varmistaa luontihetkellä (`Reservation.Create`):
+  - Yksittäisvarauksella (`ReservationType.Individual`) on oltava `GamingStationId` eikä `GameRoomId`:tä.
+  - Koko tilan (`ReservationType.Room`) ja tapahtuman (`ReservationType.Event`) varauksella on oltava `GameRoomId` eikä yksittäistä `GamingStationId`:tä.
+  - Luonti nostaa automaattisesti [`ReservationCreatedDomainEvent`](../src/Domain/Events/ReservationCreatedDomainEvent.cs)-tapahtuman ja peruutus (`Cancel`) [`ReservationCancelledDomainEvent`](../src/Domain/Events/ReservationCancelledDomainEvent.cs)-tapahtuman.
+- **[`User`](../src/Domain/Models/User.cs):** Hallinnoi käyttäjän validoitua koulusähköpostia (`SchoolEmail`), roolia (`User`, `Admin`, `SuperAdmin`) sekä käyttöestoja (`BannedUntilUtc`, `BanReason`, `IsBanned(nowUtc)`, `Ban(...)`, `Unban()`). Estää `SuperAdmin`-käyttäjän bannaamisen domain-tasolla.
+- **[`GamingStation`](../src/Domain/Models/GamingStation.cs):** Edustaa fyysistä pelipistettä (PC 1–6, PS5, Switch), sen laitekoodia (`PC-01`..`SW-01`), jaetun television riippuvuutta (`UsesSharedTv`) ja huoltotilaa (`IsActive`, `Activate()`, `Deactivate()`).
+
+### 3.2 Arvo-objektit (`Value Objects`)
+- **[`TimeWindow`](../src/Domain/ValueObjects/TimeWindow.cs):** Muuttumaton aikaväli (`StartUtc`, `EndUtc`), joka pakottaa `EndUtc > StartUtc` ja tarjoaa `OverlapsWith(TimeWindow other)` -leikkaustarkistuksen.
+- **[`SchoolEmail`](../src/Domain/ValueObjects/SchoolEmail.cs):** Sallii ainoastaan `@edu.xamk.fi`- ja `@xamk.fi`-päätteiset sähköpostiosoitteet ja normalisoi ne pieniksi kirjaimiksi.
+- **[`OpeningHours`](../src/Domain/ValueObjects/OpeningHours.cs):** Kapseloi Suomen aikavyöhykkeen (`Europe/Helsinki` / `FLE Standard Time`) aukiolotarkistuksen, arkipäiväsäännön ja 15 minuutin joustovaran (`GracePeriod`).
+
+---
+
+## 4. Tietokanta, Rinnakkaisuudenhallinta ja Transactional Outbox
+
+### 4.1 Kaksoistietokantatuki (PostgreSQL & InMemory Fallback)
+[`DependencyInjection.AddInfrastructure`](../src/Infrastructure/DependencyInjection.cs) tarkistaa käynnistyksen yhteydessä PostgreSQL-yhteyden:
+- **Tuotanto ja Integraatiotestit (`Testcontainers`):** Käyttää PostgreSQL-kantaa (`UseNpgsql`), tallentaa kaikki aikaleimat `timestamptz`-sarakkeina ja ottaa käyttöön PostgreSQL:n järjestelmäsarakkeen `xmin` optimistiseen rivilukitukseen (`UseXminAsConcurrencyToken()`).
+- **Paikallinen kehitysympäristö ilman Dockeria:** Siirtyy automaattisesti käyttämään EF Coren muistitietokantaa (`UseInMemoryDatabase("PelihuoneDevDb")`) ja alustaa sen [`DatabaseSeeder`](../src/Infrastructure/Persistence/DatabaseSeeder.cs)-luokalla.
+
+### 4.2 Transactional Outbox -kuvio (`OutboxInterceptor`)
+Jotta yksikään varausilmoitus tai domain-tapahtuma ei katoa tietokantatransaktion ja ulkoisen viestinvälityksen välillä, [`OutboxInterceptor`](../src/Infrastructure/Outbox/OutboxInterceptor.cs) sieppaa `SaveChangesAsync`-kutsun:
+
+```mermaid
+sequenceDiagram
+    participant Svc as ReservationService
+    participant DbCtx as ApplicationDbContext
+    participant Inter as OutboxInterceptor
+    participant DB as Tietokanta (reservations + outbox_messages)
+
+    Svc->>DbCtx: UnitOfWork.SaveChangesAsync()
+    DbCtx->>Inter: SavingChangesAsync(eventData)
+    Inter->>DbCtx: Kerää ChangeTrackerista kaikki AggregateRoot.DomainEvents
+    Inter->>Inter: Serialisoi tapahtumat JSON-muotoon OutboxMessage-riveiksi
+    Inter->>DbCtx: Lisää OutboxMessage-oliot DbContext.OutboxMessages-tauluun
+    Inter->>DbCtx: Tyhjentää entiteettien DomainEvents-kokoelman
+    DbCtx->>DB: Suorittaa yhden atomisen tallennuksen (Reservation + OutboxMessage)
+```
+
+---
+
+## 5. Dynaamiset Tilasäännöt ja Asetusarkkitehtuuri (`SettingsService`)
+
+Ylläpitäjän Admin-paneelissa määrittelemät tilasäännöt ja kiintiöt tallennetaan [`SettingsService`](../src/Application/Settings/SettingsService.cs)-palvelun kautta paikalliseen `site-settings.json`-tiedostoon ja luetaan jokaisen varauksen yhteydessä:
+- **Aukioloajat ja aukiolopäivät:** `OpenTimeHour` (0–23), `CloseTimeHour` (1–24), `OnlyWeekdays` (Ma–Pe vs. Ma–Su).
+- **Varauskiintiöt:** `MaxAdvanceBookingMonths` (1–12 kk), `MaxIndividualHours` (1–12 h/vrk), `MaxStudentRoomHours` (1–12 h), `MinReservationMinutes` (15–120 min).
+- **Laiteriippuvuudet ja huoltotila:** `EnforceSharedTvLock` (PS5 & Switch jaetun TV:n lukitus) sekä `IsMaintenanceMode` + `MaintenanceMessage` (koko pelitilan tilapäinen sulku opiskelijoilta).
+
+---
+
+## 6. Virheenkäsittely, Tietoturva ja Rate Limiting
+
+1. **RFC 9457 `ProblemDetails`:**
+   - Kaikki palvelukerroksen `Result.Failure(Error)`-tulokset muunnetaan [`ResultExtensions.ToHttpResult`](../src/WebApi/Extensions/ResultExtensions.cs)-laajennusmetodilla standardinmukaiseksi `application/problem+json` -vastaukseksi:
+     - `ErrorType.Validation` → `400 Bad Request`
+     - `ErrorType.Unauthorized` → `401 Unauthorized`
+     - `ErrorType.Forbidden` → `403 Forbidden` (esim. bannattu käyttäjä tai puuttuva rooli)
+     - `ErrorType.NotFound` → `404 Not Found`
+     - `ErrorType.Conflict` → `409 Conflict` (esim. laite varattu, SharedTV-ristiriita tai huoltotila)
+   - Odottamattomat poikkeukset sieppaa [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs), joka lokittaa virheen palvelimella mutta palauttaa asiakkaalle turvallisen `500 Internal Server Error` -`ProblemDetails`-vastauksen ilman pinojälkiä (Stack Trace).
+2. **Rate Limiting (Spämmi- ja bottisuojaus):**
+   - `AuthPolicy`: Enintään **5 pyyntöä / minuutti / IP** kirjautumis- ja OTP-koodipäätepisteisiin.
+   - `ReservationPolicy`: Enintään **10 pyyntöä / minuutti / IP** varauspäätepisteisiin.
+3. **GDPR ja PII-suojaus:**
+   - Palvelinlokeihin (`ILogger`) ei koskaan kirjoiteta käyttäjien nimiä tai sähköpostiosoitteita — ainoastaan anonyymit `UserId`- ja `ReservationId`-GUID-tunnisteet.
+
+---
+
+## 7. Kääntäjäpalomuuri ja Koodin Laatuvaatimukset
+
+Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Build.props`](../Directory.Build.props) sekä frontendin [`tsconfig.app.json`](../src/Client/tsconfig.app.json) ja [`eslint.config.js`](../src/Client/eslint.config.js) muodostavat automaattisen laatupalomuurin:
+
+- **`TreatWarningsAsErrors=true` & `EnforceCodeStyleInBuild=true`:** Yksikään kääntäjä- tai tyylivaroitus ei mene käännöksestä läpi.
+- **Eksplisiittisten tyyppien pakotus (`IDE0008 = error`, `no-var = error`):** `var`-avainsanan käyttö on kokonaan kielletty sekä C#- että TypeScript-koodissa.
+- **Pakollinen suomenkielinen dokumentointi (`GenerateDocumentationFile=true` / `CS1591`):** Jokaisella julkisella luokalla, tietueella, rajapinnalla, metodilla ja ominaisuudella on oltava suomenkieliset XML-/JSDoc-kommentit.

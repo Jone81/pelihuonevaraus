@@ -19,5 +19,11 @@ Tämä `Docs/`-kansio sisältää kaikki Xamk Game Room -ajanvarausjärjestelmä
 5. **[Full Stack -spesifikaatio & Järjestelmän toimintakartta (`FULLSTACK_SPECS_AND_MAP.md`)](./FULLSTACK_SPECS_AND_MAP.md)**  
    Koko teknologiapinon kuvaus, Clean Architecture -kerroskartta, päästä päähän -sekvenssikaaviot, täydellinen REST API -kutsuhakemisto (`UI → api.* → Endpoint → Service → Repository → DB`), tietokannan ER-kaavio sekä React-komponenttien ja TanStack Query -välimuistiavaimien kartta.
 
-6. **[Käynnistys- ja pikaohje (`../README.md`)](../README.md)**  
+6. **[Järjestelmäarkkitehtuuri (`arkkitehtuuri.md`)](./arkkitehtuuri.md)**  
+   Yksityiskohtainen arkkitehtuurikuvaus: Clean Architecture -kerrosjako, taktinen DDD (`AggregateRoot`, `ValueObject`, `DomainEvents`), Transactional Outbox (`OutboxInterceptor`), PostgreSQL/InMemory-rinnakkaisuudenhallinta, dynaamiset tilasäännöt ja kääntäjäpalomuuri.
+
+7. **[Rajapinnat ja tietosopimukset (`rajapinnat.md`)](./rajapinnat.md)**  
+   Kaikkien REST HTTP -päätepisteiden (`/api/auth`, `/api/users`, `/api/stations`, `/api/reservations`, `/api/games`, `/api/news`, `/api/settings`, `/api/statistics`, `/api/issues`) syöte- ja vastaussopimukset (`src/Contracts`), RFC 9457 `ProblemDetails` -virhemallit sekä sisäiset `I*Service`- ja `I*Repository`-rajapinnat.
+
+8. **[Käynnistys- ja pikaohje (`../README.md`)](../README.md)**  
    Projektin juuren pikaohje palvelimien käynnistämiseen, testaukseen ja kirjautumiseen.
