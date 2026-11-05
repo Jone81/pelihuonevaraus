@@ -177,3 +177,38 @@ Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Bui
 - **`TreatWarningsAsErrors=true` & `EnforceCodeStyleInBuild=true`:** Yksikään kääntäjä- tai tyylivaroitus ei mene käännöksestä läpi.
 - **Eksplisiittisten tyyppien pakotus (`IDE0008 = error`, `no-var = error`):** `var`-avainsanan käyttö on kokonaan kielletty sekä C#- että TypeScript-koodissa.
 - **Pakollinen suomenkielinen dokumentointi (`GenerateDocumentationFile=true` / `CS1591`):** Jokaisella julkisella luokalla, tietueella, rajapinnalla, metodilla ja ominaisuudella on oltava suomenkieliset XML-/JSDoc-kommentit.
+
+---
+
+## 9. Kiellot, Elinkaari, Ei-tavoitteet ja Valmis-kriteerit
+
+### Kiellot
+
+1. **Älä tarkista päällekkäisyyttä, aukioloaikoja tai peruutusoikeutta HTTP-päätepisteessä (`Endpoints/`).** Jokaisella säännöllä on oma `Paikka` `Docs/domain.md`:ssä.
+2. **Älä vie EF Corea, Npgsql:ää tai HTTP-kirjastoja `src/Domain`-projektiin.**
+3. **Älä anna `WebApi`-päätepisteiden kutsua repositorioita ohi `Application`-palveluiden.**
+4. **Älä kutsu järjestelmän kelloa (`DateTime.Now` / `DateTimeOffset.UtcNow`) suoraan `Domain`- tai `Application`-kerroksissa.** Nykyhetki annetaan parametrina tai `IDateTimeProvider`-rajapinnan kautta.
+5. **Älä tallenna "vapaana nyt" -tilaa tietokantaan.** Se lasketaan aktiivisista varauksista, laitteiden tilasta ja `UsesSharedTv`-riippuvuudesta.
+6. **Älä palauta Domain-entiteettejä suoraan HTTP-rajapinnasta.** Käytä aina `src/Contracts`-projektin DTO-tietueita.
+
+### Elinkaari
+
+Muistissa pidetty tietokanta (`UseInMemoryDatabase`) elää prosessin ajan paikallisessa kehityksessä ilman Dockeria, jotta tila säilyy pyyntöjen välillä. PostgreSQL-tietokantaan kytketty `ApplicationDbContext` ja repositoriot rekisteröidään `Scoped`-elinkaarella (yksi HTTP-pyyntö kerrallaan), jotta rinnakkaiset pyynnöt eivät jaa samaa `DbContext`-instanssia.
+
+### Ei-tavoitteet
+
+- Ei maksullisia varauksia tai maksupääteintegraatiota.
+- Ei automaattista toistuvaa viikkovarausta opiskelijoille (estää vakiovuorojen hamstraamisen).
+- Ei ulkopuolisten sähköpostiosoitteiden (`@gmail.com` jne.) kirjautumista.
+- Ei useamman kampuksen erillisiä huoneita tässä versiossa (tietomalli `GameRoom` on valmiina laajennukseen).
+
+### Valmis
+
+Sanoin, ei skriptinä:
+
+- Toinen varaus samalle pelipisteelle samalle aikavälille hylätään tilakoodilla `409 Conflict` (`Reservation.StationOverlap`) ja vastaus kertoo syyn.
+- Kun `PlayStation 5` on varattu klo 14–16, `Nintendo Switch` ei ole vapaana samalle välille ja sen varausyritys palauttaa `409 Conflict` (`Reservation.SharedTvConflict`).
+- `SuperAdmin`-käyttäjän luoma tapahtumavaraus (`override`) peruuttaa samalle aikavälille osuvat opiskelijavaraukset ja kirjaa niihin annetun peruutussyyn (`ADR 0001`).
+- Jo alkaneen tai menneen varauksen peruminen hylätään `Reservation`-entiteetissä (`409 Conflict`).
+- Domain-sääntöjen (#1, #4, #5, #9, #11) yksikkötestit eivät käynnistä web-palvelinta eivätkä avaa tietokantaa.
+
