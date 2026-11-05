@@ -33,7 +33,7 @@ public sealed class ReservationRepository : IReservationRepository
     /// <returns>Löytynyt <see cref="Reservation"/>-entiteetti tai <c>null</c>, jos varausta ei löydy.</returns>
     public async Task<Reservation?> GetByIdAsync(ReservationId id, CancellationToken cancellationToken = default)
     {
-        var reservation = await _context.Reservations
+        Reservation? reservation = await _context.Reservations
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
         // Tyhjennetään mahdolliset materialisoinnin yhteydessä syntyneet tapahtumat
@@ -104,7 +104,7 @@ public sealed class ReservationRepository : IReservationRepository
         CancellationToken cancellationToken = default)
     {
         // Haetaan kaikkien jaettua televisiota käyttävien konsolipisteiden tunnisteet
-        var sharedTvStationIds = await _context.GamingStations
+        List<GamingStationId> sharedTvStationIds = await _context.GamingStations
             .AsNoTracking()
             .Where(s => s.Type == GamingStationType.PlayStation5 || s.Type == GamingStationType.NintendoSwitch)
             .Select(s => s.Id)

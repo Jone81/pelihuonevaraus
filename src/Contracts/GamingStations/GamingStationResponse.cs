@@ -14,3 +14,12 @@ public sealed record GamingStationResponse(
     string Type,
     bool UsesSharedTv,
     bool IsActive);
+
+/// <summary>
+/// Pyynnön tietomalli yksittäisen pelipisteen tilan (käytössä / huollossa) ja nimen päivittämiseen.
+/// </summary>
+/// <param name="IsActive">Asetetaanko pelipiste aktiiviseksi ja varattavaksi (<c>true</c>) vai huoltotilaan (<c>false</c>).</param>
+/// <param name="Name">Valinnainen uusi näyttönimi pelipisteelle.</param>
+public sealed record UpdateGamingStationStatusRequest(
+    bool IsActive,
+    string? Name = null);

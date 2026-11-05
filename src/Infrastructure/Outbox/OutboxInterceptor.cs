@@ -1,5 +1,7 @@
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Pelihuone.Domain.Common;
 
@@ -46,7 +48,7 @@ public sealed class OutboxInterceptor : SaveChangesInterceptor
         List<IDomainEvent> domainEvents = [];
 
         // Käydään läpi kaikki muutosseurannassa olevat entiteetit
-        foreach (var entry in dbContext.ChangeTracker.Entries())
+        foreach (EntityEntry entry in dbContext.ChangeTracker.Entries())
         {
             if (entry.Entity is null)
             {
@@ -54,14 +56,14 @@ public sealed class OutboxInterceptor : SaveChangesInterceptor
             }
 
             // Haetaan entiteetin DomainEvents-ominaisuus reflektion avulla
-            var type = entry.Entity.GetType();
-            var domainEventsProperty = type.GetProperty("DomainEvents");
+            Type type = entry.Entity.GetType();
+            PropertyInfo? domainEventsProperty = type.GetProperty("DomainEvents");
             if (domainEventsProperty?.GetValue(entry.Entity) is IReadOnlyCollection<IDomainEvent> events && events.Count > 0)
             {
                 domainEvents.AddRange(events);
 
                 // Tyhjennetään entiteetin tapahtumalista, jottei samoja tapahtumia käsitellä uudelleen
-                var clearMethod = type.GetMethod("ClearDomainEvents");
+                MethodInfo? clearMethod = type.GetMethod("ClearDomainEvents");
                 clearMethod?.Invoke(entry.Entity, null);
             }
         }
@@ -73,7 +75,7 @@ public sealed class OutboxInterceptor : SaveChangesInterceptor
         }
 
         // Muunnetaan jokainen domain-tapahtuma JSON-muotoiseksi OutboxMessage-entiteetiksi
-        var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage
+        IEnumerable<OutboxMessage> outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage
         {
             Id = Guid.NewGuid(),
             Type = domainEvent.GetType().Name,

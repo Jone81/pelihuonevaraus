@@ -35,7 +35,7 @@ public class ReservationServiceTests
     public ReservationServiceTests()
     {
         // Asetetaan kiinteä aika (1.11.2026 klo 08:00 EET) determinististä aikaikkunoiden testausta varten
-        var fixedTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset fixedTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
         _fakeTimeProvider.SetUtcNow(fixedTime);
         _dateTimeProvider.UtcNow.Returns(_fakeTimeProvider.GetUtcNow());
 
@@ -57,10 +57,10 @@ public class ReservationServiceTests
     public async Task CreateReservation_WhenStationConflict_ReturnsConflictResult()
     {
         // Arrange (Sääntö 1)
-        var userId = Guid.NewGuid();
-        var stationId = Guid.NewGuid();
-        var user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
-        var station = GamingStation.Create(new GamingStationId(stationId), "PC 1", GamingStationType.PC);
+        Guid userId = Guid.NewGuid();
+        Guid stationId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
+        GamingStation station = GamingStation.Create(new GamingStationId(stationId), "PC 1", GamingStationType.PC);
 
         _userRepository.GetByIdAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>()).Returns(user);
         _gamingStationRepository.GetByIdAsync(Arg.Any<GamingStationId>(), Arg.Any<CancellationToken>()).Returns(station);
@@ -73,7 +73,7 @@ public class ReservationServiceTests
             Arg.Any<CancellationToken>())
             .Returns(true);
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "idem-key-1",
             userId,
             (int)ReservationType.Individual,
@@ -82,7 +82,7 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(4)); // 12:00
 
         // Act: Yritetään varata jo varattu pelipiste
-        var result = await _service.CreateReservationAsync(request);
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
 
         // Assert: Varmistetaan, että palautetaan ristiriitavirhe
         Assert.True(result.IsFailure);
@@ -97,10 +97,10 @@ public class ReservationServiceTests
     public async Task CreateReservation_WhenSharedTvInUse_ReturnsConflict()
     {
         // Arrange (Sääntö 6: PS5 ja Switch jakavat saman TV:n)
-        var userId = Guid.NewGuid();
-        var switchId = Guid.NewGuid();
-        var user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
-        var switchStation = GamingStation.Create(new GamingStationId(switchId), "Nintendo Switch", GamingStationType.NintendoSwitch);
+        Guid userId = Guid.NewGuid();
+        Guid switchId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
+        GamingStation switchStation = GamingStation.Create(new GamingStationId(switchId), "Nintendo Switch", GamingStationType.NintendoSwitch);
 
         _userRepository.GetByIdAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>()).Returns(user);
         _gamingStationRepository.GetByIdAsync(Arg.Any<GamingStationId>(), Arg.Any<CancellationToken>()).Returns(switchStation);
@@ -112,7 +112,7 @@ public class ReservationServiceTests
             Arg.Any<CancellationToken>())
             .Returns(true);
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "idem-key-2",
             userId,
             (int)ReservationType.Individual,
@@ -121,7 +121,7 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(4));
 
         // Act: Yritetään luoda varaus Nintendo Switchille
-        var result = await _service.CreateReservationAsync(request);
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
 
         // Assert: Varmistetaan, että jaetun TV:n konflikti estää varauksen
         Assert.True(result.IsFailure);
@@ -135,33 +135,33 @@ public class ReservationServiceTests
     public async Task CancelReservation_WhenUserIsNotOwnerAndNotStaff_ReturnsForbidden()
     {
         // Arrange (Anti-IDOR / Käyttöoikeustarkistus)
-        var ownerId = Guid.NewGuid();
-        var hackerId = Guid.NewGuid();
-        var resId = Guid.NewGuid();
+        Guid ownerId = Guid.NewGuid();
+        Guid hackerId = Guid.NewGuid();
+        Guid resId = Guid.NewGuid();
 
-        var stationId = GamingStationId.New();
-        var window = TimeWindow.Create(
+        GamingStationId stationId = GamingStationId.New();
+        TimeWindow window = TimeWindow.Create(
             _dateTimeProvider.UtcNow.AddHours(2),
             _dateTimeProvider.UtcNow.AddHours(4),
             ReservationType.Individual,
             _dateTimeProvider.UtcNow);
 
-        var reservation = Reservation.CreateIndividual(
+        Reservation reservation = Reservation.CreateIndividual(
             new ReservationId(resId),
             new UserId(ownerId),
             stationId,
             window,
             _dateTimeProvider.UtcNow);
 
-        var hackerUser = User.Create(new UserId(hackerId), SchoolEmail.Create("hacker@edu.xamk.fi"), "Hacker", UserRole.User, _dateTimeProvider.UtcNow);
+        User hackerUser = User.Create(new UserId(hackerId), SchoolEmail.Create("hacker@edu.xamk.fi"), "Hacker", UserRole.User, _dateTimeProvider.UtcNow);
 
         _reservationRepository.GetByIdAsync(Arg.Any<ReservationId>(), Arg.Any<CancellationToken>()).Returns(reservation);
         _userRepository.GetByIdAsync(new UserId(hackerId), Arg.Any<CancellationToken>()).Returns(hackerUser);
 
-        var cancelRequest = new CancelReservationRequest(hackerId, "Yritän perua toisen varauksen");
+        CancelReservationRequest cancelRequest = new CancelReservationRequest(hackerId, "Yritän perua toisen varauksen");
 
         // Act: Yritetään peruuttaa toisen käyttäjän varaus
-        var result = await _service.CancelReservationAsync(resId, cancelRequest);
+        Result<ReservationResponse> result = await _service.CancelReservationAsync(resId, cancelRequest);
 
         // Assert: Varmistetaan, että operaatio estetään Forbidden-virheellä
         Assert.True(result.IsFailure);
@@ -175,19 +175,19 @@ public class ReservationServiceTests
     public async Task OverrideAndCreateEvent_WhenSuperAdmin_CancelsExistingReservationsAndCreatesEvent()
     {
         // Arrange (Sääntö 8: SuperAdmin jyräys)
-        var superAdminId = Guid.NewGuid();
-        var superAdmin = User.Create(new UserId(superAdminId), SchoolEmail.Create("opettaja@xamk.fi"), "Opettaja", UserRole.SuperAdmin, _dateTimeProvider.UtcNow);
+        Guid superAdminId = Guid.NewGuid();
+        User superAdmin = User.Create(new UserId(superAdminId), SchoolEmail.Create("opettaja@xamk.fi"), "Opettaja", UserRole.SuperAdmin, _dateTimeProvider.UtcNow);
 
         _userRepository.GetByIdAsync(new UserId(superAdminId), Arg.Any<CancellationToken>()).Returns(superAdmin);
 
-        var stationId = GamingStationId.New();
-        var window = TimeWindow.Create(
+        GamingStationId stationId = GamingStationId.New();
+        TimeWindow window = TimeWindow.Create(
             _dateTimeProvider.UtcNow.AddHours(2),
             _dateTimeProvider.UtcNow.AddHours(6),
             ReservationType.Event,
             _dateTimeProvider.UtcNow);
 
-        var existingRes = Reservation.CreateIndividual(
+        Reservation existingRes = Reservation.CreateIndividual(
             ReservationId.New(),
             UserId.New(),
             stationId,
@@ -197,7 +197,7 @@ public class ReservationServiceTests
         _reservationRepository.GetActiveReservationsInWindowAsync(Arg.Any<TimeWindow>(), Arg.Any<CancellationToken>())
             .Returns([existingRes]);
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "superadmin-idem-1",
             superAdminId,
             (int)ReservationType.Event,
@@ -206,7 +206,7 @@ public class ReservationServiceTests
             window.EndUtc);
 
         // Act: Suoritetaan jyräys ja tapahtuman luonti SuperAdmin-oikeuksilla
-        var result = await _service.OverrideAndCreateEventAsync(request, "Turnaus pelihuoneessa");
+        Result<ReservationResponse> result = await _service.OverrideAndCreateEventAsync(request, "Turnaus pelihuoneessa");
 
         // Assert: Varmistetaan, että aiempi varaus peruuntui perusteluineen ja uusi tapahtuma tallennettiin
         Assert.True(result.IsSuccess);
@@ -224,12 +224,12 @@ public class ReservationServiceTests
     public async Task OverrideAndCreateEvent_WhenNormalUser_ReturnsForbidden()
     {
         // Arrange (Sääntö 8: Tavallinen käyttäjä ei voi jyrätä)
-        var userId = Guid.NewGuid();
-        var user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
+        Guid userId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
 
         _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(user);
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "normal-idem-1",
             userId,
             (int)ReservationType.Event,
@@ -238,7 +238,7 @@ public class ReservationServiceTests
             _dateTimeProvider.UtcNow.AddHours(6));
 
         // Act: Yritetään jyrätä varaukset tavallisena opiskelijana
-        var result = await _service.OverrideAndCreateEventAsync(request, "Oma lanitapahtuma");
+        Result<ReservationResponse> result = await _service.OverrideAndCreateEventAsync(request, "Oma lanitapahtuma");
 
         // Assert: Varmistetaan, että kutsu palauttaa Forbidden-virheen
         Assert.True(result.IsFailure);
@@ -252,14 +252,14 @@ public class ReservationServiceTests
     public async Task CreateReservation_WhenStudentBooksRoomForMoreThan4Hours_ReturnsValidationFailure()
     {
         // Arrange: Opiskelija yrittää tilavarausta 5 tunniksi
-        var userId = Guid.NewGuid();
-        var user = User.Create(new UserId(userId), SchoolEmail.Create("student@edu.xamk.fi"), "Teemu", UserRole.User, _dateTimeProvider.UtcNow);
+        Guid userId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("student@edu.xamk.fi"), "Teemu", UserRole.User, _dateTimeProvider.UtcNow);
         _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(user);
 
-        var startUtc = _dateTimeProvider.UtcNow.AddHours(1);
-        var endUtc = startUtc.AddHours(5); // 5h > 4h
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        DateTimeOffset endUtc = startUtc.AddHours(5); // 5h > 4h
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "student-room-idem",
             userId,
             (int)ReservationType.Room,
@@ -268,7 +268,7 @@ public class ReservationServiceTests
             endUtc);
 
         // Act: Yritetään luoda yli 4 tunnin tilavaraus
-        var result = await _service.CreateReservationAsync(request);
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
 
         // Assert: Varmistetaan, että varaus epäonnistuu RoomDurationExceeded-virhekoodilla
         Assert.True(result.IsFailure);
@@ -282,14 +282,14 @@ public class ReservationServiceTests
     public async Task CreateReservation_WhenStudentExceedsDaily4HoursQuota_ReturnsValidationFailure()
     {
         // Arrange: Opiskelijalla on jo 3h varaus, yrittää toista 2h varausta samalle päivälle (3h + 2h = 5h > 4h)
-        var userId = Guid.NewGuid();
-        var user = User.Create(new UserId(userId), SchoolEmail.Create("student@edu.xamk.fi"), "Teemu", UserRole.User, _dateTimeProvider.UtcNow);
+        Guid userId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("student@edu.xamk.fi"), "Teemu", UserRole.User, _dateTimeProvider.UtcNow);
         _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(user);
 
-        var startUtc = _dateTimeProvider.UtcNow.AddHours(1);
-        var endUtc = startUtc.AddHours(2);
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        DateTimeOffset endUtc = startUtc.AddHours(2);
 
-        var existingRes = Reservation.CreateIndividual(
+        Reservation existingRes = Reservation.CreateIndividual(
             ReservationId.New(),
             new UserId(userId),
             GamingStationId.New(),
@@ -299,7 +299,7 @@ public class ReservationServiceTests
         _reservationRepository.GetActiveReservationsForUserAsync(new UserId(userId), Arg.Any<CancellationToken>())
             .Returns(new List<Reservation> { existingRes });
 
-        var request = new CreateReservationRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "student-quota-idem",
             userId,
             (int)ReservationType.Individual,
@@ -308,7 +308,7 @@ public class ReservationServiceTests
             endUtc);
 
         // Act: Yritetään luoda toinen varaus, joka nostaa päivän kokonaisajan 5 tuntiin
-        var result = await _service.CreateReservationAsync(request);
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
 
         // Assert: Varmistetaan, että päiväkiintiön ylitys estää varauksen
         Assert.True(result.IsFailure);

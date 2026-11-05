@@ -1,6 +1,8 @@
 using NSubstitute;
 using Pelihuone.Application.Abstractions.Repositories;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.GamingStations;
+using Pelihuone.Contracts.GamingStations;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.Models;
 using Pelihuone.Domain.ValueObjects;
@@ -32,18 +34,18 @@ public class GamingStationServiceTests
     public async Task GetAvailableStationsAsync_WhenPS5IsReserved_BothPS5AndSwitchAreExcluded()
     {
         // Arrange (Reaaliaikainen laskenta + Sääntö 6 SharedTV)
-        var pcStation = GamingStation.Create(GamingStationId.New(), "PC 1", GamingStationType.PC);
-        var ps5Station = GamingStation.Create(GamingStationId.New(), "PlayStation 5", GamingStationType.PlayStation5);
-        var switchStation = GamingStation.Create(GamingStationId.New(), "Nintendo Switch", GamingStationType.NintendoSwitch);
+        GamingStation pcStation = GamingStation.Create(GamingStationId.New(), "PC 1", GamingStationType.PC);
+        GamingStation ps5Station = GamingStation.Create(GamingStationId.New(), "PlayStation 5", GamingStationType.PlayStation5);
+        GamingStation switchStation = GamingStation.Create(GamingStationId.New(), "Nintendo Switch", GamingStationType.NintendoSwitch);
 
         _stationRepository.GetAllActiveAsync(Arg.Any<CancellationToken>())
             .Returns([pcStation, ps5Station, switchStation]);
 
-        var baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
-        var queryWindow = TimeWindow.Create(baseTime.AddHours(2), baseTime.AddHours(4), ReservationType.Individual, baseTime);
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        TimeWindow queryWindow = TimeWindow.Create(baseTime.AddHours(2), baseTime.AddHours(4), ReservationType.Individual, baseTime);
 
         // Vain PS5 on varattu tietokannassa
-        var ps5Reservation = Reservation.CreateIndividual(
+        Reservation ps5Reservation = Reservation.CreateIndividual(
             ReservationId.New(),
             UserId.New(),
             ps5Station.Id,
@@ -54,7 +56,7 @@ public class GamingStationServiceTests
             .Returns([ps5Reservation]);
 
         // Act: Haetaan vapaat pelipisteet kyseiselle aikaikkunalle
-        var result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
+        Result<IReadOnlyList<GamingStationResponse>> result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
 
         // Assert: Sekä PS5 että Switch ovat poissa, joten vain PC 1 on vapaana
         Assert.True(result.IsSuccess);
@@ -69,15 +71,15 @@ public class GamingStationServiceTests
     public async Task GetAvailableStationsAsync_WhenRoomReservationActive_ReturnsEmptyList()
     {
         // Arrange (Sääntö 4: Tilavarauksen aikana mikään piste ei ole vapaana)
-        var pcStation = GamingStation.Create(GamingStationId.New(), "PC 1", GamingStationType.PC);
+        GamingStation pcStation = GamingStation.Create(GamingStationId.New(), "PC 1", GamingStationType.PC);
         _stationRepository.GetAllActiveAsync(Arg.Any<CancellationToken>())
             .Returns([pcStation]);
 
-        var baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
-        var queryWindow = TimeWindow.Create(baseTime.AddHours(2), baseTime.AddHours(4), ReservationType.Individual, baseTime);
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        TimeWindow queryWindow = TimeWindow.Create(baseTime.AddHours(2), baseTime.AddHours(4), ReservationType.Individual, baseTime);
 
         // Luodaan koko huoneen kattava tilavaraus
-        var roomReservation = Reservation.CreateRoom(
+        Reservation roomReservation = Reservation.CreateRoom(
             ReservationId.New(),
             UserId.New(),
             queryWindow,
@@ -87,7 +89,7 @@ public class GamingStationServiceTests
             .Returns([roomReservation]);
 
         // Act: Tarkistetaan vapaat pelipisteet tilavarauksen ajalta
-        var result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
+        Result<IReadOnlyList<GamingStationResponse>> result = await _service.GetAvailableStationsAsync(queryWindow.StartUtc, queryWindow.EndUtc);
 
         // Assert: Vapaiden pelipisteiden listan tulee olla tyhjä
         Assert.True(result.IsSuccess);

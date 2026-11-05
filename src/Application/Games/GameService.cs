@@ -41,8 +41,8 @@ public sealed class GameService : IGameService
     public async Task<Result<IReadOnlyList<GameResponse>>> GetAllGamesAsync(CancellationToken cancellationToken = default)
     {
         // Haetaan kaikki pelit tietovarastosta ja muunnetaan ne DTO-malleiksi
-        var games = await _gameRepository.GetAllAsync(cancellationToken);
-        var responses = games.Select(MapToResponse).ToList();
+        IReadOnlyList<Game> games = await _gameRepository.GetAllAsync(cancellationToken);
+        List<GameResponse> responses = games.Select(MapToResponse).ToList();
         return Result.Success<IReadOnlyList<GameResponse>>(responses);
     }
 
@@ -54,8 +54,8 @@ public sealed class GameService : IGameService
         CancellationToken cancellationToken = default)
     {
         // Suodatetaan pelit valitun pelialustan mukaan
-        var games = await _gameRepository.GetByPlatformAsync(platform, cancellationToken);
-        var responses = games.Select(MapToResponse).ToList();
+        IReadOnlyList<Game> games = await _gameRepository.GetByPlatformAsync(platform, cancellationToken);
+        List<GameResponse> responses = games.Select(MapToResponse).ToList();
         return Result.Success<IReadOnlyList<GameResponse>>(responses);
     }
 
@@ -65,8 +65,8 @@ public sealed class GameService : IGameService
     public async Task<Result<IReadOnlyList<GameResponse>>> GetWishlistAsync(CancellationToken cancellationToken = default)
     {
         // Haetaan opiskelijoiden toivomat pelit tietovarastosta
-        var wishlist = await _gameRepository.GetWishlistAsync(cancellationToken);
-        var responses = wishlist.Select(MapToResponse).ToList();
+        IReadOnlyList<Game> wishlist = await _gameRepository.GetWishlistAsync(cancellationToken);
+        List<GameResponse> responses = wishlist.Select(MapToResponse).ToList();
         return Result.Success<IReadOnlyList<GameResponse>>(responses);
     }
 
@@ -84,7 +84,7 @@ public sealed class GameService : IGameService
         }
 
         // Jäsennetään pelialusta tai käytetään oletuksena PC-alustaa
-        if (!Enum.TryParse<GamingPlatform>(request.Platform, true, out var platform))
+        if (!Enum.TryParse<GamingPlatform>(request.Platform, true, out GamingPlatform platform))
         {
             platform = GamingPlatform.PC;
         }
@@ -92,7 +92,7 @@ public sealed class GameService : IGameService
         try
         {
             // Luodaan uusi peli toivelistatilassa ja tallennetaan tietokantaan
-            var game = Game.Create(
+            Game game = Game.Create(
                 GameId.New(),
                 request.Name,
                 platform,
@@ -122,7 +122,7 @@ public sealed class GameService : IGameService
         CancellationToken cancellationToken = default)
     {
         // Tarkistetaan, että kutsuja on ylläpitäjä
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<GameResponse>(Error.Forbidden("Game.Forbidden", "Vain ylläpitäjä voi lisätä virallisia pelejä valikoimaan."));
@@ -135,7 +135,7 @@ public sealed class GameService : IGameService
         }
 
         // Jäsennetään pelialusta tai asetetaan oletukseksi PC
-        if (!Enum.TryParse<GamingPlatform>(request.Platform, true, out var platform))
+        if (!Enum.TryParse<GamingPlatform>(request.Platform, true, out GamingPlatform platform))
         {
             platform = GamingPlatform.PC;
         }
@@ -143,7 +143,7 @@ public sealed class GameService : IGameService
         try
         {
             // Luodaan peli-entiteetti ja tallennetaan muutokset
-            var game = Game.Create(
+            Game game = Game.Create(
                 GameId.New(),
                 request.Name,
                 platform,
@@ -172,14 +172,14 @@ public sealed class GameService : IGameService
         CancellationToken cancellationToken = default)
     {
         // Tarkistetaan ylläpitäjäoikeudet
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<GameResponse>(Error.Forbidden("Game.Forbidden", "Vain ylläpitäjä voi hyväksyä toivelistapelejä pelivalikoimaan."));
         }
 
         // Haetaan muokattava peli tietokannasta
-        var game = await _gameRepository.GetByIdAsync(new GameId(gameId), cancellationToken);
+        Game? game = await _gameRepository.GetByIdAsync(new GameId(gameId), cancellationToken);
         if (game is null)
         {
             return Result.Failure<GameResponse>(Error.NotFound("Game.NotFound", "Peliä ei löytynyt."));
@@ -210,7 +210,7 @@ public sealed class GameService : IGameService
     public async Task<Result<GameResponse>> UpvoteWishlistGameAsync(Guid gameId, CancellationToken cancellationToken = default)
     {
         // Haetaan äänestettävä peli
-        var game = await _gameRepository.GetByIdAsync(new GameId(gameId), cancellationToken);
+        Game? game = await _gameRepository.GetByIdAsync(new GameId(gameId), cancellationToken);
         if (game is null)
         {
             return Result.Failure<GameResponse>(Error.NotFound("Game.NotFound", "Peliä ei löytynyt."));

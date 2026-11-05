@@ -16,7 +16,7 @@ public class UserRepositoryTests
     // Luo eristetyn muistinsisäisen tietokantakontekstin kutakin testiä varten
     private static ApplicationDbContext CreateDbContext()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .AddInterceptors(new OutboxInterceptor())
             .Options;
@@ -31,20 +31,20 @@ public class UserRepositoryTests
     public async Task AddAndGetByEmailAsync_FindsUserCorrectly()
     {
         // Arrange: Luodaan ja tallennetaan uusi käyttäjä tietokantaan
-        using var context = CreateDbContext();
-        var repository = new UserRepository(context);
+        using ApplicationDbContext context = CreateDbContext();
+        UserRepository repository = new UserRepository(context);
 
-        var userId = UserId.New();
-        var email = SchoolEmail.Create("opiskelija@edu.xamk.fi");
-        var now = DateTimeOffset.UtcNow;
+        UserId userId = UserId.New();
+        SchoolEmail email = SchoolEmail.Create("opiskelija@edu.xamk.fi");
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        var user = User.Create(userId, email, "Matti Meikäläinen", UserRole.User, now);
+        User user = User.Create(userId, email, "Matti Meikäläinen", UserRole.User, now);
 
         await repository.AddAsync(user);
         await context.SaveChangesAsync();
 
         // Act: Haetaan tallennettu käyttäjä sähköpostiosoitteen perusteella
-        var result = await repository.GetByEmailAsync(email);
+        User? result = await repository.GetByEmailAsync(email);
 
         // Assert: Varmistetaan, että käyttäjä löytyi ja tiedot täsmäävät
         Assert.NotNull(result);

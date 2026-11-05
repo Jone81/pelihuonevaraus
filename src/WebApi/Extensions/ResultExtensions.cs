@@ -79,7 +79,7 @@ public static class ResultExtensions
         };
 
         // Rakennetaan ProblemDetails-rakenne pyynnön polulla ja virheen kuvauksella
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title = GetTitle(error.Type),

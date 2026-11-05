@@ -6,6 +6,7 @@ using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Application.Users;
 using Pelihuone.Application.Users.Validators;
+using Pelihuone.Contracts.Users;
 using Pelihuone.Domain.Models;
 using Pelihuone.Domain.ValueObjects;
 
@@ -48,7 +49,7 @@ public class UserServiceTests
     public async Task AuthenticateOrCreateUserAsync_WithNonSchoolEmail_ReturnsValidationError(string invalidEmail)
     {
         // Arrange & Act (Sääntö 7)
-        var result = await _service.AuthenticateOrCreateUserAsync(invalidEmail, "Testaaja");
+        Result<UserResponse> result = await _service.AuthenticateOrCreateUserAsync(invalidEmail, "Testaaja");
 
         // Assert: Ulkopuolisen sähköpostin tulee tuottaa User.InvalidEmail-validointivirhe
         Assert.True(result.IsFailure);
@@ -70,7 +71,7 @@ public class UserServiceTests
             .Returns((User?)null);
 
         // Act: Tunnistaudutaan kelvollisella oppilaitossähköpostilla
-        var result = await _service.AuthenticateOrCreateUserAsync(validEmail, "Opiskelija");
+        Result<UserResponse> result = await _service.AuthenticateOrCreateUserAsync(validEmail, "Opiskelija");
 
         // Assert: Varmistetaan, että uusi käyttäjä luotiin ja tallennettiin tietokantaan
         Assert.True(result.IsSuccess);

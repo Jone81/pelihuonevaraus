@@ -41,7 +41,7 @@ public class GameServiceTests
     public async Task GetAllGamesAsync_ReturnsAllGames()
     {
         // Arrange: Valmistellaan kahden pelin testilista
-        var games = new List<Game>
+        List<Game> games = new List<Game>
         {
             Game.Create(GameId.New(), "CS2", GamingPlatform.PC, "Shooter", false),
             Game.Create(GameId.New(), "Tekken 8", GamingPlatform.PlayStation5, "Fighting", true),
@@ -49,7 +49,7 @@ public class GameServiceTests
         _gameRepository.GetAllAsync(Arg.Any<CancellationToken>()).Returns(games);
 
         // Act: Haetaan kaikki pelit palvelun kautta
-        var result = await _service.GetAllGamesAsync();
+        Result<IReadOnlyList<GameResponse>> result = await _service.GetAllGamesAsync();
 
         // Assert: Varmistetaan, että haku onnistui ja molemmat pelit palautettiin
         Assert.True(result.IsSuccess);
@@ -63,10 +63,10 @@ public class GameServiceTests
     public async Task AddWishlistGame_CreatesWishlistGameSuccessfully()
     {
         // Arrange: Luodaan pelitoivepyyntö PC-alustalle
-        var request = new WishGameRequest("Helldivers 2", "PC", "Co-op game");
+        WishGameRequest request = new WishGameRequest("Helldivers 2", "PC", "Co-op game");
 
         // Act: Lisätään peli toivelistalle
-        var result = await _service.AddWishlistGameAsync(request);
+        Result<GameResponse> result = await _service.AddWishlistGameAsync(request);
 
         // Assert: Tarkistetaan, että peli merkittiin toivelistapeliksi ja tallennettiin UnitOfWorkin kautta
         Assert.True(result.IsSuccess);
@@ -83,14 +83,14 @@ public class GameServiceTests
     public async Task CreateGame_WhenUserIsNotAdmin_ReturnsForbidden()
     {
         // Arrange: Alustetaan tavallinen opiskelijakäyttäjä ilman ylläpito-oikeuksia
-        var userId = Guid.NewGuid();
-        var normalUser = User.Create(new UserId(userId), SchoolEmail.Create("opiskelija@edu.xamk.fi"), "Matti", UserRole.User, DateTimeOffset.UtcNow);
+        Guid userId = Guid.NewGuid();
+        User normalUser = User.Create(new UserId(userId), SchoolEmail.Create("opiskelija@edu.xamk.fi"), "Matti", UserRole.User, DateTimeOffset.UtcNow);
         _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(normalUser);
 
-        var request = new CreateGameRequest("New Game", "PC", "Desc");
+        CreateGameRequest request = new CreateGameRequest("New Game", "PC", "Desc");
 
         // Act: Yritetään luoda virallinen peli tavallisen käyttäjän tunnuksilla
-        var result = await _service.CreateGameAsync(request, userId);
+        Result<GameResponse> result = await _service.CreateGameAsync(request, userId);
 
         // Assert: Varmistetaan, että kutsu hylätään Forbidden-virheellä
         Assert.False(result.IsSuccess);
@@ -104,12 +104,12 @@ public class GameServiceTests
     public async Task UpvoteWishlistGame_IncrementsVotesSuccessfully()
     {
         // Arrange: Luodaan toivelistapeli, jolla on entuudestaan 5 ääntä
-        var gameId = Guid.NewGuid();
-        var game = Game.Create(new GameId(gameId), "Hollow Knight: Silksong", GamingPlatform.PC, "Metroidvania", true, 5);
+        Guid gameId = Guid.NewGuid();
+        Game game = Game.Create(new GameId(gameId), "Hollow Knight: Silksong", GamingPlatform.PC, "Metroidvania", true, 5);
         _gameRepository.GetByIdAsync(new GameId(gameId), Arg.Any<CancellationToken>()).Returns(game);
 
         // Act: Annetaan pelille uusi ääni
-        var result = await _service.UpvoteWishlistGameAsync(gameId);
+        Result<GameResponse> result = await _service.UpvoteWishlistGameAsync(gameId);
 
         // Assert: Varmistetaan, että äänimäärä kasvoi kuuteen ja muutos tallennettiin
         Assert.True(result.IsSuccess);

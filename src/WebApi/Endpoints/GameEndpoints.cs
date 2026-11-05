@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Games;
 using Pelihuone.Contracts.Games;
 using Pelihuone.Domain.Enums;
@@ -19,7 +20,7 @@ public static class GameEndpoints
     public static IEndpointRouteBuilder MapGameEndpoints(this IEndpointRouteBuilder app)
     {
         // Ryhmitellään kaikki peleihin liittyvät päätepisteet /api/games -polun alle
-        var group = app.MapGroup("/api/games")
+        RouteGroupBuilder group = app.MapGroup("/api/games")
             .WithTags("Games & Wishlist");
 
         // Kaikki saatavilla olevat pelit
@@ -30,14 +31,14 @@ public static class GameEndpoints
             CancellationToken cancellationToken) =>
         {
             // Jos kyselyparametrina on annettu kelvollinen pelialusta, suodatetaan pelit sen mukaan
-            if (!string.IsNullOrWhiteSpace(platform) && Enum.TryParse<GamingPlatform>(platform, true, out var parsedPlatform))
+            if (!string.IsNullOrWhiteSpace(platform) && Enum.TryParse<GamingPlatform>(platform, true, out GamingPlatform parsedPlatform))
             {
-                var result = await gameService.GetGamesByPlatformAsync(parsedPlatform, cancellationToken);
+                Result<IReadOnlyList<GameResponse>> result = await gameService.GetGamesByPlatformAsync(parsedPlatform, cancellationToken);
                 return result.ToHttpResult(httpContext);
             }
 
             // Muussa tapauksessa palautetaan kaikki virallisessa valikoimassa olevat pelit
-            var allResult = await gameService.GetAllGamesAsync(cancellationToken);
+            Result<IReadOnlyList<GameResponse>> allResult = await gameService.GetAllGamesAsync(cancellationToken);
             return allResult.ToHttpResult(httpContext);
         })
         .WithName("GetGames")
@@ -50,7 +51,7 @@ public static class GameEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan kaikki opiskelijoiden ehdottamat toivelistapelit äänimäärineen
-            var result = await gameService.GetWishlistAsync(cancellationToken);
+            Result<IReadOnlyList<GameResponse>> result = await gameService.GetWishlistAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetWishlist")
@@ -64,7 +65,7 @@ public static class GameEndpoints
             CancellationToken cancellationToken) =>
         {
             // Lisätään uusi pelitoive toivelistalle ja palautetaan 201 Created
-            var result = await gameService.AddWishlistGameAsync(request, cancellationToken);
+            Result<GameResponse> result = await gameService.AddWishlistGameAsync(request, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/games/wishlist", val));
         })
         .WithName("AddWishlistGame")
@@ -80,7 +81,7 @@ public static class GameEndpoints
         {
             // Poimitaan kutsujan tunniste otsikosta käyttöoikeustarkistusta varten
             Guid userId = headerUserId ?? Guid.Empty;
-            var result = await gameService.CreateGameAsync(request, userId, cancellationToken);
+            Result<GameResponse> result = await gameService.CreateGameAsync(request, userId, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/games/{val.Id}", val));
         })
         .WithName("CreateGame")
@@ -96,7 +97,7 @@ public static class GameEndpoints
         {
             // Siirretään peli toivelistalta viralliseen valikoimaan tai päinvastoin (vaatii Admin-oikeudet)
             Guid userId = headerUserId ?? Guid.Empty;
-            var result = await gameService.ToggleWishlistStatusAsync(id, userId, cancellationToken);
+            Result<GameResponse> result = await gameService.ToggleWishlistStatusAsync(id, userId, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("ToggleWishlistStatus")
@@ -110,7 +111,7 @@ public static class GameEndpoints
             CancellationToken cancellationToken) =>
         {
             // Kasvatetaan toivelistalla olevan pelin äänimäärää yhdellä
-            var result = await gameService.UpvoteWishlistGameAsync(id, cancellationToken);
+            Result<GameResponse> result = await gameService.UpvoteWishlistGameAsync(id, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("VoteGame")

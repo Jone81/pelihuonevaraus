@@ -50,6 +50,16 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("timestamptz")
             .IsRequired();
 
+        // Mahdollinen määräaikaisen tai pysyvän käyttöeston (bannin) päättymisaika
+        builder.Property(u => u.BannedUntilUtc)
+            .HasColumnType("timestamptz")
+            .IsRequired(false);
+
+        // Käyttöeston (bannin) valinnainen syy tai selite
+        builder.Property(u => u.BanReason)
+            .HasMaxLength(500)
+            .IsRequired(false);
+
         // Jätetään lasketut apuominaisuudet pois tietokantataulusta
         builder.Ignore(u => u.IsSuperAdmin);
         builder.Ignore(u => u.IsAdmin);

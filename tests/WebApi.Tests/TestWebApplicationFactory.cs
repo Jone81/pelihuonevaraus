@@ -32,14 +32,14 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IUnitOfWork>();
 
             // Rakennetaan erillinen sisäinen palveluntarjoaja InMemory-tietokantaa varten
-            var inMemoryProvider = new ServiceCollection()
+            ServiceProvider inMemoryProvider = new ServiceCollection()
                 .AddEntityFrameworkInMemoryDatabase()
                 .BuildServiceProvider();
 
             // Rekisteröidään muistitietokanta yksilöllisellä nimellä ja Outbox-siepparilla
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
-                var outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
+                OutboxInterceptor outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
                 options.UseInternalServiceProvider(inMemoryProvider);
                 options.UseInMemoryDatabase(_databaseName);
                 options.AddInterceptors(outboxInterceptor);

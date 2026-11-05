@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Users;
 using Pelihuone.Contracts.Users;
 using Pelihuone.Domain.Enums;
@@ -19,7 +20,7 @@ public static class AuthEndpoints
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan yhteinen reittiryhmä autentikoinnille ja käyttäjille
-        var group = app.MapGroup("/api")
+        RouteGroupBuilder group = app.MapGroup("/api")
             .WithTags("Authentication & Users");
 
         // Perinteinen nopea kirjautuminen (tai taaksepäinyhteensopivuus)
@@ -30,7 +31,7 @@ public static class AuthEndpoints
             CancellationToken cancellationToken) =>
         {
             // Tunnistetaan olemassa oleva käyttäjä tai luodaan uusi oppilaitossähköpostin perusteella
-            var result = await userService.AuthenticateOrCreateUserAsync(
+            Result<UserResponse> result = await userService.AuthenticateOrCreateUserAsync(
                 request.Email,
                 request.DisplayName ?? string.Empty,
                 cancellationToken);
@@ -50,7 +51,7 @@ public static class AuthEndpoints
             CancellationToken cancellationToken) =>
         {
             // Generoidaan ja lähetetään kertakäyttöinen vahvistuskoodi käyttäjän sähköpostiin
-            var result = await userService.SendVerificationCodeAsync(request.Email, cancellationToken);
+            Result<string> result = await userService.SendVerificationCodeAsync(request.Email, cancellationToken);
 
             // Palautetaan onnistumisviesti sekä kehitysympäristöä varten generoitu koodi
             return result.ToHttpResult(httpContext, code =>
@@ -68,7 +69,7 @@ public static class AuthEndpoints
             CancellationToken cancellationToken) =>
         {
             // Tarkistetaan vahvistuskoodin oikeellisuus ja voimassaolo sekä kirjataan käyttäjä sisään
-            var result = await userService.VerifyCodeAndLoginAsync(
+            Result<UserResponse> result = await userService.VerifyCodeAndLoginAsync(
                 request.Email,
                 request.Code,
                 request.DisplayName,
@@ -94,14 +95,14 @@ public static class AuthEndpoints
             }
 
             // Tarkistetaan, että kutsujalla on ylläpitäjän (Admin tai SuperAdmin) oikeudet
-            var userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            Result<UserResponse> userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
                 return Results.Forbid();
             }
 
             // Haetaan ja palautetaan kaikki järjestelmän käyttäjät
-            var result = await userService.GetAllUsersAsync(cancellationToken);
+            Result<IReadOnlyList<UserResponse>> result = await userService.GetAllUsersAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetAllUsers")
@@ -115,7 +116,7 @@ public static class AuthEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan yksittäisen käyttäjän profiilitiedot tunnisteen perusteella
-            var result = await userService.GetUserByIdAsync(id, cancellationToken);
+            Result<UserResponse> result = await userService.GetUserByIdAsync(id, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetUserById")
@@ -137,24 +138,53 @@ public static class AuthEndpoints
             }
 
             // Vain SuperAdmin-roolissa oleva käyttäjä saa muuttaa muiden käyttäjien rooleja
-            var authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            Result<UserResponse> authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!authUserResult.IsSuccess || authUserResult.Value.Role != "SuperAdmin")
             {
                 return Results.Forbid();
             }
 
             // Jäsennetään ja validoidaan pyydetty uusi käyttäjärooli
-            if (!Enum.TryParse<UserRole>(request.Role, true, out var newRole))
+            if (!Enum.TryParse<UserRole>(request.Role, true, out UserRole newRole))
             {
                 return Results.BadRequest(new { error = "Tuntematon rooli. Sallitut: User, Admin, SuperAdmin." });
             }
 
             // Päivitetään kohdekäyttäjän rooli tietokantaan
-            var result = await userService.UpdateUserRoleAsync(id, newRole, cancellationToken);
+            Result<UserResponse> result = await userService.UpdateUserRoleAsync(id, newRole, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("UpdateUserRole")
         .WithSummary("Päivitä käyttäjän järjestelmärooli (Admin)");
+
+        // Käyttäjän käyttöeston / bannin asettaminen tai poistaminen (Admin / SuperAdmin)
+        group.MapPut("/users/{id:guid}/ban", async (
+            Guid id,
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
+            [FromBody] BanUserRequest request,
+            IUserService userService,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Varmistetaan, että pyynnön tekijä on tunnistautunut
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            // Tarkistetaan, että kutsujalla on ylläpitäjän (Admin tai SuperAdmin) oikeudet
+            Result<UserResponse> authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            if (!authUserResult.IsSuccess || (authUserResult.Value.Role != "Admin" && authUserResult.Value.Role != "SuperAdmin"))
+            {
+                return Results.Forbid();
+            }
+
+            // Asetetaan tai poistetaan kohdekäyttäjän käyttöesto (banni)
+            Result<UserResponse> result = await userService.UpdateUserBanAsync(id, request, cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("UpdateUserBan")
+        .WithSummary("Aseta tai poista käyttäjän määräaikainen tai pysyvä käyttöesto / banni (Admin)");
 
         return app;
     }

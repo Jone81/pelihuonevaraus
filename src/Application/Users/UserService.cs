@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
@@ -54,7 +55,7 @@ public sealed class UserService : IUserService
         CancellationToken cancellationToken = default)
     {
         // Tarkistetaan sähköpostiosoite FluentValidation-säännöillä
-        var validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
+        ValidationResult validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
         if (!validationResult.IsValid)
         {
             string errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
@@ -72,16 +73,31 @@ public sealed class UserService : IUserService
             return Result.Failure<UserResponse>(Error.Validation("User.InvalidEmail", ex.Message));
         }
 
-        // Jos käyttäjä löytyy jo tietokannasta, palautetaan hänen tietonsa suoraan
-        var existingUser = await _userRepository.GetByEmailAsync(schoolEmail, cancellationToken);
+        // Jos käyttäjä löytyy jo tietokannasta, tarkistetaan mahdollinen käyttöesto (banni) ennen sisäänkirjausta
+        DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
+        User? existingUser = await _userRepository.GetByEmailAsync(schoolEmail, cancellationToken);
         if (existingUser is not null)
         {
+            if (existingUser.IsBanned(nowUtc))
+            {
+                string untilText = existingUser.BannedUntilUtc!.Value.Year >= nowUtc.Year + 50
+                    ? "toistaiseksi (pysyvä esto)"
+                    : existingUser.BannedUntilUtc.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                string reasonText = !string.IsNullOrWhiteSpace(existingUser.BanReason)
+                    ? $" Syy: {existingUser.BanReason}"
+                    : string.Empty;
+
+                return Result.Failure<UserResponse>(
+                    Error.Forbidden(
+                        "User.Banned",
+                        $"Käyttäjätilisi on asetettu käyttöestoon ({untilText}).{reasonText}"));
+            }
+
             _logger.LogInformation("Käyttäjä {UserId} kirjautui sisään.", existingUser.Id.Value);
             return Result.Success(MapToResponse(existingUser));
         }
 
         // Muodostetaan näyttönimi joko annetusta nimestä tai sähköpostin alkuosasta
-        DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
         string resolvedDisplayName = !string.IsNullOrWhiteSpace(displayName)
             ? displayName.Trim()
             : schoolEmail.Value.Split('@')[0].Replace('.', ' ');
@@ -117,7 +133,7 @@ public sealed class UserService : IUserService
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null)
         {
             return Result.Failure<UserResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
@@ -132,8 +148,8 @@ public sealed class UserService : IUserService
     public async Task<Result<IReadOnlyList<UserResponse>>> GetAllUsersAsync(
         CancellationToken cancellationToken = default)
     {
-        var users = await _userRepository.GetAllAsync(cancellationToken);
-        var responses = users.Select(MapToResponse).ToList();
+        IReadOnlyList<User> users = await _userRepository.GetAllAsync(cancellationToken);
+        List<UserResponse> responses = users.Select(MapToResponse).ToList();
         return Result.Success<IReadOnlyList<UserResponse>>(responses);
     }
 
@@ -146,7 +162,7 @@ public sealed class UserService : IUserService
         CancellationToken cancellationToken = default)
     {
         // Haetaan muokattava käyttäjä
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null)
         {
             return Result.Failure<UserResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
@@ -162,6 +178,68 @@ public sealed class UserService : IUserService
     }
 
     /// <summary>
+    /// Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston (bannin) tai poistaa voimassa olevan eston.
+    /// </summary>
+    public async Task<Result<UserResponse>> UpdateUserBanAsync(
+        Guid userId,
+        BanUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        // Haetaan kohdekäyttäjä tietokannasta
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        if (user is null)
+        {
+            return Result.Failure<UserResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
+        }
+
+        // Varmistetaan, ettei pääkäyttäjää (SuperAdmin) voida bannata
+        if (user.IsSuperAdmin)
+        {
+            return Result.Failure<UserResponse>(
+                Error.Validation("User.CannotBanSuperAdmin", "Pääkäyttäjää (SuperAdmin) ei voi asettaa käyttöestoon."));
+        }
+
+        DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
+
+        try
+        {
+            if (request.IsPermanent)
+            {
+                // Pysyvä banni asetetaan 100 vuoden päähän tulevaisuuteen
+                DateTimeOffset bannedUntil = nowUtc.AddYears(100);
+                user.Ban(bannedUntil, request.Reason);
+                _logger.LogInformation("Käyttäjälle {UserId} asetettiin pysyvä käyttöesto.", userId);
+            }
+            else if (request.DurationHours is > 0)
+            {
+                // Määräaikainen banni valitun tuntimäärän mukaisesti
+                DateTimeOffset bannedUntil = nowUtc.AddHours(request.DurationHours.Value);
+                user.Ban(bannedUntil, request.Reason);
+                _logger.LogInformation(
+                    "Käyttäjälle {UserId} asetettiin käyttöesto {Hours} tunniksi ({BannedUntilUtc} asti).",
+                    userId,
+                    request.DurationHours.Value,
+                    bannedUntil);
+            }
+            else
+            {
+                // Poistetaan voimassa oleva käyttöesto
+                user.Unban();
+                _logger.LogInformation("Käyttäjän {UserId} käyttöesto poistettiin.", userId);
+            }
+        }
+        catch (DomainException ex)
+        {
+            return Result.Failure<UserResponse>(Error.Validation("User.BanFailed", ex.Message));
+        }
+
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(MapToResponse(user));
+    }
+
+    /// <summary>
     /// Luo 6-numeroisen kertakäyttöisen vahvistuskoodin, joka on voimassa 15 minuuttia.
     /// </summary>
     public async Task<Result<string>> SendVerificationCodeAsync(
@@ -169,7 +247,7 @@ public sealed class UserService : IUserService
         CancellationToken cancellationToken = default)
     {
         // Varmistetaan, että sähköposti kuuluu sallittuun Xamk-verkkotunnukseen
-        var validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
+        ValidationResult validationResult = await _emailValidator.ValidateAsync(email, cancellationToken);
         if (!validationResult.IsValid)
         {
             string errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
@@ -199,7 +277,7 @@ public sealed class UserService : IUserService
 
         // Kehitys-/testikoodi 123456 hyväksytään aina tai vastaava generoitu koodi
         bool isDevBypass = code == "123456";
-        bool isMatchingCode = VerificationCodes.TryGetValue(normalizedEmail, out var record) &&
+        bool isMatchingCode = VerificationCodes.TryGetValue(normalizedEmail, out (string Code, DateTimeOffset ExpiresAtUtc) record) &&
                               record.Code == code.Trim() &&
                               record.ExpiresAtUtc >= _dateTimeProvider.UtcNow;
 
@@ -216,12 +294,17 @@ public sealed class UserService : IUserService
     }
 
     // Muuntaa User-entiteetin UserResponse-tiedonsiirto-olioksi
-    private static UserResponse MapToResponse(User user)
+    private UserResponse MapToResponse(User user)
     {
+        DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
+        bool isBanned = user.IsBanned(nowUtc);
         return new UserResponse(
             user.Id.Value,
             user.Email.Value,
             user.DisplayName,
-            user.Role.ToString());
+            user.Role.ToString(),
+            isBanned ? user.BannedUntilUtc : null,
+            isBanned ? user.BanReason : null,
+            isBanned);
     }
 }

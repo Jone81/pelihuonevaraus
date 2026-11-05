@@ -5,6 +5,7 @@
  * kaikki sovelluksen tarvitsemat API-metodit.
  */
 import type {
+  BanUserRequest,
   CancelReservationRequest,
   CreateGameRequest,
   CreateIssueReportRequest,
@@ -20,6 +21,7 @@ import type {
   ResolveIssueReportRequest,
   SiteSettingsResponse,
   StatisticsResponse,
+  UpdateGamingStationStatusRequest,
   UpdateSiteSettingsRequest,
   User,
   WishGameRequest,
@@ -99,11 +101,38 @@ export const api = {
 
   // Stations
   /**
-   * Hakee kaikki järjestelmään rekisteröidyt pelipisteet ja laitteet.
+   * Hakee kaikki aktiiviset pelipisteet ja laitteet.
    */
   async getAllStations(): Promise<GamingStation[]> {
     const res = await fetch('/api/stations');
     return handleResponse<GamingStation[]>(res);
+  },
+
+  /**
+   * Admin-toiminto: hakee kaikki pelipisteet mukaan lukien huoltotilaan asetetut laitteet.
+   */
+  async getAllStationsForAdmin(): Promise<GamingStation[]> {
+    const res = await fetch('/api/stations/admin');
+    return handleResponse<GamingStation[]>(res);
+  },
+
+  /**
+   * Admin-toiminto: päivittää yksittäisen pelipisteen käyttötilan (Käytössä / Huollossa).
+   */
+  async updateStationStatus(
+    stationId: string,
+    request: UpdateGamingStationStatusRequest,
+    adminUserId: string
+  ): Promise<GamingStation> {
+    const res = await fetch(`/api/stations/${stationId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': adminUserId,
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<GamingStation>(res);
   },
 
   /**
@@ -316,6 +345,20 @@ export const api = {
       method: 'PUT',
       headers,
       body: JSON.stringify({ role }),
+    });
+    return handleResponse<User>(res);
+  },
+
+  /**
+   * Admin-toiminto: asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston (bannin) tai poistaa eston.
+   */
+  async updateUserBan(userId: string, request: BanUserRequest, adminUserId?: string): Promise<User> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (adminUserId) headers['X-User-Id'] = adminUserId;
+    const res = await fetch(`/api/users/${userId}/ban`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(request),
     });
     return handleResponse<User>(res);
   },

@@ -23,7 +23,8 @@ Toimit osana rinnakkaista moniagenttiympäristöä (Git Worktrees). Tunnista roo
 6. **ASYNKRONISUUS JA SUORITUSKYKY:**
    - Jokainen asynkroninen metodi (`Task` / `ValueTask`) Endpoint-, Service- ja Repository-tasolla ottaa vastaan `CancellationToken cancellationToken = default` ja välittää sen eteenpäin tietokanta- ja I/O-kutsuille.
    - ÄLÄ KOSKAAN käytä synkronista blokkausta (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`) tai `async void` -metodeja.
-7. **TYYPPITURVALLISUUS JA KONFIGURAATIO:**
+7. **TYYPPITURVALLISUUS, EKSPLISIITTISET TYYPIT (`var`-KIELTO) JA KONFIGURAATIO:**
+   - **`var`-avainsanan käyttö on ehdottomasti kielletty:** Käytä C#-koodissa aina eksplisiittisiä tyyppejä `var`-avainsanan sijaan (esim. `Reservation reservation = ...`, `IReadOnlyList<User> users = ...`). Sääntö on pakotettu käännösvirheeksi (`.editorconfig` ja `Directory.Build.props`: `IDE0008 = error`, `csharp_style_var_* = false:error`). Myös TypeScript/JavaScript-koodissa `var` on kielletty (`no-var: error`).
    - Frontendissä `tsconfig.app.json` pakottaa `"strict": true` ja ESLint `--max-warnings 0`. Eksplisiittisen `any`-tyypin käyttö on kielletty.
    - Älä koskaan kovakoodaa salaisuuksia, API-avaimia tai ympäristökohtaisia osoitteita lähdekoodiin.
 

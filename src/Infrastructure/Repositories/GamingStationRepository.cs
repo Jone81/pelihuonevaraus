@@ -51,6 +51,19 @@ public sealed class GamingStationRepository : IGamingStationRepository
     }
 
     /// <summary>
+    /// Hakee kaikki pelipisteet (myös huoltotilassa olevat) nimen mukaan järjestettynä.
+    /// </summary>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Vain luku -lista kaikista pelipisteistä.</returns>
+    public async Task<IReadOnlyList<GamingStation>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.GamingStations
+            .AsNoTracking()
+            .OrderBy(s => s.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Lisää uuden pelipisteen tietokantakontekstiin tallennusta varten.
     /// </summary>
     /// <param name="station">Lisättävä <see cref="GamingStation"/>-entiteetti.</param>

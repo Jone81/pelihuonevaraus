@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Reservations;
 using Pelihuone.Contracts.Reservations;
 using Pelihuone.WebApi.Extensions;
@@ -18,7 +19,7 @@ public static class ReservationEndpoints
     public static IEndpointRouteBuilder MapReservationEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan reittiryhmä varauksille
-        var group = app.MapGroup("/api/reservations")
+        RouteGroupBuilder group = app.MapGroup("/api/reservations")
             .WithTags("Reservations");
 
         // Luo uusi varaus (pelipiste, koko tila tai tapahtuma)
@@ -29,7 +30,7 @@ public static class ReservationEndpoints
             CancellationToken cancellationToken) =>
         {
             // Luodaan varaus liiketoimintasääntöjen ja päällekkäisyystarkistusten mukaisesti
-            var result = await reservationService.CreateReservationAsync(request, cancellationToken);
+            Result<ReservationResponse> result = await reservationService.CreateReservationAsync(request, cancellationToken);
             return result.ToHttpResult(httpContext, response =>
                 Results.Created($"/api/reservations/{response.Id}", response));
         })
@@ -46,7 +47,7 @@ public static class ReservationEndpoints
             CancellationToken cancellationToken) =>
         {
             // Peruutetaan varaus, mikäli kutsujalla on oikeus ja varaus ei ole vielä alkanut
-            var result = await reservationService.CancelReservationAsync(id, request, cancellationToken);
+            Result<ReservationResponse> result = await reservationService.CancelReservationAsync(id, request, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .RequireRateLimiting("ReservationPolicy")
@@ -61,7 +62,7 @@ public static class ReservationEndpoints
             CancellationToken cancellationToken) =>
         {
             // Jyrätään mahdolliset päällekkäiset opiskelijavaraukset ja luodaan tapahtuma
-            var result = await reservationService.OverrideAndCreateEventAsync(
+            Result<ReservationResponse> result = await reservationService.OverrideAndCreateEventAsync(
                 request.ReservationRequest,
                 request.Reason,
                 cancellationToken);
@@ -80,7 +81,7 @@ public static class ReservationEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan varauksen tarkemmat tiedot tunnisteella
-            var result = await reservationService.GetByIdAsync(id, cancellationToken);
+            Result<ReservationResponse> result = await reservationService.GetByIdAsync(id, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetReservationById")
@@ -95,7 +96,7 @@ public static class ReservationEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan kaikki voimassa olevat varaukset pyydetyltä UTC-aikaväliltä kalenterinäkymää varten
-            var result = await reservationService.GetActiveReservationsAsync(startUtc, endUtc, cancellationToken);
+            Result<IReadOnlyList<ReservationResponse>> result = await reservationService.GetActiveReservationsAsync(startUtc, endUtc, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetActiveReservations")

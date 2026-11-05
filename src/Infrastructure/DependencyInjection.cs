@@ -49,7 +49,7 @@ public static class DependencyInjection
         {
             try
             {
-                using var testConn = new Npgsql.NpgsqlConnection(npgsqlConnStr);
+                using Npgsql.NpgsqlConnection testConn = new Npgsql.NpgsqlConnection(npgsqlConnStr);
                 testConn.Open();
                 canUsePostgres = true;
             }
@@ -63,7 +63,7 @@ public static class DependencyInjection
         // Konfiguroidaan EF Coren ApplicationDbContext ja liitetään OutboxInterceptor mukaan
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
-            var outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
+            OutboxInterceptor outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
 
             if (canUsePostgres)
             {

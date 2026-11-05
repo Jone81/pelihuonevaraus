@@ -19,6 +19,24 @@ export interface User {
   displayName: string;
   /** Käyttäjän rooli (User, Admin tai SuperAdmin) */
   role: UserRole;
+  /** Käyttöeston (bannin) päättymisaika ISO 8601 UTC -muodossa tai null */
+  bannedUntilUtc?: string | null;
+  /** Ylläpitäjän kirjaama syy käyttöestolle */
+  banReason?: string | null;
+  /** Ilmaisee, onko käyttäjä parhaillaan käyttöestossa (bannattu) */
+  isBanned?: boolean;
+}
+
+/**
+ * Pyyntö käyttäjän määräaikaisen tai pysyvän käyttöeston (bannin) asettamiseksi tai poistamiseksi.
+ */
+export interface BanUserRequest {
+  /** Käyttöeston pituus tunteina (null tai <= 0 poistaa eston, jos isPermanent on false) */
+  durationHours: number | null;
+  /** Valinnainen syy tai selite käyttöestolle */
+  reason?: string | null;
+  /** Asetetaanko käyttäjälle pysyvä käyttöesto */
+  isPermanent?: boolean;
 }
 
 /**
@@ -312,25 +330,69 @@ export interface StatisticsResponse {
 }
 
 /**
- * Sivuston yleiset asetukset ja varausrajoitukset.
+ * Sivuston yleiset asetukset, aukioloajat, varausrajoitukset ja huoltotila.
  */
 export interface SiteSettingsResponse {
   /** Discord-webhookin URL-osoite ilmoituksia varten */
   discordWebhookUrl: string;
-  /** Aukioloaikojen ohjeteksti */
+  /** Aukioloaikojen esitysteksti (esim. "08:00 – 18:00 (Ma–Pe)") */
   openingHoursText: string;
+  /** Päivittäinen avaamiskellonaika täysinä tunteina (0–23) */
+  openTimeHour: number;
+  /** Päivittäinen sulkemiskellonaika täysinä tunteina (1–24) */
+  closeTimeHour: number;
+  /** Onko pelitila avoinna vain arkipäivisin (ma–pe) vai joka päivä (ma–su) */
+  onlyWeekdays: boolean;
   /** Kuinka monta kuukautta etukäteen varauksia voi tehdä */
   maxAdvanceBookingMonths: number;
-  /** Yksittäisen laitevarauksen enimmäiskesto tunteina */
+  /** Yksittäisen laitevarauksen ja päiväkiintiön enimmäiskesto tunteina */
   maxIndividualHours: number;
   /** Opiskelijan tilavarauksen enimmäiskesto tunteina */
   maxStudentRoomHours: number;
+  /** Varauksen vähimmäiskesto minuutteina (esim. 30 tai 60) */
+  minReservationMinutes: number;
+  /** Valvotaanko konsolien (PS5 ja Switch) yhteisen television rinnakkaislukkoa */
+  enforceSharedTvLock: boolean;
+  /** Onko pelihuone asetettu tilapäiseen huoltotilaan (estää uudet opiskelijavaraukset) */
+  isMaintenanceMode: boolean;
+  /** Käyttäjille näytettävä tiedote huoltokatkon syystä */
+  maintenanceMessage: string;
 }
 
 /**
- * Pyyntö sivuston asetusten päivittämiseksi.
+ * Pyyntö sivuston asetusten ja varauskiintiöiden päivittämiseksi.
  */
 export interface UpdateSiteSettingsRequest {
   /** Uusi Discord-webhookin URL-osoite */
   discordWebhookUrl?: string;
+  /** Uusi avaamiskellonaika täysinä tunteina (0–23) */
+  openTimeHour?: number;
+  /** Uusi sulkemiskellonaika täysinä tunteina (1–24) */
+  closeTimeHour?: number;
+  /** Onko pelitila avoinna vain arkisin (ma–pe) */
+  onlyWeekdays?: boolean;
+  /** Ennakkovarauksen enimmäisaika kuukausina (1–12) */
+  maxAdvanceBookingMonths?: number;
+  /** Yksittäisvarauksen ja päiväkiintiön enimmäiskesto tunteina (1–12) */
+  maxIndividualHours?: number;
+  /** Opiskelijan tilavarauksen enimmäiskesto tunteina (1–12) */
+  maxStudentRoomHours?: number;
+  /** Varauksen vähimmäiskesto minuutteina (30–240) */
+  minReservationMinutes?: number;
+  /** Valvotaanko konsolien (PS5 ja Switch) yhteisen television rinnakkaislukkoa */
+  enforceSharedTvLock?: boolean;
+  /** Onko pelihuone tilapäisessä huoltotilassa */
+  isMaintenanceMode?: boolean;
+  /** Huoltotiedotteen viesti */
+  maintenanceMessage?: string;
+}
+
+/**
+ * Admin-pyyntö yksittäisen pelipisteen käyttötilan (käytössä / huollossa) päivittämiseksi.
+ */
+export interface UpdateGamingStationStatusRequest {
+  /** Asetetaanko pelipiste aktiiviseksi (`true`) vai huoltotilaan (`false`) */
+  isActive: boolean;
+  /** Valinnainen uusi näyttönimi */
+  name?: string;
 }

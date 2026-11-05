@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.News;
 using Pelihuone.Contracts.News;
 using Pelihuone.WebApi.Extensions;
@@ -18,7 +19,7 @@ public static class NewsEndpoints
     public static IEndpointRouteBuilder MapNewsEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan reittiryhmä uutisille ja tiedotteille
-        var group = app.MapGroup("/api/news")
+        RouteGroupBuilder group = app.MapGroup("/api/news")
             .WithTags("News & Announcements");
 
         // Hae kaikki uutiset ja tiedotteet
@@ -28,7 +29,7 @@ public static class NewsEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan kaikki julkaistut uutiset ja tiedotteet aikajärjestyksessä
-            var result = await newsService.GetAllNewsAsync(cancellationToken);
+            Result<IReadOnlyList<NewsResponse>> result = await newsService.GetAllNewsAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetAllNews")
@@ -44,7 +45,7 @@ public static class NewsEndpoints
         {
             // Käytetään otsikossa välitettyä käyttäjätunnistetta tai pyynnön tekijätunnistetta
             Guid userId = headerUserId ?? request.AuthorUserId;
-            var result = await newsService.CreateNewsAsync(request, userId, cancellationToken);
+            Result<NewsResponse> result = await newsService.CreateNewsAsync(request, userId, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/news/{val.Id}", val));
         })
         .WithName("CreateNews")
@@ -60,7 +61,7 @@ public static class NewsEndpoints
         {
             // Poistetaan tiedote tunnisteen perusteella (vaatii Admin-oikeudet)
             Guid userId = headerUserId ?? Guid.Empty;
-            var result = await newsService.DeleteNewsAsync(id, userId, cancellationToken);
+            Result<bool> result = await newsService.DeleteNewsAsync(id, userId, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("DeleteNews")

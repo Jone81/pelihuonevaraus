@@ -29,7 +29,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
     public async Task AuthEndpoint_WhenExceedingRateLimit_Returns429TooManyRequestsWithProblemDetails()
     {
         // Arrange: Valmistellaan toistettava kirjautumispyyntö
-        var request = new LoginRequest("limittest@edu.xamk.fi", "Limit Tester");
+        LoginRequest request = new LoginRequest("limittest@edu.xamk.fi", "Limit Tester");
         HttpResponseMessage? lastResponse = null;
 
         // Act: AuthPolicy sallii 5 pyyntöä per minuutti
@@ -47,7 +47,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         Assert.Equal(HttpStatusCode.TooManyRequests, lastResponse.StatusCode);
         Assert.Equal("application/problem+json", lastResponse.Content.Headers.ContentType?.MediaType);
 
-        var problem = await lastResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        ProblemDetails? problem = await lastResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal(429, problem.Status);
         Assert.Equal("Liikaa pyyntöjä", problem.Title);

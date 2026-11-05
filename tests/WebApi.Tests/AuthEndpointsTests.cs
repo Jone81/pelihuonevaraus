@@ -31,15 +31,15 @@ public class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory>
     public async Task Login_WithSchoolEmail_ReturnsSuccess()
     {
         // Arrange (Sääntö 7: Oppilaitossähköpostit sallittu)
-        var request = new LoginRequest("test.opiskelija@edu.xamk.fi", "Testi Opiskelija");
+        LoginRequest request = new LoginRequest("test.opiskelija@edu.xamk.fi", "Testi Opiskelija");
 
         // Act: Lähetetään kirjautumispyyntö rajapintaan
-        var response = await _client.PostAsJsonAsync("/api/auth/login", request);
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/auth/login", request);
 
         // Assert: Tarkistetaan onnistunut tilakoodi ja vastauksen sisältämä sähköposti
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var user = await response.Content.ReadFromJsonAsync<UserResponse>();
+        UserResponse? user = await response.Content.ReadFromJsonAsync<UserResponse>();
         Assert.NotNull(user);
         Assert.Equal("test.opiskelija@edu.xamk.fi", user.Email);
     }
@@ -51,16 +51,16 @@ public class AuthEndpointsTests : IClassFixture<TestWebApplicationFactory>
     public async Task Login_WithNonSchoolEmail_ReturnsBadRequestProblemDetails()
     {
         // Arrange (Sääntö 7: Ulkopuoliset sähköpostit hylätään)
-        var request = new LoginRequest("user@gmail.com", "Matti Ulkopuolinen");
+        LoginRequest request = new LoginRequest("user@gmail.com", "Matti Ulkopuolinen");
 
         // Act: Yritetään kirjautua ulkopuolisella sähköpostiosoitteella
-        var response = await _client.PostAsJsonAsync("/api/auth/login", request);
+        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/auth/login", request);
 
         // Assert: Varmistetaan 400 Bad Request ja RFC 9457 ProblemDetails -muotoilu
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
 
-        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        ProblemDetails? problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal(400, problem.Status);
         Assert.Equal("Validointivirhe", problem.Title);

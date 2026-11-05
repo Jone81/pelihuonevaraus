@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Settings;
+using Pelihuone.Contracts.Settings;
 
 namespace Pelihuone.Application.Notifications;
 
@@ -36,7 +38,7 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         CancellationToken cancellationToken = default)
     {
         // Haetaan tallennettu Discord Webhook -osoite asetuksista
-        var settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
+        Result<SiteSettingsResponse> settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
         string webhookUrl = settingsResult.Value.DiscordWebhookUrl;
 
         // Ohitetaan lähetys hiljaisesti, jos webhookia ei ole määritelty
@@ -49,17 +51,17 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         try
         {
             // Muodostetaan Discord-viestin sisältö
-            var payload = new
+            Dictionary<string, string> payload = new()
             {
-                content = $"🏆 **UUSI TAPAHTUMA XAMK GAME ROOMISSA!**\n\n" +
-                          $"**Otsikko:** {eventTitle}\n" +
-                          $"**Ajankohta:** {startUtc:dd.MM.yyyy HH:mm} – {endUtc:HH:mm} UTC\n" +
-                          $"**Järjestäjä:** {organizer}\n" +
-                          $"**Kuvaus:** {description}\n\n" +
-                          $"Tervetuloa mukaan paikan päälle!"
+                ["content"] = $"🏆 **UUSI TAPAHTUMA XAMK GAME ROOMISSA!**\n\n" +
+                              $"**Otsikko:** {eventTitle}\n" +
+                              $"**Ajankohta:** {startUtc:dd.MM.yyyy HH:mm} – {endUtc:HH:mm} UTC\n" +
+                              $"**Järjestäjä:** {organizer}\n" +
+                              $"**Kuvaus:** {description}\n\n" +
+                              $"Tervetuloa mukaan paikan päälle!"
             };
 
-            var response = await HttpClient.PostAsJsonAsync(webhookUrl, payload, cancellationToken);
+            HttpResponseMessage response = await HttpClient.PostAsJsonAsync(webhookUrl, payload, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Discord-ilmoitus tapahtumasta lähetetty onnistuneesti.");
@@ -88,7 +90,7 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
         CancellationToken cancellationToken = default)
     {
         // Haetaan tallennettu Discord Webhook -osoite asetuksista
-        var settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
+        Result<SiteSettingsResponse> settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
         string webhookUrl = settingsResult.Value.DiscordWebhookUrl;
 
         if (string.IsNullOrWhiteSpace(webhookUrl))
@@ -104,17 +106,17 @@ public sealed class DiscordNotificationService : IDiscordNotificationService
                 ? "Anonyymi opiskelija"
                 : $"{reporterName} ({reporterEmail})".Trim();
 
-            var payload = new
+            Dictionary<string, string> payload = new()
             {
-                content = $"🚨 **UUSI VIKAILMOITUS / PALAUTE ADMINILLE!**\n\n" +
-                          $"**Kohde:** {target}\n" +
-                          $"**Otsikko:** {title}\n" +
-                          $"**Ilmoittaja:** {reporterInfo}\n" +
-                          $"**Kuvaus:**\n{description}\n\n" +
-                          $"*Tarkista ja kuittaa ilmoitus Ylläpitopaneelissa.*"
+                ["content"] = $"🚨 **UUSI VIKAILMOITUS / PALAUTE ADMINILLE!**\n\n" +
+                              $"**Kohde:** {target}\n" +
+                              $"**Otsikko:** {title}\n" +
+                              $"**Ilmoittaja:** {reporterInfo}\n" +
+                              $"**Kuvaus:**\n{description}\n\n" +
+                              $"*Tarkista ja kuittaa ilmoitus Ylläpitopaneelissa.*"
             };
 
-            var response = await HttpClient.PostAsJsonAsync(webhookUrl, payload, cancellationToken);
+            HttpResponseMessage response = await HttpClient.PostAsJsonAsync(webhookUrl, payload, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Discord-vikailmoitus lähetetty ylläpidolle onnistuneesti.");

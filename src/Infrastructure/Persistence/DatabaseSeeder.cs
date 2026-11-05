@@ -40,7 +40,7 @@ public static class DatabaseSeeder
             if (!await context.GamingStations.AnyAsync())
             {
                 logger.LogInformation("Alustetaan oletuspelipisteet tietokantaan...");
-                var stations = new List<GamingStation>
+                List<GamingStation> stations = new List<GamingStation>
                 {
                     GamingStation.Create(GamingStationId.New(), "PC 1", GamingStationType.PC, isActive: true, stationCode: "PC-01"),
                     GamingStation.Create(GamingStationId.New(), "PC 2", GamingStationType.PC, isActive: true, stationCode: "PC-02"),
@@ -62,7 +62,7 @@ public static class DatabaseSeeder
             if (!await context.Users.AnyAsync())
             {
                 logger.LogInformation("Alustetaan oletuskäyttäjät tietokantaan...");
-                var now = DateTimeOffset.UtcNow;
+                DateTimeOffset now = DateTimeOffset.UtcNow;
                 adminUser = User.Create(
                     UserId.New(),
                     SchoolEmail.Create("admin@xamk.fi"),
@@ -70,7 +70,7 @@ public static class DatabaseSeeder
                     UserRole.SuperAdmin,
                     now);
 
-                var normalUser = User.Create(
+                User normalUser = User.Create(
                     UserId.New(),
                     SchoolEmail.Create("opiskelija@edu.xamk.fi"),
                     "Matti Meikäläinen",
@@ -86,7 +86,7 @@ public static class DatabaseSeeder
             if (!await context.Games.AnyAsync())
             {
                 logger.LogInformation("Alustetaan pelit ja toivelista...");
-                var games = new List<Game>
+                List<Game> games = new List<Game>
                 {
                     // PC-pelit
                     Game.Create(GameId.New(), "Counter-Strike 2", GamingPlatform.PC, "Taktinen 5v5 FPS-ammuntapeli. Asennettu kaikkiin PC-koneisiin.", isWishlist: false),
@@ -118,9 +118,9 @@ public static class DatabaseSeeder
             {
                 logger.LogInformation("Alustetaan uutiset ja tiedotteet...");
                 UserId authorId = adminUser?.Id ?? UserId.New();
-                var now = DateTimeOffset.UtcNow;
+                DateTimeOffset now = DateTimeOffset.UtcNow;
 
-                var newsList = new List<News>
+                List<News> newsList = new List<News>
                 {
                     News.Create(
                         NewsId.New(),
@@ -140,8 +140,8 @@ public static class DatabaseSeeder
             if (!await context.IssueReports.AnyAsync())
             {
                 logger.LogInformation("Alustetaan esimerkkivikailmoitukset...");
-                var now = DateTimeOffset.UtcNow;
-                var sampleIssues = new List<IssueReport>
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                List<IssueReport> sampleIssues = new List<IssueReport>
                 {
                     IssueReport.Create(
                         IssueReportId.New(),

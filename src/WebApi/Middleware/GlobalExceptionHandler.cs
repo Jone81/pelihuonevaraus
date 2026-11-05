@@ -57,7 +57,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         }
 
         // Muodostetaan RFC 9457 -standardin mukainen ProblemDetails-vastaus
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title = title,

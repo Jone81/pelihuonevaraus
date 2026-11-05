@@ -68,8 +68,8 @@ public sealed class IssueReportService : IIssueReportService
         try
         {
             // Luodaan vikailmoitus nykyisellä UTC-aikaleimalla ja tallennetaan tietovarastoon
-            var now = _dateTimeProvider.UtcNow;
-            var report = IssueReport.Create(
+            DateTimeOffset now = _dateTimeProvider.UtcNow;
+            IssueReport report = IssueReport.Create(
                 IssueReportId.New(),
                 request.ReporterEmail ?? "",
                 request.ReporterName ?? "",
@@ -116,15 +116,15 @@ public sealed class IssueReportService : IIssueReportService
         CancellationToken cancellationToken = default)
     {
         // Varmistetaan, että kutsujalla on ylläpitäjän oikeudet
-        var user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<IReadOnlyList<IssueReportResponse>>(
                 Error.Forbidden("Issue.Forbidden", "Vain ylläpitäjät voivat tarkastella vikailmoituksia."));
         }
 
-        var reports = await _issueReportRepository.GetAllAsync(cancellationToken);
-        var responses = reports.Select(MapToResponse).ToList();
+        IReadOnlyList<IssueReport> reports = await _issueReportRepository.GetAllAsync(cancellationToken);
+        List<IssueReportResponse> responses = reports.Select(MapToResponse).ToList();
         return Result.Success<IReadOnlyList<IssueReportResponse>>(responses);
     }
 
@@ -138,7 +138,7 @@ public sealed class IssueReportService : IIssueReportService
         CancellationToken cancellationToken = default)
     {
         // Tarkistetaan ylläpitäjäoikeudet
-        var user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(adminUserId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<IssueReportResponse>(
@@ -146,7 +146,7 @@ public sealed class IssueReportService : IIssueReportService
         }
 
         // Haetaan kuitattava vikailmoitus
-        var report = await _issueReportRepository.GetByIdAsync(new IssueReportId(issueId), cancellationToken);
+        IssueReport? report = await _issueReportRepository.GetByIdAsync(new IssueReportId(issueId), cancellationToken);
         if (report is null)
         {
             return Result.Failure<IssueReportResponse>(

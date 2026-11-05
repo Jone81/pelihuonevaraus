@@ -39,6 +39,14 @@ public interface IUserService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston (bannin) tai poistaa voimassa olevan eston.
+    /// </summary>
+    Task<Result<UserResponse>> UpdateUserBanAsync(
+        Guid userId,
+        BanUserRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Generoi ja lähettää kertakäyttöisen vahvistuskoodin oppilaitoksen sähköpostiosoitteeseen.
     /// </summary>
     Task<Result<string>> SendVerificationCodeAsync(

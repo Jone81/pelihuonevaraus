@@ -1,11 +1,14 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Settings;
 using Pelihuone.Contracts.Reservations;
+using Pelihuone.Contracts.Settings;
 using Pelihuone.Domain.Common;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.Models;
@@ -27,10 +30,21 @@ public sealed class ReservationService : IReservationService
     private readonly IValidator<CancelReservationRequest> _cancelValidator;
     private readonly ILogger<ReservationService> _logger;
     private readonly IDiscordNotificationService? _discordNotificationService;
+    private readonly ISettingsService? _settingsService;
 
     /// <summary>
     /// Alustaa uuden <see cref="ReservationService"/>-instanssin.
     /// </summary>
+    /// <param name="reservationRepository">Varausten tietovarasto.</param>
+    /// <param name="gamingStationRepository">Pelipisteiden tietovarasto.</param>
+    /// <param name="userRepository">Käyttäjien tietovarasto.</param>
+    /// <param name="unitOfWork">Työyksikkö tietokantamuutosten tallentamiseen.</param>
+    /// <param name="dateTimeProvider">Palvelimen kellonaika-abstraktio.</param>
+    /// <param name="createValidator">Uuden varauksen syötevalidaattori.</param>
+    /// <param name="cancelValidator">Peruutuspyynnön syötevalidaattori.</param>
+    /// <param name="logger">Lokituspalvelu tapahtumien kirjaamiseen.</param>
+    /// <param name="discordNotificationService">Valinnainen Discord-ilmoituspalvelu.</param>
+    /// <param name="settingsService">Valinnainen sivustoasetuspalvelu dynaamisten kiintiöiden ja aukioloaikojen lukemiseen.</param>
     public ReservationService(
         IReservationRepository reservationRepository,
         IGamingStationRepository gamingStationRepository,
@@ -40,7 +54,8 @@ public sealed class ReservationService : IReservationService
         IValidator<CreateReservationRequest> createValidator,
         IValidator<CancelReservationRequest> cancelValidator,
         ILogger<ReservationService> logger,
-        IDiscordNotificationService? discordNotificationService = null)
+        IDiscordNotificationService? discordNotificationService = null,
+        ISettingsService? settingsService = null)
     {
         _reservationRepository = reservationRepository;
         _gamingStationRepository = gamingStationRepository;
@@ -51,17 +66,21 @@ public sealed class ReservationService : IReservationService
         _cancelValidator = cancelValidator;
         _logger = logger;
         _discordNotificationService = discordNotificationService;
+        _settingsService = settingsService;
     }
 
     /// <summary>
     /// Luo uuden varauksen validoimalla pyynnön, aukioloajat, käyttäjän päiväkiintiön ja päällekkäisyydet.
     /// </summary>
+    /// <param name="request">Uuden varauksen luontipyyntö.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos luodusta varauksesta tai virhekuvaus.</returns>
     public async Task<Result<ReservationResponse>> CreateReservationAsync(
         CreateReservationRequest request,
         CancellationToken cancellationToken = default)
     {
         // Validoidaan syötepyyntö FluentValidation-säännöillä
-        var validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
+        ValidationResult validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             string errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
@@ -69,12 +88,76 @@ public sealed class ReservationService : IReservationService
         }
 
         // Varmistetaan, että varauksen tekevä käyttäjä on olemassa
-        var userId = new UserId(request.UserId);
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        UserId userId = new UserId(request.UserId);
+        User? user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<ReservationResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
         }
+
+        // Tarkistetaan, onko käyttäjällä voimassa oleva käyttöesto (banni / porttikielto)
+        DateTimeOffset currentUtc = _dateTimeProvider.UtcNow;
+        if (user.IsBanned(currentUtc))
+        {
+            string untilText = user.BannedUntilUtc!.Value.Year >= currentUtc.Year + 50
+                ? "toistaiseksi (pysyvä esto)"
+                : user.BannedUntilUtc.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+            string reasonText = !string.IsNullOrWhiteSpace(user.BanReason)
+                ? $" Syy: {user.BanReason}"
+                : string.Empty;
+
+            return Result.Failure<ReservationResponse>(
+                Error.Forbidden(
+                    "User.Banned",
+                    $"Käyttäjätilisi on käyttöestossa ({untilText}), etkä voi tehdä uusia varauksia.{reasonText}"));
+        }
+
+        // Haetaan mahdolliset ylläpitäjän asettamat dynaamiset tilasäännöt ja kiintiöt
+        int openHour = 8;
+        int closeHour = 18;
+        bool onlyWeekdays = true;
+        int maxAdvanceMonths = 2;
+        int maxIndividualHours = 4;
+        int maxStudentRoomHours = 4;
+        int minReservationMinutes = 30;
+        bool enforceSharedTv = true;
+        bool isMaintenanceMode = false;
+        string maintenanceMessage = string.Empty;
+
+        if (_settingsService is not null)
+        {
+            Result<SiteSettingsResponse> settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
+            if (settingsResult.IsSuccess)
+            {
+                SiteSettingsResponse s = settingsResult.Value;
+                openHour = s.OpenTimeHour;
+                closeHour = s.CloseTimeHour;
+                onlyWeekdays = s.OnlyWeekdays;
+                maxAdvanceMonths = s.MaxAdvanceBookingMonths;
+                maxIndividualHours = s.MaxIndividualHours;
+                maxStudentRoomHours = s.MaxStudentRoomHours;
+                minReservationMinutes = s.MinReservationMinutes;
+                enforceSharedTv = s.EnforceSharedTvLock;
+                isMaintenanceMode = s.IsMaintenanceMode;
+                maintenanceMessage = s.MaintenanceMessage;
+            }
+        }
+
+        // Tarkistetaan, onko pelitila asetettu tilapäiseen huoltotilaan (estää opiskelijavaraukset)
+        if (isMaintenanceMode && !user.IsAdmin)
+        {
+            string msg = string.IsNullOrWhiteSpace(maintenanceMessage)
+                ? "Pelihuone on tilapäisesti suljettu huollon vuoksi. Uusia varauksia ei voida tällä hetkellä tehdä."
+                : $"Pelihuone on huoltotilassa: {maintenanceMessage}";
+            return Result.Failure<ReservationResponse>(Error.Validation("Reservation.MaintenanceMode", msg));
+        }
+
+        OpeningHours configuredOpeningHours = new OpeningHours
+        {
+            OpenTime = new TimeOnly(openHour, 0),
+            CloseTime = closeHour >= 24 ? new TimeOnly(23, 59) : new TimeOnly(closeHour, 0),
+            OnlyWeekdays = onlyWeekdays
+        };
 
         DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
         TimeWindow timeWindow;
@@ -87,6 +170,7 @@ public sealed class ReservationService : IReservationService
                 request.EndUtc,
                 (ReservationType)request.ReservationType,
                 nowUtc,
+                openingHours: configuredOpeningHours,
                 allowAnytime: user.IsSuperAdmin);
         }
         catch (DomainException ex)
@@ -95,25 +179,52 @@ public sealed class ReservationService : IReservationService
         }
 
         Reservation reservation;
-        var reservationType = (ReservationType)request.ReservationType;
+        ReservationType reservationType = (ReservationType)request.ReservationType;
 
-        // Sääntö: Opiskelijan tilavaraus saa kestää enintään 4 tuntia
-        if (reservationType == ReservationType.Room && !user.IsAdmin && timeWindow.Duration > TimeSpan.FromHours(4))
+        if (!user.IsSuperAdmin)
+        {
+            // Tarkistetaan dynaaminen vähimmäiskesto
+            if (timeWindow.Duration < TimeSpan.FromMinutes(minReservationMinutes))
+            {
+                return Result.Failure<ReservationResponse>(Error.Validation(
+                    "Reservation.MinDurationNotMet",
+                    $"Varauksen vähimmäiskesto on {minReservationMinutes} minuuttia."));
+            }
+
+            // Tarkistetaan dynaaminen ennakkovarausraja
+            if (timeWindow.StartUtc > nowUtc.AddMonths(maxAdvanceMonths))
+            {
+                return Result.Failure<ReservationResponse>(Error.Validation(
+                    "Reservation.AdvanceWindowExceeded",
+                    $"Varauksen voi tehdä enintään {maxAdvanceMonths} kuukautta etukäteen."));
+            }
+
+            // Tarkistetaan dynaaminen yksittäisvarauksen enimmäiskesto
+            if (reservationType == ReservationType.Individual && timeWindow.Duration > TimeSpan.FromHours(maxIndividualHours))
+            {
+                return Result.Failure<ReservationResponse>(Error.Validation(
+                    "Reservation.IndividualDurationExceeded",
+                    $"Yksittäisvarauksen enimmäiskesto on {maxIndividualHours} tuntia."));
+            }
+        }
+
+        // Sääntö: Opiskelijan tilavaraus saa kestää enintään määritetyn tuntimäärän (oletus 4h)
+        if (reservationType == ReservationType.Room && !user.IsAdmin && timeWindow.Duration > TimeSpan.FromHours(maxStudentRoomHours))
         {
             return Result.Failure<ReservationResponse>(Error.Validation(
                 "Reservation.RoomDurationExceeded",
-                "Opiskelijan tilavarauksen enimmäiskesto on 4 tuntia. Pidemmät tilavaraukset ovat sallittuja vain henkilökunnalle/Admineille."));
+                $"Opiskelijan tilavarauksen enimmäiskesto on {maxStudentRoomHours} tuntia. Pidemmät tilavaraukset ovat sallittuja vain henkilökunnalle/Admineille."));
         }
 
-        // Sääntö: Päiväkohtainen enimmäisaika opiskelijalle (yhteensä max 4h / päivä)
+        // Sääntö: Päiväkohtainen enimmäisaika opiskelijalle (yhteensä max N tuntia / päivä)
         if (!user.IsAdmin)
         {
-            var userReservations = await _reservationRepository.GetActiveReservationsForUserAsync(userId, cancellationToken);
+            IReadOnlyList<Reservation> userReservations = await _reservationRepository.GetActiveReservationsForUserAsync(userId, cancellationToken);
             TimeZoneInfo tz = OpeningHours.FinnishTimeZone;
             DateTime targetDateLocal = TimeZoneInfo.ConvertTime(timeWindow.StartUtc, tz).Date;
 
             TimeSpan existingDailyDuration = TimeSpan.Zero;
-            foreach (var r in userReservations)
+            foreach (Reservation r in userReservations)
             {
                 DateTime existingDateLocal = TimeZoneInfo.ConvertTime(r.TimeWindow.StartUtc, tz).Date;
                 if (existingDateLocal == targetDateLocal)
@@ -122,26 +233,26 @@ public sealed class ReservationService : IReservationService
                 }
             }
 
-            if (existingDailyDuration + timeWindow.Duration > TimeSpan.FromHours(4))
+            if (existingDailyDuration + timeWindow.Duration > TimeSpan.FromHours(maxIndividualHours))
             {
                 return Result.Failure<ReservationResponse>(Error.Validation(
                     "Reservation.DailyLimitExceeded",
-                    $"Päivittäinen varauskiintiö (enintään 4 tuntia / päivä) ylittyy. Sinulla on jo {existingDailyDuration.TotalMinutes} minuuttia aktiivisia varauksia kyseiselle päivälle."));
+                    $"Päivittäinen varauskiintiö (enintään {maxIndividualHours} tuntia / päivä) ylittyy. Sinulla on jo {existingDailyDuration.TotalMinutes} minuuttia aktiivisia varauksia kyseiselle päivälle."));
             }
         }
 
         // Käsitellään yksittäisen pelipisteen varaus
         if (reservationType == ReservationType.Individual)
         {
-            var stationId = new GamingStationId(request.GamingStationId!.Value);
-            var station = await _gamingStationRepository.GetByIdAsync(stationId, cancellationToken);
+            GamingStationId stationId = new GamingStationId(request.GamingStationId!.Value);
+            GamingStation? station = await _gamingStationRepository.GetByIdAsync(stationId, cancellationToken);
             if (station is null || !station.IsActive)
             {
-                return Result.Failure<ReservationResponse>(Error.NotFound("GamingStation.NotFound", "Pelipistettä ei löytynyt tai se ei ole käytössä."));
+                return Result.Failure<ReservationResponse>(Error.NotFound("GamingStation.NotFound", "Pelipistettä ei löytynyt tai se on huoltotilassa."));
             }
 
-            // Sääntö 6: Jos laite käyttää SharedTV:tä (PS5 / Switch), kumpikaan ei saa olla varattuna
-            if (station.UsesSharedTv)
+            // Sääntö 6: Jos laite käyttää SharedTV:tä (PS5 / Switch) ja sääntö on päällä, kumpikaan ei saa olla varattuna
+            if (enforceSharedTv && station.UsesSharedTv)
             {
                 bool sharedTvConflict = await _reservationRepository.HasSharedTvConflictAsync(timeWindow, null, cancellationToken);
                 if (sharedTvConflict)
@@ -230,13 +341,17 @@ public sealed class ReservationService : IReservationService
     /// <summary>
     /// Peruu olemassa olevan varauksen ja varmistaa käyttäjän oikeuden peruutukseen (Anti-IDOR).
     /// </summary>
+    /// <param name="reservationId">Peruttavan varauksen tunniste.</param>
+    /// <param name="request">Peruutuspyynnön tiedot.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos perutusta varauksesta tai virhekuvaus.</returns>
     public async Task<Result<ReservationResponse>> CancelReservationAsync(
         Guid reservationId,
         CancelReservationRequest request,
         CancellationToken cancellationToken = default)
     {
         // Validoidaan peruutuspyyntö
-        var validationResult = await _cancelValidator.ValidateAsync(request, cancellationToken);
+        ValidationResult validationResult = await _cancelValidator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             string errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
@@ -244,16 +359,16 @@ public sealed class ReservationService : IReservationService
         }
 
         // Haetaan peruttava varaus
-        var resId = new ReservationId(reservationId);
-        var reservation = await _reservationRepository.GetByIdAsync(resId, cancellationToken);
+        ReservationId resId = new ReservationId(reservationId);
+        Reservation? reservation = await _reservationRepository.GetByIdAsync(resId, cancellationToken);
         if (reservation is null)
         {
             return Result.Failure<ReservationResponse>(Error.NotFound("Reservation.NotFound", "Varausta ei löytynyt."));
         }
 
         // Haetaan peruutusta pyytävä käyttäjä
-        var userId = new UserId(request.UserId);
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        UserId userId = new UserId(request.UserId);
+        User? user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<ReservationResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
@@ -269,7 +384,7 @@ public sealed class ReservationService : IReservationService
 
         try
         {
-            // Suoritetaan toimialueen peruutuslogiikka (esim. 2 tunnin peruutussääntö opiskelijoille)
+            // Suoritetaan toimialueen peruutuslogiikka (esim. peruutussääntö opiskelijoille)
             reservation.Cancel(nowUtc, userId, user.Role, request.Reason);
         }
         catch (DomainException ex)
@@ -288,21 +403,25 @@ public sealed class ReservationService : IReservationService
     /// <summary>
     /// Jyrää kaikki aikavälillä olevat aktiiviset varaukset ja luo tilalle SuperAdmin-tapahtumavarauksen.
     /// </summary>
+    /// <param name="request">Uuden tapahtumavarauksen luontipyyntö.</param>
+    /// <param name="overrideReason">Perustelu sille, miksi olemassa olevat varaukset jyrätään.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos luodusta tapahtumavarauksesta tai virhekuvaus.</returns>
     public async Task<Result<ReservationResponse>> OverrideAndCreateEventAsync(
         CreateReservationRequest request,
         string overrideReason,
         CancellationToken cancellationToken = default)
     {
         // Validoidaan varauspyynnön perustiedot
-        var validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
+        ValidationResult validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
             string errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
             return Result.Failure<ReservationResponse>(Error.Validation("Reservation.ValidationFailed", errorMessage));
         }
 
-        var userId = new UserId(request.UserId);
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        UserId userId = new UserId(request.UserId);
+        User? user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result.Failure<ReservationResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
@@ -333,15 +452,15 @@ public sealed class ReservationService : IReservationService
         }
 
         // Haetaan kaikki aikavälille osuvat aktiiviset varaukset ja jyrätään ne
-        var conflicts = await _reservationRepository.GetActiveReservationsInWindowAsync(timeWindow, cancellationToken);
-        foreach (var conflict in conflicts)
+        IReadOnlyList<Reservation> conflicts = await _reservationRepository.GetActiveReservationsInWindowAsync(timeWindow, cancellationToken);
+        foreach (Reservation conflict in conflicts)
         {
             conflict.OverrideAndCancelBySuperAdmin(nowUtc, userId, overrideReason);
             await _reservationRepository.UpdateAsync(conflict, cancellationToken);
         }
 
         // Luodaan uusi tapahtumavaraus jyrättyjen varausten tilalle
-        var eventReservation = Reservation.CreateEvent(
+        Reservation eventReservation = Reservation.CreateEvent(
             ReservationId.New(),
             userId,
             user.Role,
@@ -372,24 +491,31 @@ public sealed class ReservationService : IReservationService
     /// <summary>
     /// Hakee yksittäisen varauksen tiedot tunnisteen perusteella.
     /// </summary>
+    /// <param name="reservationId">Haettavan varauksen tunniste.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos varauksen tiedoista tai NotFound-virhe.</returns>
     public async Task<Result<ReservationResponse>> GetByIdAsync(
         Guid reservationId,
         CancellationToken cancellationToken = default)
     {
         // Haetaan varaus ja siihen liittyvä käyttäjä tietovarastosta
-        var reservation = await _reservationRepository.GetByIdAsync(new ReservationId(reservationId), cancellationToken);
+        Reservation? reservation = await _reservationRepository.GetByIdAsync(new ReservationId(reservationId), cancellationToken);
         if (reservation is null)
         {
             return Result.Failure<ReservationResponse>(Error.NotFound("Reservation.NotFound", "Varausta ei löytynyt."));
         }
 
-        var user = await _userRepository.GetByIdAsync(reservation.UserId, cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(reservation.UserId, cancellationToken);
         return Result.Success(MapToResponse(reservation, user));
     }
 
     /// <summary>
     /// Hakee kaikki annetulle aikavälille osuvat aktiiviset varaukset käyttäjätietoineen.
     /// </summary>
+    /// <param name="startUtc">Aikaikkunan alkamisaika UTC-muodossa.</param>
+    /// <param name="endUtc">Aikaikkunan päättymisaika UTC-muodossa.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos aktiivisista varauksista.</returns>
     public async Task<Result<IReadOnlyList<ReservationResponse>>> GetActiveReservationsAsync(
         DateTimeOffset startUtc,
         DateTimeOffset endUtc,
@@ -402,14 +528,14 @@ public sealed class ReservationService : IReservationService
                 Error.Validation("TimeWindow.Invalid", "Alkuajan on oltava ennen loppuaikaa."));
         }
 
-        var window = TimeWindow.FromExact(startUtc, endUtc);
-        var active = await _reservationRepository.GetActiveReservationsInWindowAsync(window, cancellationToken);
+        TimeWindow window = TimeWindow.FromExact(startUtc, endUtc);
+        IReadOnlyList<Reservation> active = await _reservationRepository.GetActiveReservationsInWindowAsync(window, cancellationToken);
 
         // Täydennetään varauksiin varaajan näyttönimi ja sähköposti
-        var responses = new List<ReservationResponse>(active.Count);
-        foreach (var r in active)
+        List<ReservationResponse> responses = new List<ReservationResponse>(active.Count);
+        foreach (Reservation r in active)
         {
-            var user = await _userRepository.GetByIdAsync(r.UserId, cancellationToken);
+            User? user = await _userRepository.GetByIdAsync(r.UserId, cancellationToken);
             responses.Add(MapToResponse(r, user));
         }
 

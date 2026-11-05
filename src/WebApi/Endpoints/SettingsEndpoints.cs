@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Settings;
 using Pelihuone.Application.Users;
 using Pelihuone.Contracts.Settings;
+using Pelihuone.Contracts.Users;
 using Pelihuone.WebApi.Extensions;
 
 namespace Pelihuone.WebApi.Endpoints;
@@ -19,7 +21,7 @@ public static class SettingsEndpoints
     public static IEndpointRouteBuilder MapSettingsEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan reittiryhmä järjestelmäasetuksille
-        var group = app.MapGroup("/api/settings")
+        RouteGroupBuilder group = app.MapGroup("/api/settings")
             .WithTags("Site Settings & Config");
 
         // Hae sivuston asetukset
@@ -29,7 +31,7 @@ public static class SettingsEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan nykyiset sivustoasetukset (aukioloajat, säännöt, ylläpitotila jne.)
-            var result = await settingsService.GetSettingsAsync(cancellationToken);
+            Result<SiteSettingsResponse> result = await settingsService.GetSettingsAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetSettings")
@@ -51,14 +53,14 @@ public static class SettingsEndpoints
             }
 
             // Tarkistetaan, että käyttäjällä on ylläpitäjän (Admin tai SuperAdmin) oikeudet
-            var userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
+            Result<UserResponse> userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
                 return Results.Forbid();
             }
 
             // Tallennetaan päivitetyt sivustoasetukset
-            var result = await settingsService.UpdateSettingsAsync(request, cancellationToken);
+            Result<SiteSettingsResponse> result = await settingsService.UpdateSettingsAsync(request, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("UpdateSettings")

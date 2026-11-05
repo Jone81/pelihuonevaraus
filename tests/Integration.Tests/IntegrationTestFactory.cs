@@ -49,7 +49,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
             // Rekisteröidään Npgsql-pohjainen tietokantakonteksti Outbox-siepparilla
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
-                var outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
+                OutboxInterceptor outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
                 options.UseNpgsql(_connectionString)
                     .AddInterceptors(outboxInterceptor);
             });

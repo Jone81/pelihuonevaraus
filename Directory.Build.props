@@ -10,6 +10,8 @@
     <Deterministic>true</Deterministic>
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditLevel>low</NuGetAuditLevel>
+    <!-- Pakotetaan eksplisiittiset tyypit (IDE0008: var-avainsanan kielto) käännösvirheeksi yhdessä .editorconfig-tiedoston kanssa -->
+    <WarningsAsErrors>$(WarningsAsErrors);IDE0008</WarningsAsErrors>
     <!-- Allow standard ILogger extensions (CA1848/CA1873), xUnit test method underscores (CA1707), Error record name (CA1716), and PagedResult<T>.Empty (CA1000) -->
     <NoWarn>$(NoWarn);CA1848;CA1873;CA1707;CA1716;CA1000</NoWarn>
   </PropertyGroup>

@@ -16,7 +16,7 @@ public class GamingStationRepositoryTests
     // Luo eristetyn muistinsisäisen tietokantakontekstin kutakin testiä varten
     private static ApplicationDbContext CreateDbContext()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .AddInterceptors(new OutboxInterceptor())
             .Options;
@@ -31,12 +31,12 @@ public class GamingStationRepositoryTests
     public async Task GetAllActiveAsync_ReturnsOnlyActiveStationsOrderedByName()
     {
         // Arrange: Lisätään kantaan kaksi aktiivista ja yksi epäaktiivinen pelipiste
-        using var context = CreateDbContext();
-        var repository = new GamingStationRepository(context);
+        using ApplicationDbContext context = CreateDbContext();
+        GamingStationRepository repository = new GamingStationRepository(context);
 
-        var activeStationB = GamingStation.Create(GamingStationId.New(), "Station B", GamingStationType.PC, isActive: true);
-        var activeStationA = GamingStation.Create(GamingStationId.New(), "Station A", GamingStationType.PC, isActive: true);
-        var inactiveStation = GamingStation.Create(GamingStationId.New(), "Station C", GamingStationType.PC, isActive: false);
+        GamingStation activeStationB = GamingStation.Create(GamingStationId.New(), "Station B", GamingStationType.PC, isActive: true);
+        GamingStation activeStationA = GamingStation.Create(GamingStationId.New(), "Station A", GamingStationType.PC, isActive: true);
+        GamingStation inactiveStation = GamingStation.Create(GamingStationId.New(), "Station C", GamingStationType.PC, isActive: false);
 
         await repository.AddAsync(activeStationB);
         await repository.AddAsync(activeStationA);
@@ -44,7 +44,7 @@ public class GamingStationRepositoryTests
         await context.SaveChangesAsync();
 
         // Act: Haetaan kaikki aktiiviset pelipisteet
-        var result = await repository.GetAllActiveAsync();
+        IReadOnlyList<GamingStation> result = await repository.GetAllActiveAsync();
 
         // Assert: Vain aktiiviset pisteet palautetaan ja ne ovat nimen mukaisessa järjestyksessä
         Assert.Equal(2, result.Count);

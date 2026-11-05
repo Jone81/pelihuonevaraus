@@ -1,4 +1,6 @@
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Statistics;
+using Pelihuone.Contracts.Statistics;
 using Pelihuone.WebApi.Extensions;
 
 namespace Pelihuone.WebApi.Endpoints;
@@ -16,7 +18,7 @@ public static class StatisticsEndpoints
     public static IEndpointRouteBuilder MapStatisticsEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan reittiryhmä tilastoille
-        var group = app.MapGroup("/api/statistics")
+        RouteGroupBuilder group = app.MapGroup("/api/statistics")
             .WithTags("Statistics & Logging");
 
         // Hae järjestelmän tilastot
@@ -26,7 +28,7 @@ public static class StatisticsEndpoints
             CancellationToken cancellationToken) =>
         {
             // Haetaan koostetut käyttöastetilastot ja laitekohtaiset varausmäärät
-            var result = await statisticsService.GetStatisticsAsync(cancellationToken);
+            Result<StatisticsResponse> result = await statisticsService.GetStatisticsAsync(cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetStatistics")

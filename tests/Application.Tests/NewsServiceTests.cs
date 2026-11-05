@@ -47,14 +47,14 @@ public class NewsServiceTests
     public async Task GetAllNews_ReturnsAllPublishedNews()
     {
         // Arrange: Valmistellaan yksi julkaistu ja kiinnitetty tiedote
-        var news = new List<NewsEntity>
+        List<NewsEntity> news = new List<NewsEntity>
         {
             NewsEntity.Create(NewsId.New(), "Uutinen 1", "Sisältö 1", UserId.New(), DateTimeOffset.UtcNow, true),
         };
         _newsRepository.GetAllAsync(Arg.Any<CancellationToken>()).Returns(news);
 
         // Act: Haetaan kaikki uutiset
-        var result = await _service.GetAllNewsAsync();
+        Result<IReadOnlyList<NewsResponse>> result = await _service.GetAllNewsAsync();
 
         // Assert: Varmistetaan, että tiedote palautetaan oikealla otsikolla
         Assert.True(result.IsSuccess);
@@ -69,14 +69,14 @@ public class NewsServiceTests
     public async Task CreateNews_WhenAdmin_Succeeds()
     {
         // Arrange: Luodaan Admin-roolissa oleva käyttäjä
-        var adminId = Guid.NewGuid();
-        var admin = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
+        Guid adminId = Guid.NewGuid();
+        User admin = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
         _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(admin);
 
-        var request = new CreateNewsRequest("Turnaus tulossa", "Ilmoittaudu nyt!", adminId, true);
+        CreateNewsRequest request = new CreateNewsRequest("Turnaus tulossa", "Ilmoittaudu nyt!", adminId, true);
 
         // Act: Julkaistaan uusi tiedote Admin-tunnuksilla
-        var result = await _service.CreateNewsAsync(request, adminId);
+        Result<NewsResponse> result = await _service.CreateNewsAsync(request, adminId);
 
         // Assert: Tarkistetaan, että uutinen luotiin ja lisättiin repositorioon
         Assert.True(result.IsSuccess);
@@ -91,14 +91,14 @@ public class NewsServiceTests
     public async Task CreateNews_WhenNormalUser_ReturnsForbidden()
     {
         // Arrange: Alustetaan tavallinen opiskelijakäyttäjä
-        var userId = Guid.NewGuid();
-        var normalUser = User.Create(new UserId(userId), SchoolEmail.Create("opiskelija@edu.xamk.fi"), "Opiskelija", UserRole.User, DateTimeOffset.UtcNow);
+        Guid userId = Guid.NewGuid();
+        User normalUser = User.Create(new UserId(userId), SchoolEmail.Create("opiskelija@edu.xamk.fi"), "Opiskelija", UserRole.User, DateTimeOffset.UtcNow);
         _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(normalUser);
 
-        var request = new CreateNewsRequest("Oma tiedote", "Sisältö", userId);
+        CreateNewsRequest request = new CreateNewsRequest("Oma tiedote", "Sisältö", userId);
 
         // Act: Yritetään luoda tiedote ilman ylläpito-oikeuksia
-        var result = await _service.CreateNewsAsync(request, userId);
+        Result<NewsResponse> result = await _service.CreateNewsAsync(request, userId);
 
         // Assert: Varmistetaan, että operaatio estetään Forbidden-virheellä
         Assert.False(result.IsSuccess);

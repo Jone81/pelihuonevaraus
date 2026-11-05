@@ -2,6 +2,7 @@ using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Statistics;
 using Pelihuone.Domain.Enums;
+using Pelihuone.Domain.Models;
 
 namespace Pelihuone.Application.Statistics;
 
@@ -36,10 +37,10 @@ public sealed class StatisticsService : IStatisticsService
     public async Task<Result<StatisticsResponse>> GetStatisticsAsync(CancellationToken cancellationToken = default)
     {
         // Haetaan raakadata tietovarastoista tilastolaskentaa varten
-        var reservations = await _reservationRepository.GetAllAsync(cancellationToken);
-        var stations = await _stationRepository.GetAllActiveAsync(cancellationToken);
-        var users = await _userRepository.GetAllAsync(cancellationToken);
-        var games = await _gameRepository.GetAllAsync(cancellationToken);
+        IReadOnlyList<Reservation> reservations = await _reservationRepository.GetAllAsync(cancellationToken);
+        IReadOnlyList<GamingStation> stations = await _stationRepository.GetAllActiveAsync(cancellationToken);
+        IReadOnlyList<User> users = await _userRepository.GetAllAsync(cancellationToken);
+        IReadOnlyList<Game> games = await _gameRepository.GetAllAsync(cancellationToken);
 
         // Lasketaan varausten kokonaismäärät tilan mukaan
         int total = reservations.Count;
@@ -47,10 +48,10 @@ public sealed class StatisticsService : IStatisticsService
         int cancelled = reservations.Count(r => r.Status == ReservationStatus.Cancelled);
 
         // Lasketaan pelipistekohtaiset varausmäärät ja kokonaistunnit
-        var stationStats = new List<StationUsageStat>();
-        foreach (var station in stations)
+        List<StationUsageStat> stationStats = new List<StationUsageStat>();
+        foreach (GamingStation station in stations)
         {
-            var stationRes = reservations.Where(r => r.GamingStationId == station.Id).ToList();
+            List<Reservation> stationRes = reservations.Where(r => r.GamingStationId == station.Id).ToList();
             int count = stationRes.Count;
             double hours = stationRes.Sum(r => r.TimeWindow.Duration.TotalHours);
 
@@ -63,7 +64,7 @@ public sealed class StatisticsService : IStatisticsService
         }
 
         // Jaotellaan varaukset varaustyypin mukaan
-        var typeStats = new List<ReservationTypeStat>
+        List<ReservationTypeStat> typeStats = new List<ReservationTypeStat>
         {
             new("Individual", reservations.Count(r => r.Type == ReservationType.Individual)),
             new("Room", reservations.Count(r => r.Type == ReservationType.Room)),
@@ -71,7 +72,7 @@ public sealed class StatisticsService : IStatisticsService
         };
 
         // Koostetaan lopullinen tilastovastaus järjestettynä suosituimman pelipisteen mukaan
-        var response = new StatisticsResponse(
+        StatisticsResponse response = new StatisticsResponse(
             TotalReservations: total,
             ActiveReservations: active,
             CancelledReservations: cancelled,

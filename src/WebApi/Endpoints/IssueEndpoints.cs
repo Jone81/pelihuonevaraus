@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
 using Pelihuone.Application.Issues;
 using Pelihuone.Contracts.Issues;
 using Pelihuone.WebApi.Extensions;
@@ -18,7 +19,7 @@ public static class IssueEndpoints
     public static IEndpointRouteBuilder MapIssueEndpoints(this IEndpointRouteBuilder app)
     {
         // Luodaan reittiryhmä vikailmoituksille
-        var group = app.MapGroup("/api/issues")
+        RouteGroupBuilder group = app.MapGroup("/api/issues")
             .WithTags("Issues & Bug Reports");
 
         // Lähetä vikailmoitus / virheilmoitus
@@ -29,7 +30,7 @@ public static class IssueEndpoints
             CancellationToken cancellationToken) =>
         {
             // Tallennetaan uusi vikailmoitus ja välitetään siitä ilmoitus ylläpidon Discord-kanavalle
-            var result = await issueReportService.CreateIssueReportAsync(request, cancellationToken);
+            Result<IssueReportResponse> result = await issueReportService.CreateIssueReportAsync(request, cancellationToken);
             return result.ToHttpResult(httpContext, val => Results.Created($"/api/issues/{val.Id}", val));
         })
         .WithName("CreateIssueReport")
@@ -44,7 +45,7 @@ public static class IssueEndpoints
         {
             // Haetaan kaikki vikailmoitukset ylläpitäjän tarkasteltavaksi
             Guid adminId = headerUserId ?? Guid.Empty;
-            var result = await issueReportService.GetAllIssueReportsAsync(adminId, cancellationToken);
+            Result<IReadOnlyList<IssueReportResponse>> result = await issueReportService.GetAllIssueReportsAsync(adminId, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("GetAllIssueReports")
@@ -61,7 +62,7 @@ public static class IssueEndpoints
         {
             // Merkitään vikailmoitus ratkaistuksi ja liitetään siihen ylläpitäjän muistiinpanot
             Guid adminId = headerUserId ?? Guid.Empty;
-            var result = await issueReportService.ResolveIssueReportAsync(id, request, adminId, cancellationToken);
+            Result<IssueReportResponse> result = await issueReportService.ResolveIssueReportAsync(id, request, adminId, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
         .WithName("ResolveIssueReport")

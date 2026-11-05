@@ -5,6 +5,7 @@ using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.News;
 using Pelihuone.Domain.Common;
+using Pelihuone.Domain.Models;
 using Pelihuone.Domain.ValueObjects;
 using NewsEntity = Pelihuone.Domain.Models.News;
 
@@ -44,8 +45,8 @@ public sealed class NewsService : INewsService
     public async Task<Result<IReadOnlyList<NewsResponse>>> GetAllNewsAsync(CancellationToken cancellationToken = default)
     {
         // Haetaan uutiset tietovarastosta ja suodatetaan pois vanha oletustiedote
-        var newsList = await _newsRepository.GetAllAsync(cancellationToken);
-        var responses = newsList
+        IReadOnlyList<NewsEntity> newsList = await _newsRepository.GetAllAsync(cancellationToken);
+        List<NewsResponse> responses = newsList
             .Where(n => !n.Title.Contains("Tervetuloa Xamk Game Roomiin", StringComparison.OrdinalIgnoreCase))
             .Select(MapToResponse)
             .ToList();
@@ -61,7 +62,7 @@ public sealed class NewsService : INewsService
         CancellationToken cancellationToken = default)
     {
         // Tarkistetaan, että käyttäjä on ylläpitäjä
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<NewsResponse>(Error.Forbidden("News.Forbidden", "Vain ylläpitäjä (Admin) voi luoda uutisia ja tiedotteita."));
@@ -81,8 +82,8 @@ public sealed class NewsService : INewsService
         try
         {
             // Luodaan uusi tiedote ja tallennetaan tietokantaan
-            var now = _dateTimeProvider.UtcNow;
-            var news = NewsEntity.Create(
+            DateTimeOffset now = _dateTimeProvider.UtcNow;
+            NewsEntity news = NewsEntity.Create(
                 NewsId.New(),
                 request.Title,
                 request.Content,
@@ -112,14 +113,14 @@ public sealed class NewsService : INewsService
         CancellationToken cancellationToken = default)
     {
         // Varmistetaan ylläpitäjäoikeudet
-        var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
         if (user is null || !user.IsAdmin)
         {
             return Result.Failure<bool>(Error.Forbidden("News.Forbidden", "Vain ylläpitäjä voi poistaa tiedotteita."));
         }
 
         // Haetaan poistettava uutinen
-        var news = await _newsRepository.GetByIdAsync(new NewsId(newsId), cancellationToken);
+        NewsEntity? news = await _newsRepository.GetByIdAsync(new NewsId(newsId), cancellationToken);
         if (news is null)
         {
             return Result.Failure<bool>(Error.NotFound("News.NotFound", "Uutista ei löytynyt."));

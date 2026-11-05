@@ -6,7 +6,7 @@ using Pelihuone.Infrastructure;
 using Pelihuone.WebApi.Endpoints;
 using Pelihuone.WebApi.Middleware;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // 1. Rekisteröidään sovelluskerrokset DI-eristyssääntöjen mukaisesti
 builder.Services.AddApplication();
@@ -39,7 +39,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.OnRejected = async (context, cancellationToken) =>
     {
-        var problem = new ProblemDetails
+        ProblemDetails problem = new ProblemDetails
         {
             Status = StatusCodes.Status429TooManyRequests,
             Title = "Liikaa pyyntöjä",
@@ -80,7 +80,7 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Pipeline-konfiguraatio
 app.UseExceptionHandler();
@@ -108,10 +108,10 @@ app.MapHealthChecks("/health/live");
 app.MapHealthChecks("/health/ready");
 
 // Alustetaan ja siemennetään tietokanta kehityskäyttöön
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<Pelihuone.Infrastructure.Persistence.ApplicationDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    Pelihuone.Infrastructure.Persistence.ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<Pelihuone.Infrastructure.Persistence.ApplicationDbContext>();
+    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await Pelihuone.Infrastructure.Persistence.DatabaseSeeder.SeedAsync(dbContext, logger);
 }
 

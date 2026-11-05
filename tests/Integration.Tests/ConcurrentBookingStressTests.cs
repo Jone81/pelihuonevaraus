@@ -41,20 +41,20 @@ public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontaine
         }
 
         // Arrange: Alustetaan tietokanta oikeassa PostgreSQL-kontissa
-        using var factory = new IntegrationTestFactory(_fixture.Container.GetConnectionString());
-        using (var scope = factory.Services.CreateScope())
+        using IntegrationTestFactory factory = new IntegrationTestFactory(_fixture.Container.GetConnectionString());
+        using (IServiceScope scope = factory.Services.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             await db.Database.EnsureCreatedAsync();
 
-            var user = User.Create(
+            User user = User.Create(
                 new UserId(Guid.NewGuid()),
                 SchoolEmail.Create("stress.test@edu.xamk.fi"),
                 "Stress Tester",
                 UserRole.User,
                 DateTimeOffset.UtcNow);
 
-            var station = GamingStation.Create(
+            GamingStation station = GamingStation.Create(
                 new GamingStationId(Guid.NewGuid()),
                 "PC Stress 1",
                 GamingStationType.PC);
@@ -63,14 +63,14 @@ public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontaine
             await db.GamingStations.AddAsync(station);
             await db.SaveChangesAsync();
 
-            var client = factory.CreateClient();
+            HttpClient client = factory.CreateClient();
 
-            var baseDate = new DateTimeOffset(2026, 11, 20, 8, 0, 0, TimeSpan.FromHours(2));
-            var startUtc = baseDate.AddHours(2);
-            var endUtc = baseDate.AddHours(4);
+            DateTimeOffset baseDate = new DateTimeOffset(2026, 11, 20, 8, 0, 0, TimeSpan.FromHours(2));
+            DateTimeOffset startUtc = baseDate.AddHours(2);
+            DateTimeOffset endUtc = baseDate.AddHours(4);
 
             // Valmistellaan 10 rinnakkaista pyyntöä täsmälleen samaan aikaväliin eri IdempotencyKey-tunnisteilla
-            var requests = Enumerable.Range(1, 10).Select(i => new CreateReservationRequest(
+            List<CreateReservationRequest> requests = Enumerable.Range(1, 10).Select(i => new CreateReservationRequest(
                 $"stress-idem-key-{i}",
                 user.Id.Value,
                 (int)ReservationType.Individual,
@@ -79,8 +79,8 @@ public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontaine
                 endUtc)).ToList();
 
             // Act: Ammutaan kaikki 10 pyyntöä samanaikaisesti Task.WhenAll-kutsulla
-            var tasks = requests.Select(req => client.PostAsJsonAsync("/api/reservations", req));
-            var responses = await Task.WhenAll(tasks);
+            IEnumerable<Task<HttpResponseMessage>> tasks = requests.Select(req => client.PostAsJsonAsync("/api/reservations", req));
+            HttpResponseMessage[] responses = await Task.WhenAll(tasks);
 
             // Assert: Tasan 1 palauttaa 201 Created ja loput 9 palauttavat 409 Conflict
             int createdCount = responses.Count(r => r.StatusCode == HttpStatusCode.Created);

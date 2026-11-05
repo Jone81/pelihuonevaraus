@@ -49,7 +49,7 @@ public class IssueReportServiceTests
     public async Task CreateIssueReport_WithValidData_CreatesReportAndNotifiesDiscord()
     {
         // Arrange: Muodostetaan kelvollinen vikailmoituspyyntö
-        var request = new CreateIssueReportRequest(
+        CreateIssueReportRequest request = new CreateIssueReportRequest(
             "student@edu.xamk.fi",
             "Matti Meikäläinen",
             "PC 3",
@@ -57,7 +57,7 @@ public class IssueReportServiceTests
             "Näyttö sammuilee satunnaisesti pelatessa");
 
         // Act: Lähetetään vikailmoitus palvelulle
-        var result = await _service.CreateIssueReportAsync(request);
+        Result<IssueReportResponse> result = await _service.CreateIssueReportAsync(request);
 
         // Assert: Tarkistetaan tallennus, paluuarvon tila sekä Discord-webhookin kutsuminen
         Assert.True(result.IsSuccess);
@@ -83,10 +83,10 @@ public class IssueReportServiceTests
     public async Task CreateIssueReport_WhenTargetIsMissing_ReturnsValidationFailure()
     {
         // Arrange: Luodaan puutteellinen pyyntö tyhjällä Target-arvolla
-        var request = new CreateIssueReportRequest("student@edu.xamk.fi", "Matti", "", "Otsikko", "Kuvaus");
+        CreateIssueReportRequest request = new CreateIssueReportRequest("student@edu.xamk.fi", "Matti", "", "Otsikko", "Kuvaus");
 
         // Act: Yritetään tallentaa virheellinen vikailmoitus
-        var result = await _service.CreateIssueReportAsync(request);
+        Result<IssueReportResponse> result = await _service.CreateIssueReportAsync(request);
 
         // Assert: Varmistetaan, että palautetaan validointivirhe
         Assert.False(result.IsSuccess);
@@ -100,11 +100,11 @@ public class IssueReportServiceTests
     public async Task ResolveIssueReport_WhenUserIsAdmin_ResolvesSuccessfully()
     {
         // Arrange: Alustetaan Admin-käyttäjä sekä avoin vikailmoitus
-        var adminId = Guid.NewGuid();
-        var adminUser = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
+        Guid adminId = Guid.NewGuid();
+        User adminUser = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
         _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(adminUser);
 
-        var report = IssueReport.Create(
+        IssueReport report = IssueReport.Create(
             IssueReportId.New(),
             "student@edu.xamk.fi",
             "Matti",
@@ -115,10 +115,10 @@ public class IssueReportServiceTests
 
         _issueReportRepository.GetByIdAsync(report.Id, Arg.Any<CancellationToken>()).Returns(report);
 
-        var resolveRequest = new ResolveIssueReportRequest("Ohjain vaihdettu uuteen.");
+        ResolveIssueReportRequest resolveRequest = new ResolveIssueReportRequest("Ohjain vaihdettu uuteen.");
 
         // Act: Merkitään vikailmoitus ratkaistuksi ylläpitäjän toimesta
-        var result = await _service.ResolveIssueReportAsync(report.Id.Value, resolveRequest, adminId);
+        Result<IssueReportResponse> result = await _service.ResolveIssueReportAsync(report.Id.Value, resolveRequest, adminId);
 
         // Assert: Tarkistetaan, että tila päivittyi ratkaistuksi ja muistiinpanot tallentuivat
         Assert.True(result.IsSuccess);
