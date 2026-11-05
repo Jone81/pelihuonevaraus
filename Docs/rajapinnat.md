@@ -13,6 +13,18 @@ Tämä dokumentti määrittelee **Pelihuonevaraus (Xamk Game Room)** -järjestel
 - **Idempotenssiotsake:**
   - `Idempotency-Key: <Guid>` — tuettu `POST /api/reservations`-varauspyynnöissä estämään mobiiliverkon pätkimisestä tai tuplaklikkauksesta johtuvat kaksoisvaraukset.
 
+### 1.1 Roolit ja Rajapintojen Lupatasot (API Authorization Levels)
+
+Jokainen REST-päätepiste ja palvelumetodi noudattaa yhtä seuraavista viidestä valtuutustasosta:
+
+| Lupataso | Vaadittu otsake / tila | Kuvaus ja sallitut kutsujat | Virhekoodi puuttuessa |
+| :--- | :--- | :--- | :--- |
+| **1. Julkinen (`Public`)** | Ei vaadita | Lukuoperaatiot (`GET /api/stations`, `GET /api/reservations`, `GET /api/games`, `GET /api/news`, `/health/*`), OTP-kirjautuminen sekä vikailmoituksen jättö (`POST /api/issues`). | — |
+| **2. Aktiivinen käyttäjä (`Authenticated User`)** | Kirjautunut `userId` (`!user.IsBanned(nowUtc)`) | Uuden varauksen luonti (`POST /api/reservations`), omien varausten haku ja peruutus, pelitoiveiden lisäys ja äänestys. Jos käyttäjällä on voimassa oleva banni, kutsu estetään. | `401 Unauthorized` / `403 Forbidden (User.Banned)` |
+| **3. Omistaja tai Admin (`Owner or Admin`)** | `request.UserId == reservation.UserId` TAI `user.IsAdmin` | Varauksen peruutus (`DELETE /api/reservations/{id}`). Opiskelija voi perua vain oman varauksensa; `Admin` ja `SuperAdmin` voivat perua minkä tahansa varauksen. | `403 Forbidden (Reservation.Forbidden)` |
+| **4. Ylläpitäjä (`Admin` / `SuperAdmin`)** | `X-User-Id: <Guid>` (`Role` on `Admin` tai `SuperAdmin`) | Pelien ja toivelistan ylläpito, tiedotteiden julkaisu/poisto, varauskiintiöiden ja huoltotilan muokkaus (`PUT /api/settings`), laitekohtainen huoltotila (`PUT /api/stations/{id}/status`), vikailmoitusten kuittaus, käyttäjälistaus (`GET /api/users`) ja käyttäjien bannaus (`PUT /api/users/{id}/ban`). | `401 Unauthorized` / `403 Forbidden` |
+| **5. Pääkäyttäjä (`SuperAdmin Only`)** | `X-User-Id: <Guid>` (`Role == "SuperAdmin"`) | Käyttäjien roolien muuttaminen (`PUT /api/users/{id}/role`), päällekkäisten opiskelijavarausten jyrääminen (`POST /api/reservations/override`) sekä aukioloaikojen ohitus (`allowAnytime = true`). | `403 Forbidden` |
+
 ### Standardoidut virhevastaukset (`ProblemDetails` — RFC 9457)
 
 Kaikki epäonnistuneet API-kutsut palauttavat rakenteisen JSON-virheen:

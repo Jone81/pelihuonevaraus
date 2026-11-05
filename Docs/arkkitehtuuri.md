@@ -122,7 +122,37 @@ Ylläpitäjän Admin-paneelissa määrittelemät tilasäännöt ja kiintiöt tal
 
 ---
 
-## 6. Virheenkäsittely, Tietoturva ja Rate Limiting
+## 6. Roolitukset, Käyttöoikeusarkkitehtuuri (RBAC) ja Luvat
+
+Järjestelmän valtuutusmalli (Authorization) on monikerroksinen: oikeudet tarkistetaan sekä HTTP-päätepisteissä (`X-User-Id`), sovelluspalveluissa (`ReservationService`, `UserService`) että domain-entiteettien sisäisissä invarianteissa (`User`, `OpeningHours`).
+
+### 6.1 Roolihierarkia (`UserRole`)
+
+1. **`UserRole.User` (`0` — Opiskelija / Henkilökunta):**
+   - Tunnistautuu oppilaitoksen sähköpostilla (`@edu.xamk.fi` tai `@xamk.fi`).
+   - Saa luoda yksittäisiä laitevarauksia (`ReservationType.Individual`, oletuskiintiö enintään `4 h / vrk`) sekä koko pelitilan varauksia (`ReservationType.Room`, oletuskiintiö enintään `4 h`).
+   - On sidottu voimassa oleviin aukioloaikoihin (oletus Ma–Pe klo 08:00–18:00), ennakkovarausrajaan (`2 kk`) sekä tilan ja laitteiden huoltotilaan.
+   - Saa peruuttaa vain **omia** varauksiaan (`reservation.UserId == currentUser.Id`, estää IDOR-haavoittuvuudet).
+2. **`UserRole.Admin` (`1` — Tilanvalvoja / Ylläpitäjä):**
+   - Sisältää ominaisuuden `user.IsAdmin == true`.
+   - Pääsee Admin-hallintapaneeliin (`AdminPanel.tsx`) ja saa kutsua ylläpidon REST-päätepisteitä (`X-User-Id`).
+   - Saa tehdä koko tilan (`Room`) ja tapahtuman (`Event`) varauksia ilman opiskelijan tuntikiintiötä sekä tilan ollessa huoltotilassa (`IsMaintenanceMode`).
+   - Saa peruuttaa kenen tahansa käyttäjän varauksen, hallita pelejä, toivelistaa, tiedotteita, tilastoja, vikailmoituksia, varauskiintiöitä (`PUT /api/settings`), laitehuoltoja (`PUT /api/stations/{id}/status`) sekä **asettaa ja poistaa käyttäjien määräaikaisia tai pysyviä käyttöestoja / banneja** (`PUT /api/users/{id}/ban`).
+   - **Rajoitukset:** `Admin` **ei voi** muuttaa käyttäjien rooleja (`PUT /api/users/{id}/role`), **ei voi** jyrätä olemassa olevia varauksia (`POST /api/reservations/override`) **eikä voi** ohittaa aukioloaikoja.
+3. **`UserRole.SuperAdmin` (`2` — Pääkäyttäjä):**
+   - Sisältää ominaisuudet `user.IsSuperAdmin == true` ja `user.IsAdmin == true`.
+   - **Aukioloaikojen ohitus (`allowAnytime = true`):** Saa luoda varauksia mihin vuorokaudenaikaan tahansa ja myös viikonloppuisin.
+   - **Jyräysvaltuus (`POST /api/reservations/override`):** Saa pakkovarata tilan tai laitteen tapahtumalle, jolloin järjestelmä peruuttaa automaattisesti kaikki aikavälille osuvat opiskelijavaraukset perustelun kera.
+   - **Roolien hallinta (`PUT /api/users/{id}/role`):** Ainoa rooli, joka voi ylentää tai alentaa käyttäjiä `User`- ja `Admin`-tasojen välillä.
+   - **Lukittu suojaustaso:** `SuperAdmin`-tiliä ei voi bannata (`User.Ban` heittää `DomainException`-poikkeuksen).
+
+### 6.2 Käyttöestot / Bannaus (`BannedUntilUtc` & `IsBanned`)
+- Ylläpitäjä (`Admin` tai `SuperAdmin`) voi asettaa käyttäjälle määräaikaisen (`1 h`, `3 h`, `12 h`, `24 h`, `72 h`, `7 vrk`, `14 vrk`, `30 vrk`, `90 vrk`) tai pysyvän (`+100 vuotta`) käyttöeston sekä kirjata sille syyn (`BanReason`).
+- Kun `user.IsBanned(nowUtc)` on tosi, sekä sisäänkirjautuminen (`UserService.AuthenticateOrCreateUserAsync`) että uusien varausten luominen (`ReservationService.CreateReservationAsync`) palauttavat `Error.Forbidden("User.Banned")` (`HTTP 403 Forbidden`) selkeällä ilmoituksella bannin päättymisajasta ja syystä.
+
+---
+
+## 7. Virheenkäsittely, Tietoturva ja Rate Limiting
 
 1. **RFC 9457 `ProblemDetails`:**
    - Kaikki palvelukerroksen `Result.Failure(Error)`-tulokset muunnetaan [`ResultExtensions.ToHttpResult`](../src/WebApi/Extensions/ResultExtensions.cs)-laajennusmetodilla standardinmukaiseksi `application/problem+json` -vastaukseksi:
@@ -140,7 +170,7 @@ Ylläpitäjän Admin-paneelissa määrittelemät tilasäännöt ja kiintiöt tal
 
 ---
 
-## 7. Kääntäjäpalomuuri ja Koodin Laatuvaatimukset
+## 8. Kääntäjäpalomuuri ja Koodin Laatuvaatimukset
 
 Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Build.props`](../Directory.Build.props) sekä frontendin [`tsconfig.app.json`](../src/Client/tsconfig.app.json) ja [`eslint.config.js`](../src/Client/eslint.config.js) muodostavat automaattisen laatupalomuurin:
 

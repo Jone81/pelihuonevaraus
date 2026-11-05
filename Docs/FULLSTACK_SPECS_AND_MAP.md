@@ -254,7 +254,53 @@ Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../s
 
 ---
 
-## 5. Tietokantakaavio & Domain-entiteetit (ER-kartta)
+## 5. Roolitukset, Käyttöoikeushierarkia ja Lupamatriisi (RBAC & Permissions)
+
+Järjestelmässä on viisi toiminnallista käyttöoikeustasoa: **Vierailija (Anonyymi)**, **Estetty / Bannattu käyttäjä (`Banned`)**, **Peruskäyttäjä (`UserRole.User = 0`)**, **Ylläpitäjä (`UserRole.Admin = 1`)** sekä **Pääkäyttäjä (`UserRole.SuperAdmin = 2`)**.
+
+```mermaid
+flowchart LR
+    Anon["👀 Vierailija (Anonyymi)\n• Selaa kalenteria, laitteita, pelejä & uutisia\n• Lähettää vikailmoituksen\n• Kirjautuu Xamk-sähköpostilla (OTP)"]
+    Banned["🚫 Bannattu (IsBanned = true)\n• Määräaikainen (1 h – 3 kk) tai pysyvä esto\n• Kirjautuminen & uudet varaukset estetty (403 Forbidden)"]
+    User["🎓 User (Opiskelija / Henkilökunta)\n• Yksittäisvaraus (max 4 h / vrk)\n• Tilavaraus (max 4 h)\n• Omien varausten peruutus\n• Pelitoiveiden ehdotus & +1 äänestys"]
+    Admin["🛡️ Admin (Tilanvalvoja / Ylläpitäjä)\n• Admin-paneeli (6 välilehteä)\n• Tila- & tapahtumavaraukset ilman tuntikiintiötä\n• Kaikkien varausten peruutus\n• Pelien, uutisten, kiintiöiden, laitehuollon & vikojen hallinta\n• Käyttäjien bannaus & bannin poisto"]
+    SuperAdmin["⚡ SuperAdmin (Pääkäyttäjä)\n• Aukioloaikojen ohitus (allowAnytime = 24/7)\n• Päällekkäisten varausten jyräys (Override)\n• Käyttäjäroolien muuttaminen (User <-> Admin)\n• Suojattu tili (ei voi bannata tai alentaa)"]
+
+    Anon --> User
+    User -. "Admin asettaa bannin" .-> Banned
+    Banned -. "Banni päättyy / poistetaan" .-> User
+    User -- "SuperAdmin ylentää" --> Admin
+    Admin --> SuperAdmin
+```
+
+### Täydellinen toiminto- ja lupamatriisi (RBAC Matrix)
+
+| Toiminto / Oikeus | Vierailija (Anonyymi) | Bannattu (`IsBanned`) | `User` (Opiskelija) | `Admin` (Ylläpitäjä) | `SuperAdmin` (Pääkäyttäjä) | Valvova kerros (`Backend` / `UI`) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Tilanteen, kalenterin, pelien & uutisten selaus** | ✅ | ✅ | ✅ | ✅ | ✅ | Julkiset `GET`-päätepisteet |
+| **Vikailmoituksen lähetys (`POST /api/issues`)** | ✅ | ✅ | ✅ | ✅ | ✅ | `IssueEndpoints` |
+| **Sisäänkirjautuminen (`@edu.xamk.fi` / `@xamk.fi`)** | ✅ | ❌ (`403`) | ✅ | ✅ | ✅ | `UserService.AuthenticateOrCreateUserAsync` |
+| **Yksittäisen pelipisteen varaus (`Individual`)** | ❌ | ❌ (`403`) | ✅ *(max 4 h/vrk)* | ✅ *(max 4 h/vrk)* | ✅ *(max 4 h/vrk)* | `ReservationService.CreateReservationAsync` |
+| **Koko pelitilan varaus (`Room`)** | ❌ | ❌ (`403`) | ✅ *(max 4 h)* | ✅ *(ei tuntirajaa)* | ✅ *(ei tuntirajaa)* | `ReservationService` (`!user.IsAdmin` kiintiötarkistus) |
+| **Tapahtumavaraus (`Event`)** | ❌ | ❌ (`403`) | ❌ (`403`) | ✅ | ✅ | `ReservationService` (`!user.IsAdmin` tarkistus) |
+| **Varaaminen tilan ollessa huoltotilassa (`IsMaintenanceMode`)** | ❌ | ❌ | ❌ (`409`) | ✅ | ✅ | `ReservationService` (`isMaintenanceMode && !user.IsAdmin`) |
+| **Varaaminen aukioloaikojen ja arkipäivien ulkopuolella (`24/7`)** | ❌ | ❌ | ❌ (`400`) | ❌ (`400`) | ✅ (`allowAnytime`) | `OpeningHours.IsWithinOpeningHours(..., allowAnytime: user.IsSuperAdmin)` |
+| **Päällekkäisten opiskelijavarausten jyräys (`POST /override`)** | ❌ | ❌ | ❌ (`403`) | ❌ (`403`) | ✅ | `ReservationService.CreateAdminOverrideReservationAsync` (`user.IsSuperAdmin`) |
+| **Oman varauksen peruutus (`DELETE /api/reservations/{id}`)** | ❌ | ❌ | ✅ | ✅ | ✅ | `ReservationService.CancelReservationAsync` |
+| **Muiden käyttäjien varausten peruutus** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `ReservationService` (`reservation.UserId != userId && !user.IsAdmin`) |
+| **Pelitoiveen ehdotus & äänestys (`Wishlist` + `Upvote`)** | ❌ | ❌ | ✅ | ✅ | ✅ | `GamesCatalog.tsx` + `GameEndpoints` |
+| **Pelien lisäys, hyväksyntä valikoimaan & poisto** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `GameEndpoints` (`X-User-Id`: `Admin`/`SuperAdmin`) |
+| **Tiedotteiden julkaisu, kiinnitys & poisto (`News`)** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `NewsEndpoints` (`X-User-Id`: `Admin`/`SuperAdmin`) |
+| **Varauskiintiöiden, aukioloaikojen & huoltotilan muokkaus** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `SettingsEndpoints` (`PUT /api/settings`) |
+| **Yksittäisen pelipisteen asettaminen huoltotilaan** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `StationEndpoints` (`PUT /api/stations/{id}/status`) |
+| **Käyttötilastojen & vikailmoitusten hallinta** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `StatisticsEndpoints` & `IssueEndpoints` |
+| **Käyttäjälistan tarkastelu (`GET /api/users`)** | ❌ | ❌ | ❌ (`403`) | ✅ | ✅ | `AuthEndpoints` (`Admin` / `SuperAdmin`) |
+| **Käyttäjän bannaaminen & bannin poisto (`PUT /users/{id}/ban`)** | ❌ | ❌ | ❌ (`403`) | ✅ *(ei SuperAdminia)* | ✅ *(ei SuperAdminia)* | `AuthEndpoints` + `User.Ban` (`DomainException` jos `IsSuperAdmin`) |
+| **Käyttäjän roolin muuttaminen (`PUT /users/{id}/role`)** | ❌ | ❌ | ❌ (`403`) | ❌ (`403`) | ✅ | `AuthEndpoints` (`authUser.Role == "SuperAdmin"`) |
+
+---
+
+## 6. Tietokantakaavio & Domain-entiteetit (ER-kartta)
 
 Kaikki entiteetit tallennetaan `ApplicationDbContext`-luokan kautta (PostgreSQL-tauluihin tai kehitysympäristön muistitietokantaan) ja jokaisella taululla on oma EF Core -konfiguraationsa kansiossa `src/Infrastructure/Persistence/Configurations/`. Lisäksi järjestelmän dynaamiset aukiolo- ja kiintiösäännöt tallennetaan tiedostoon `site-settings.json`.
 
@@ -353,7 +399,7 @@ erDiagram
 
 ---
 
-## 6. Käyttöliittymän Komponentti-, Reititys- ja Välimuistikartta (`src/Client`)
+## 7. Käyttöliittymän Komponentti-, Reititys- ja Välimuistikartta (`src/Client`)
 
 Käyttöliittymä rakentuu kolmen kontekstintarjoajan (`LanguageProvider`, `AuthProvider`, `RouterProvider`) ja viiden päävälilehden (`NavTab`) ympärille:
 
