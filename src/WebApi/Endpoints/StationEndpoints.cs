@@ -82,7 +82,7 @@ public static class StationEndpoints
             Result<UserResponse> userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
             Result<GamingStationResponse> result = await stationService.UpdateStationStatusAsync(id, request, cancellationToken);

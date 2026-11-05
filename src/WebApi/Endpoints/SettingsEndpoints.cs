@@ -56,7 +56,7 @@ public static class SettingsEndpoints
             Result<UserResponse> userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
             // Tallennetaan päivitetyt sivustoasetukset

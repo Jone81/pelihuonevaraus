@@ -80,7 +80,7 @@ public class ReservationEndpointsTests : IClassFixture<TestWebApplicationFactory
                 "PC A1",
                 GamingStationType.PC);
 
-            DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 15, 8, 0, 0, TimeSpan.FromHours(2));
+            DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 16, 8, 0, 0, TimeSpan.FromHours(2));
             TimeWindow window = TimeWindow.Create(
                 baseTime.AddHours(2), // 10:00
                 baseTime.AddHours(4), // 12:00

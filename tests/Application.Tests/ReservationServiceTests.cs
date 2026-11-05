@@ -8,7 +8,9 @@ using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Application.Reservations;
 using Pelihuone.Application.Reservations.Validators;
+using Pelihuone.Application.Settings;
 using Pelihuone.Contracts.Reservations;
+using Pelihuone.Contracts.Settings;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.Models;
 using Pelihuone.Domain.ValueObjects;
@@ -26,6 +28,7 @@ public class ReservationServiceTests
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IDateTimeProvider _dateTimeProvider = Substitute.For<IDateTimeProvider>();
+    private readonly ISettingsService _settingsService = Substitute.For<ISettingsService>();
     private readonly FakeTimeProvider _fakeTimeProvider = new();
     private readonly ReservationService _service;
 
@@ -34,10 +37,25 @@ public class ReservationServiceTests
     /// </summary>
     public ReservationServiceTests()
     {
-        // Asetetaan kiinteä aika (1.11.2026 klo 08:00 EET) determinististä aikaikkunoiden testausta varten
-        DateTimeOffset fixedTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        // Asetetaan kiinteä aika maanantaille (2.11.2026 klo 08:00 EET arkipäivä) determinististä aikaikkunoiden testausta varten
+        DateTimeOffset fixedTime = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
         _fakeTimeProvider.SetUtcNow(fixedTime);
         _dateTimeProvider.UtcNow.Returns(_fakeTimeProvider.GetUtcNow());
+
+        _settingsService.GetSettingsAsync(Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new SiteSettingsResponse(
+                DiscordWebhookUrl: "",
+                OpeningHoursText: "08:00 - 18:00",
+                OpenTimeHour: 8,
+                CloseTimeHour: 18,
+                OnlyWeekdays: true,
+                MaxAdvanceBookingMonths: 2,
+                MaxIndividualHours: 4,
+                MaxStudentRoomHours: 4,
+                MinReservationMinutes: 30,
+                EnforceSharedTvLock: true,
+                IsMaintenanceMode: false,
+                MaintenanceMessage: "")));
 
         _service = new ReservationService(
             _reservationRepository,
@@ -45,9 +63,11 @@ public class ReservationServiceTests
             _userRepository,
             _unitOfWork,
             _dateTimeProvider,
-            new CreateReservationRequestValidator(),
+            new CreateReservationRequestValidator(_dateTimeProvider),
             new CancelReservationRequestValidator(),
-            NullLogger<ReservationService>.Instance);
+            NullLogger<ReservationService>.Instance,
+            null,
+            _settingsService);
     }
 
     /// <summary>
@@ -313,5 +333,160 @@ public class ReservationServiceTests
         // Assert: Varmistetaan, että päiväkiintiön ylitys estää varauksen
         Assert.True(result.IsFailure);
         Assert.Equal("Reservation.DailyLimitExceeded", result.Error.Code);
+    }
+
+    /// <summary>
+    /// Varmistaa, että käyttöestossa (bannattu) oleva käyttäjä ei voi luoda uutta varausta.
+    /// </summary>
+    [Fact]
+    public async Task CreateReservation_WhenUserIsBanned_ReturnsForbidden()
+    {
+        // Arrange: Luodaan käyttäjä, jolla on aktiivinen banni
+        Guid userId = Guid.NewGuid();
+        User bannedUser = User.Create(new UserId(userId), SchoolEmail.Create("banned@edu.xamk.fi"), "Bannattu", UserRole.User, _dateTimeProvider.UtcNow.AddDays(-5));
+        bannedUser.Ban(_dateTimeProvider.UtcNow.AddDays(3), "Sääntörikkomus pelitilassa");
+
+        _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(bannedUser);
+
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        CreateReservationRequest request = new CreateReservationRequest(
+            "banned-idem-key",
+            userId,
+            (int)ReservationType.Individual,
+            Guid.NewGuid(),
+            startUtc,
+            startUtc.AddHours(2));
+
+        // Act
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Forbidden, result.Error.Type);
+        Assert.Equal("User.Banned", result.Error.Code);
+    }
+
+    /// <summary>
+    /// Varmistaa, että huoltotilassa olevalle pelipisteelle ei voida tehdä varausta.
+    /// </summary>
+    [Fact]
+    public async Task CreateReservation_WhenStationIsInactive_ReturnsNotFound()
+    {
+        // Arrange: Pelipiste on asetettu huoltotilaan (IsActive = false)
+        Guid userId = Guid.NewGuid();
+        Guid stationId = Guid.NewGuid();
+        User user = User.Create(new UserId(userId), SchoolEmail.Create("user@edu.xamk.fi"), "Matti", UserRole.User, _dateTimeProvider.UtcNow);
+        GamingStation station = GamingStation.Create(new GamingStationId(stationId), "PC 1", GamingStationType.PC);
+        station.Deactivate();
+
+        _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(user);
+        _gamingStationRepository.GetByIdAsync(new GamingStationId(stationId), Arg.Any<CancellationToken>()).Returns(station);
+
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        CreateReservationRequest request = new CreateReservationRequest(
+            "inactive-station-idem",
+            userId,
+            (int)ReservationType.Individual,
+            stationId,
+            startUtc,
+            startUtc.AddHours(2));
+
+        // Act
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal("GamingStation.NotFound", result.Error.Code);
+    }
+
+    /// <summary>
+    /// Varmistaa, että tilapäisessä huoltotilassa tavallisen opiskelijan varaus estetään.
+    /// </summary>
+    [Fact]
+    public async Task CreateReservation_WhenMaintenanceModeActiveAndNormalUser_ReturnsMaintenanceError()
+    {
+        // Arrange: Asetukset määrittelevät huoltotilan olevan päällä
+        _settingsService.GetSettingsAsync(Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new SiteSettingsResponse(
+                DiscordWebhookUrl: "",
+                OpeningHoursText: "08:00 - 18:00",
+                OpenTimeHour: 8,
+                CloseTimeHour: 18,
+                OnlyWeekdays: true,
+                MaxAdvanceBookingMonths: 2,
+                MaxIndividualHours: 4,
+                MaxStudentRoomHours: 4,
+                MinReservationMinutes: 30,
+                EnforceSharedTvLock: true,
+                IsMaintenanceMode: true,
+                MaintenanceMessage: "Pelitilan verkkohuolto käynnissä")));
+
+        Guid userId = Guid.NewGuid();
+        User normalUser = User.Create(new UserId(userId), SchoolEmail.Create("student@edu.xamk.fi"), "Opiskelija", UserRole.User, _dateTimeProvider.UtcNow);
+        _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(normalUser);
+
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        CreateReservationRequest request = new CreateReservationRequest(
+            "maint-idem-key",
+            userId,
+            (int)ReservationType.Individual,
+            Guid.NewGuid(),
+            startUtc,
+            startUtc.AddHours(2));
+
+        // Act
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal("Reservation.MaintenanceMode", result.Error.Code);
+    }
+
+    /// <summary>
+    /// Varmistaa, että ylläpitäjä (Admin) voi tehdä varauksia vaikka pelitila olisi huoltotilassa.
+    /// </summary>
+    [Fact]
+    public async Task CreateReservation_WhenMaintenanceModeActiveAndAdminUser_AllowsReservation()
+    {
+        // Arrange: Huoltotila päällä, mutta varaajana Admin
+        _settingsService.GetSettingsAsync(Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new SiteSettingsResponse(
+                DiscordWebhookUrl: "",
+                OpeningHoursText: "08:00 - 18:00",
+                OpenTimeHour: 8,
+                CloseTimeHour: 18,
+                OnlyWeekdays: true,
+                MaxAdvanceBookingMonths: 2,
+                MaxIndividualHours: 4,
+                MaxStudentRoomHours: 4,
+                MinReservationMinutes: 30,
+                EnforceSharedTvLock: true,
+                IsMaintenanceMode: true,
+                MaintenanceMessage: "Huoltokatko")));
+
+        Guid adminId = Guid.NewGuid();
+        Guid stationId = Guid.NewGuid();
+        User adminUser = User.Create(new UserId(adminId), SchoolEmail.Create("admin@xamk.fi"), "Valvoja", UserRole.Admin, _dateTimeProvider.UtcNow);
+        GamingStation station = GamingStation.Create(new GamingStationId(stationId), "PC 1", GamingStationType.PC);
+
+        _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(adminUser);
+        _gamingStationRepository.GetByIdAsync(new GamingStationId(stationId), Arg.Any<CancellationToken>()).Returns(station);
+
+        DateTimeOffset startUtc = _dateTimeProvider.UtcNow.AddHours(1);
+        CreateReservationRequest request = new CreateReservationRequest(
+            "admin-maint-idem",
+            adminId,
+            (int)ReservationType.Individual,
+            stationId,
+            startUtc,
+            startUtc.AddHours(2));
+
+        // Act
+        Result<ReservationResponse> result = await _service.CreateReservationAsync(request);
+
+        // Assert: Admin saa luoda varauksen huoltotilasta huolimatta
+        Assert.True(result.IsSuccess);
+        await _reservationRepository.Received(1).AddAsync(Arg.Any<Reservation>(), Arg.Any<CancellationToken>());
+        await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

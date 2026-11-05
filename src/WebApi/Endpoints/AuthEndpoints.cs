@@ -98,7 +98,7 @@ public static class AuthEndpoints
             Result<UserResponse> userResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
             {
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
             // Haetaan ja palautetaan kaikki järjestelmän käyttäjät
@@ -141,7 +141,7 @@ public static class AuthEndpoints
             Result<UserResponse> authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!authUserResult.IsSuccess || authUserResult.Value.Role != "SuperAdmin")
             {
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
             // Jäsennetään ja validoidaan pyydetty uusi käyttäjärooli
@@ -176,7 +176,7 @@ public static class AuthEndpoints
             Result<UserResponse> authUserResult = await userService.GetUserByIdAsync(headerUserId.Value, cancellationToken);
             if (!authUserResult.IsSuccess || (authUserResult.Value.Role != "Admin" && authUserResult.Value.Role != "SuperAdmin"))
             {
-                return Results.Forbid();
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
             // Asetetaan tai poistetaan kohdekäyttäjän käyttöesto (banni)

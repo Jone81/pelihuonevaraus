@@ -38,7 +38,7 @@ public class OutboxInterceptorTests
         GamingStationId stationId = GamingStationId.New();
         ReservationId reservationId = ReservationId.New();
 
-        DateTimeOffset fixedNow = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset fixedNow = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
         TimeWindow timeWindow = TimeWindow.Create(
             fixedNow.AddHours(1),
             fixedNow.AddHours(3),

@@ -36,7 +36,7 @@ public class ReservationRepositoryTests
 
         UserId userId = UserId.New();
         GamingStationId stationId = GamingStationId.New();
-        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
 
         TimeWindow existingWindow = TimeWindow.Create(
             baseTime.AddHours(2), // 10:00
@@ -84,7 +84,7 @@ public class ReservationRepositoryTests
         await context.GamingStations.AddRangeAsync(ps5Station, switchStation);
 
         UserId userId = UserId.New();
-        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
 
         TimeWindow ps5Window = TimeWindow.Create(
             baseTime.AddHours(2), // 10:00
@@ -127,7 +127,7 @@ public class ReservationRepositoryTests
 
         GamingStationId pcStationId = GamingStationId.New();
         UserId userId = UserId.New();
-        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
 
         TimeWindow roomWindow = TimeWindow.Create(
             baseTime.AddHours(1), // 09:00
@@ -169,7 +169,7 @@ public class ReservationRepositoryTests
 
         GamingStationId stationId = GamingStationId.New();
         UserId userId = UserId.New();
-        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 1, 8, 0, 0, TimeSpan.FromHours(2));
+        DateTimeOffset baseTime = new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.FromHours(2));
 
         TimeWindow window = TimeWindow.Create(
             baseTime.AddHours(2), // 10:00

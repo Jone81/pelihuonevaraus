@@ -126,8 +126,8 @@ public sealed class ReservationService : IReservationService
 
         if (_settingsService is not null)
         {
-            Result<SiteSettingsResponse> settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
-            if (settingsResult.IsSuccess)
+            Result<SiteSettingsResponse>? settingsResult = await _settingsService.GetSettingsAsync(cancellationToken);
+            if (settingsResult is not null && settingsResult.IsSuccess)
             {
                 SiteSettingsResponse s = settingsResult.Value;
                 openHour = s.OpenTimeHour;

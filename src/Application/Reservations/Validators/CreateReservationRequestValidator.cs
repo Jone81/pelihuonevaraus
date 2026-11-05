@@ -1,4 +1,5 @@
 using FluentValidation;
+using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Contracts.Reservations;
 
 namespace Pelihuone.Application.Reservations.Validators;
@@ -9,9 +10,10 @@ namespace Pelihuone.Application.Reservations.Validators;
 public sealed class CreateReservationRequestValidator : AbstractValidator<CreateReservationRequest>
 {
     /// <summary>
-    /// Alustaa varauspyynnön validointisäännöt.
+    /// Alustaa varauspyynnön validointisäännöt käyttäen annettua tai järjestelmän oletusaikapalvelua.
     /// </summary>
-    public CreateReservationRequestValidator()
+    /// <param name="dateTimeProvider">Valinnainen aikapalvelu UTC-ajan määrittämiseen testeissä ja ajonaikana.</param>
+    public CreateReservationRequestValidator(IDateTimeProvider? dateTimeProvider = null)
     {
         // Idempotenssiavain estää vahingossa lähetetyt tuplavaraukset
         RuleFor(x => x.IdempotencyKey)
@@ -34,8 +36,12 @@ public sealed class CreateReservationRequestValidator : AbstractValidator<Create
         // Aikavälin perusrajoitteet: ei menneisyyteen eikä yli 2 kuukautta etukäteen
         RuleFor(x => x.StartUtc)
             .LessThan(x => x.EndUtc).WithMessage("Alkuajan on oltava ennen loppuaikaa.")
-            .GreaterThan(DateTimeOffset.UtcNow.AddMinutes(-15)).WithMessage("Varausta ei voi tehdä menneisyyteen.")
-            .LessThan(DateTimeOffset.UtcNow.AddMonths(2).AddDays(2)).WithMessage("Varauksen voi tehdä enintään 2 kuukautta etukäteen.");
+            .Must((CreateReservationRequest _, DateTimeOffset startUtc) =>
+                startUtc > (dateTimeProvider?.UtcNow ?? DateTimeOffset.UtcNow).AddMinutes(-15))
+            .WithMessage("Varausta ei voi tehdä menneisyyteen.")
+            .Must((CreateReservationRequest _, DateTimeOffset startUtc) =>
+                startUtc < (dateTimeProvider?.UtcNow ?? DateTimeOffset.UtcNow).AddMonths(2).AddDays(2))
+            .WithMessage("Varauksen voi tehdä enintään 2 kuukautta etukäteen.");
 
         RuleFor(x => x.EndUtc - x.StartUtc)
             .GreaterThanOrEqualTo(TimeSpan.FromMinutes(30))
