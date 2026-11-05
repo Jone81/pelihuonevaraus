@@ -115,6 +115,29 @@ using (IServiceScope scope = app.Services.CreateScope())
     await Pelihuone.Infrastructure.Persistence.DatabaseSeeder.SeedAsync(dbContext, logger);
 }
 
+// Rekisteröidään prosessitason hätäkuuntelija kriittisille kaatumisille
+AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs eventArgs) =>
+{
+    if (eventArgs.ExceptionObject is Exception fatalException)
+    {
+        try
+        {
+            using IServiceScope emergencyScope = app.Services.CreateScope();
+            Pelihuone.Application.Notifications.IErrorNotificationService errorNotifier =
+                emergencyScope.ServiceProvider.GetRequiredService<Pelihuone.Application.Notifications.IErrorNotificationService>();
+            errorNotifier.SendErrorAlertAsync(
+                fatalException,
+                "AppDomain.UnhandledException (Kriittinen palvelinkaatuminen)",
+                null,
+                CancellationToken.None).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            // Vaimennetaan kaatumisen aikainen toissijainen poikkeus
+        }
+    }
+};
+
 app.Run();
 
 // Tehdään Program-luokasta julkinen WebApplicationFactory-integraatiotestejä varten

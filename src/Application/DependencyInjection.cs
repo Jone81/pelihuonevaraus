@@ -36,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddScoped<IDiscordNotificationService, DiscordNotificationService>();
+        services.AddScoped<IErrorNotificationService, ErrorNotificationService>();
         services.AddScoped<IIssueReportService, IssueReportService>();
 
         return services;

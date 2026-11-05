@@ -280,6 +280,8 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/We
 | [`IStatisticsService`](../src/Application/Statistics/IStatisticsService.cs) | [`StatisticsService`](../src/Application/Statistics/StatisticsService.cs) | `GetStatisticsAsync` |
 | [`IIssueReportService`](../src/Application/Issues/IIssueReportService.cs) | [`IssueReportService`](../src/Application/Issues/IssueReportService.cs) | `CreateReportAsync`, `GetAllReportsAsync`, `ResolveReportAsync` |
 | [`IDiscordNotificationService`](../src/Application/Notifications/IDiscordNotificationService.cs) | [`DiscordNotificationService`](../src/Application/Notifications/DiscordNotificationService.cs) | `SendReservationCreatedAsync`, `SendReservationOverriddenAsync` |
+| [`IErrorNotificationService`](../src/Application/Notifications/IErrorNotificationService.cs) | [`ErrorNotificationService`](../src/Application/Notifications/ErrorNotificationService.cs) | `SendErrorAlertAsync(exception, path, traceId)` |
+| [`IEmailSender`](../src/Application/Notifications/IEmailSender.cs) | [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) | `SendEmailAsync(recipients, subject, body, isHtml)` |
 
 ### 3.2 Repositorio- ja Infrastruktuuriabstraktiot (`src/Application/Abstractions`)
 

@@ -449,3 +449,14 @@ flowchart LR
 | `['settings']` | `api.getSettings()` | `AdminPanel` (`settings`) | Asetusten ja varauskiintiöiden tallennus (`updateSettingsMutation`) |
 | `['statistics']` | `api.getStatistics()` | `AdminPanel` (`statistics`) | Pelin tilan vaihto, varauksen peruutus + 10 s automaattipäivitys |
 | `['issues']` | `api.getIssueReports(adminId)` | `AdminPanel` (`issues`) | Vikailmoituksen lähetys tai ratkaistuksi kuittaaminen + 10 s automaattipäivitys |
+
+---
+
+## 7. Automaattinen Virhe- ja Kaatumishälytysjärjestelmä Ylläpidolle
+
+Järjestelmä valvoo taustalla kaikkia HTTP-pyyntöjä ja prosessitason suoritusta:
+1. **HTTP 500 -palvelinvirheet:** [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs) kutsuu skopatusti [`IErrorNotificationService.SendErrorAlertAsync`](../src/Application/Notifications/IErrorNotificationService.cs) -palvelua. Toimintasäännöistä johtuvat `DomainException`-400-virheet eivät laukaise hälytyksiä.
+2. **Prosessitason kaatumiset:** [`src/WebApi/Program.cs`](../src/WebApi/Program.cs) nappaa `AppDomain.CurrentDomain.UnhandledException`-tapahtuman ja lähettää hätähälytyksen ennen prosessin alasajoa.
+3. **Vastaanottajien dynaaminen haku:** Osoitteet haetaan tietokannasta kaikille aktiivisille `Admin`- ja `SuperAdmin`-käyttäjille. Jos tietokantayhteys katkeaa kaatumisen yhteydessä, käytetään konfiguroitua varasähköpostia (`Alerts:AdminEmail` / `Smtp:AdminEmail`).
+4. **Spämmisuojaus ja cooldown:** 60 sekunnin `AlertCooldown` identtisille poikkeuksille estää sähköpostitulvan.
+5. **SMTP & Simulaatio:** [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää HTML-raportin (sis. virheviestin, HTTP-polun, Trace ID:n, isäntäkoneen ja täyden pinojäljen). Kehitysympäristössä ilman SMTP-palvelinta lähetys simuloidaan turvallisesti sovelluslokiin.

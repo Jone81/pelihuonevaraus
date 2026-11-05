@@ -152,7 +152,7 @@ Järjestelmän valtuutusmalli (Authorization) on monikerroksinen: oikeudet tarki
 
 ---
 
-## 7. Virheenkäsittely, Tietoturva ja Rate Limiting
+## 7. Virheenkäsittely, Hälytykset, Tietoturva ja Rate Limiting
 
 1. **RFC 9457 `ProblemDetails`:**
    - Kaikki palvelukerroksen `Result.Failure(Error)`-tulokset muunnetaan [`ResultExtensions.ToHttpResult`](../src/WebApi/Extensions/ResultExtensions.cs)-laajennusmetodilla standardinmukaiseksi `application/problem+json` -vastaukseksi:
@@ -162,6 +162,16 @@ Järjestelmän valtuutusmalli (Authorization) on monikerroksinen: oikeudet tarki
      - `ErrorType.NotFound` → `404 Not Found`
      - `ErrorType.Conflict` → `409 Conflict` (esim. laite varattu, SharedTV-ristiriita tai huoltotila)
    - Odottamattomat poikkeukset sieppaa [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs), joka lokittaa virheen palvelimella mutta palauttaa asiakkaalle turvallisen `500 Internal Server Error` -`ProblemDetails`-vastauksen ilman pinojälkiä (Stack Trace).
+
+### 7.1 Automaattinen virhe- ja kaatumishälytysjärjestelmä ylläpidolle (Admin/SuperAdmin Alerting)
+Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationService`](../src/Application/Notifications/IErrorNotificationService.cs)), joka valvoo sekä HTTP-pyyntöjä että prosessitason poikkeuksia:
+- **Käsittelemättömät HTTP 500 -poikkeukset:** [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs) laukaisee automaattisen sähköpostihälytyksen kaikista palvelinvirheistä (toimialuesäännöistä johtuvat `DomainException`-400-virheet rajataan pois hälytyksistä).
+- **Prosessitason kaatumiset (Unhandled Process Crashes):** [`src/WebApi/Program.cs`](../src/WebApi/Program.cs) kuuntelee `AppDomain.CurrentDomain.UnhandledException`-tapahtumaa. Mikäli taustasäie tai CLR-prosessi kaatuu fataliin virheeseen, järjestelmä lähettää hätähälytyksen ennen prosessin alasajoa.
+- **Vastaanottajien dynaaminen resoluutio ja vikasietoisuus (Resilience):** Palvelu hakee tietokannasta kaikkien aktiivisten `Admin`- ja `SuperAdmin`-käyttäjien sähköpostiosoitteet. Jos tietokanta on alhaalla tai yhteys poikki, järjestelmä käyttää automaattisesti konfiguroitua varasähköpostia (`Alerts:AdminEmail` / `Smtp:AdminEmail` / `Smtp:FromEmail`).
+- **Spämmisuojaus ja jäähdytysaika (Spam Throttling):** Identtisille virheille on toteutettu muistipohjainen 60 sekunnin `AlertCooldown`. Tämä estää sähköpostitulvan, jos toistuva silmukka tai taustaprosessi aiheuttaa jatkuvaa virhetilaa.
+- **Rakenteinen HTML-virheraportti:** Viesti sisältää selkeän värikoodatun kortin, UTC-aikaleiman, poikkeuksen täyden tyyppinimen, virheviestin, HTTP-polun, Trace ID:n palvelinlokeihin linkittämistä varten, palvelimen isäntäkoneen tiedot sekä täydellisen pinojäljen (Stack Trace) ja sisäiset poikkeukset.
+- **SMTP & Kehitysympäristön simulaatio:** [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää viestit oikealla SMTP-palvelimella. Mikäli SMTP-isäntää ei ole konfiguroitu (paikallinen kehitys), lähetys simuloidaan turvallisesti sovelluslokiin.
+
 2. **Rate Limiting (Spämmi- ja bottisuojaus):**
    - `AuthPolicy`: Enintään **5 pyyntöä / minuutti / IP** kirjautumis- ja OTP-koodipäätepisteisiin.
    - `ReservationPolicy`: Enintään **10 pyyntöä / minuutti / IP** varauspäätepisteisiin.

@@ -4,10 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Abstractions.Time;
+using Pelihuone.Application.Notifications;
 using Pelihuone.Infrastructure.Outbox;
 using Pelihuone.Infrastructure.Persistence;
 using Pelihuone.Infrastructure.Repositories;
 using Pelihuone.Infrastructure.Services;
+using Pelihuone.Infrastructure.Services.Email;
 
 namespace Pelihuone.Infrastructure;
 
@@ -91,6 +93,7 @@ public static class DependencyInjection
         services.AddScoped<INewsRepository, NewsRepository>();
         services.AddScoped<IGameRoomRepository, GameRoomRepository>();
         services.AddScoped<IIssueReportRepository, IssueReportRepository>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         return services;
     }
