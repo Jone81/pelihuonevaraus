@@ -4,6 +4,27 @@
 
 Miksi näin: yksi agentti, joka tekee domainin, tallennuksen, rajapinnan ja käyttöliittymän samalla kertaa, sekoittaa kerrosvastuut. Kun kirjoitusoikeus on rajattu yhteen kansioon/projektiin ja katselmoija on eri agentti kuin tekijä, jokainen sääntö pysyy `Docs/domain.md`:n määräämässä paikassa.
 
+---
+
+## Yleiset laatu- ja koodisäännöt (Koskee jokaista roolia)
+
+1. **Kääntäjäpalomuuri (`Directory.Build.props`):**
+   - `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest-recommended` ja `GenerateDocumentationFile=true`.
+   - Koodissa ei saa olla yhtäkään kääntäjävaroitusta, puuttuvaa XML-kommenttia (`CS1591`), `// TODO`-kommenttia, käyttämätöntä muuttujaa tai varoitusten ohituksia (`#pragma warning disable`, `eslint-disable`).
+2. **Eksplisiittiset tyypit (`var`-avainsana kielletty):**
+   - Käytä C#-koodissa aina eksplisiittisiä tyyppejä `var`-avainsanan sijaan (esim. `Reservation reservation = ...`). Sääntö on pakotettu virheeksi (`IDE0008 = error`).
+   - TypeScript/JavaScript-koodissa `var` on kielletty (`no-var: error`), tyypit ovat tiukkoja eikä `any`-tyyppiä sallita.
+3. **Pakollinen suomenkielinen dokumentointi:**
+   - Jokainen luokka, rajapinta, tietue, enum, julkinen metodi ja ominaisuus on dokumentoitava kattavilla suomenkielisillä XML-kommenteilla (`/// <summary>`), ja monimutkaiset lohkot rivikommentein. Käyttöliittymässä käytetään JSDoc-kommentteja (`/** ... */`).
+4. **Tietoturva & GDPR (PII-suojaus):**
+   - Älä koskaan kirjoita lokitiedostoihin opiskelijoiden henkilötietoja (nimi, sähköposti, varauksen vapaat lisätiedot). Julkisissa listauksissa muiden käyttäjien henkilötiedot anonymisoidaan.
+5. **Asynkronisuus ja suorituskyky:**
+   - Asynkroniset metodit ottavat vastaan `CancellationToken cancellationToken = default` ja välittävät sen eteenpäin. Älä koskaan käytä synkronista blokkausta (`.Result`, `.Wait()`) tai `async void` -metodeja.
+6. **Aika ja kelloriipuvuus:**
+   - Aika haetaan `IDateTimeProvider`-abstraktion kautta UTC-muodossa (`DateTimeOffset`). Suoraa kutsua `DateTimeOffset.UtcNow` tai `DateTime.Now` ei sallita sovellus- eikä domain-logiikassa.
+
+---
+
 ## Johtaja
 
 - **Tehtävä:** lukee kuvauksen, esittää suunnitelman ihmiselle, jakaa yhden `Tehtävät`-askeleen kerrallaan, kokoaa tulokset, ajaa lopputarkistukset, commitoi ja kirjoittaa lopetusviestin.
@@ -20,46 +41,56 @@ Spec: 001-varaa-pelipiste, askel 3
 Rooli: Application-työntekijä
 Säännöt ja Paikat: 6 (laitepäällekkäisyys), 7 (tilavaraus), 8 (SharedTV) — ReservationService
 Kriteerit: K1, K7, K8 use case -testinä
-Saat kirjoittaa: src/Application/** ja tests/Application.UnitTests/**
+Saat kirjoittaa: src/Application/** ja tests/Application.Tests/**
 Tallennuksen rajapinnat, joita käytät: IReservationRepository, IGamingStationRepository
 Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 ```
 
+---
+
 ## Domain-työntekijä (`@ARKKITEHTI` / Domain)
 
-- **Tehtävä:** käsitteet, arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`), entiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja niiden sisäiset säännöt (#1, #4, #5, #9, #11).
+- **Tehtävä:** käsitteet, arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`, vahvasti tyypitetyt ID:t), entiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja niiden sisäiset säännöt (#1, #4, #5, #9, #11).
 - **Lukee:** `Docs/domain.md`, `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, `Docs/adr/`, spec ja sen askel.
-- **Saa muuttaa:** `src/Domain/**`, `src/Contracts/**`, `src/Application/Abstractions/**`, `tests/Domain.UnitTests/**`.
+- **Saa muuttaa:** `src/Domain/**`, `src/Contracts/**`, `src/Application/Abstractions/**`, `tests/Application.Tests/**`.
 - **Ei saa:** viitata ulkoiseen NuGet-pakettiin, tietokantaan tai HTTP-kirjastoon; kutsua järjestelmän kelloa suoraan (`DateTimeOffset.UtcNow`); käyttää `var`-avainsanaa.
-- **Palauttaa johtajalle:** muutetut tiedostot, Domain-testien tuloste, lista säännöistä ja niiden testeistä, kysymykset.
+- **Palauttaa johtajalle:** muutetut tiedostot, testien tuloste, lista säännöistä ja niiden testeistä, kysymykset.
 - **Valmis kun:** askeleen Domain-kriteerit ovat vihreitä eikä `src/Domain` viittaa mihinkään ulkoiseen kirjastoon.
+
+---
 
 ## Application-työntekijä (`@BACKEND`)
 
-- **Tehtävä:** käyttötapauspalvelut (`ReservationService`, `GamingStationService`, `UserService`, `GameService`, `NewsService`, `SettingsService`, `StatisticsService`, `IssueReportService`), FluentValidation-validaattorit ja hakua vaativat säännöt (#2, #3, #6, #7, #8, #10, #11) sekä "vapaana nyt" -laskenta.
+- **Tehtävä:** käyttötapauspalvelut (`ReservationService`, `GamingStationService`, `UserService`, `GameService`, `NewsService`, `SettingsService`, `StatisticsService`, `IssueReportService`), syötevalidaattorit ja hakua vaativat säännöt (#2, #3, #6, #7, #8, #10, #11) sekä "vapaana nyt" -laskenta.
 - **Lukee:** `Docs/domain.md`, `Docs/arkkitehtuuri.md`, `Docs/rajapinta.md`, `Docs/testaus.md`, spec ja sen askel, Domainin ja Contractsin julkiset tyypit.
-- **Saa muuttaa:** `src/Application/**` (pl. `Abstractions/`), `tests/Application.UnitTests/**`.
+- **Saa muuttaa:** `src/Application/**` (pl. `Abstractions/`), `tests/Application.Tests/**`.
 - **Ei saa:** muuttaa `src/Domain/**`; viitata EF Coreen tai ASP.NET Coreen; heittää liiketoimintavirheitä poikkeuksina (`Result<T>`-pakko); lokittaa henkilötietoja (PII).
 - **Palauttaa johtajalle:** muutetut tiedostot, use case -testien tuloste, kriteeri → testi -lista, kysymykset.
 - **Valmis kun:** askeleen kriteerit menevät läpi use case -testinä ja jokainen sääntöhylkäys palauttaa `Result.Failure(...)`.
+
+---
 
 ## Infrastructure-työntekijä (`@TIETOKANTA`)
 
 - **Tehtävä:** repositorioiden toteutus EF Corella (`ApplicationDbContext`, PostgreSQL + InMemory fallback), Fluent API -konfiguraatiot, `OutboxInterceptor`, `SystemDateTimeProvider` ja `DatabaseSeeder`.
 - **Lukee:** `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, `src/Application/Abstractions/**`, `src/Domain/**`, spec ja sen askel.
-- **Saa muuttaa:** `src/Infrastructure/**`, `tests/Integration.Tests/**`.
+- **Saa muuttaa:** `src/Infrastructure/**`, `tests/Infrastructure.Tests/**`, `tests/Integration.Tests/**`.
 - **Ei saa:** tarkistaa liiketoimintasääntöjä repositoriossa; muuttaa `src/Domain/**` tai `src/Application/**`; tallentaa tietokantatiedostoja repoon.
 - **Palauttaa johtajalle:** muutetut tiedostot, testien tuloste, kysymykset.
 - **Valmis kun:** repositoriot ja `OutboxInterceptor` toimivat sekä PostgreSQL-konttia että muistitietokantaa vasten.
 
+---
+
 ## API-työntekijä (`@API`)
 
-- **Tehtävä:** Minimal API -päätepisteet (`src/WebApi/Endpoints/`), RFC 9457 `ProblemDetails` -muunnokset (`ResultExtensions`, `GlobalExceptionHandler`), Rate Limiting ja API/E2E-testit.
+- **Tehtävä:** Minimal API -päätepisteet (`src/WebApi/Endpoints/`), RFC 9457 `ProblemDetails` -muunnokset (`ResultExtensions`, `GlobalExceptionHandler`), Rate Limiting ja päätepistetestit.
 - **Lukee:** `Docs/rajapinta.md`, `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, spec ja sen askel, `src/Contracts/**`.
-- **Saa muuttaa:** `src/WebApi/**`, `tests/E2E.Tests/**`.
+- **Saa muuttaa:** `src/WebApi/**`, `tests/WebApi.Tests/**`.
 - **Ei saa:** tarkistaa liiketoimintasääntöjä endpointissa; kutsua repositorioita ohi käyttötapauspalvelun; palauttaa Domain-entiteettejä suoraan HTTP-vastauksessa.
 - **Palauttaa johtajalle:** muutetut tiedostot, API-testien tuloste kriteerinumeroin, kysymykset.
 - **Valmis kun:** askeleen HTTP-kriteerit menevät läpi oikeilla statuskoodeilla (`200`, `201`, `204`, `400`, `403`, `404`, `409`).
+
+---
 
 ## UI-työntekijä (`@UI`)
 
@@ -69,6 +100,8 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 - **Ei saa:** muokata backend-projekteja; käyttää `any`-tyyppiä tai `var`-avainsanaa; jättää kääntäjä- tai ESLint-varoituksia.
 - **Palauttaa johtajalle:** muutetut tiedostot, `npm --prefix src/Client run build && npm --prefix src/Client run lint` -tuloste, kysymykset.
 - **Valmis kun:** UI kääntyy ja läpäisee ESLintin nollalla varoituksella ja täyttää `Docs/UI_SPEC.md`:n invariantit `UI-1`–`UI-6`.
+
+---
 
 ## Katselmoija (`@QA` / Reviewer)
 
@@ -82,6 +115,8 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
   5. Repoon ei tule kiellettyä tiedostoa.
 - **Saa muuttaa:** ei mitään.
 - **Palauttaa johtajalle:** löytölistan muodossa `tiedosto:rivi — sääntö/kielto — mitä korjataan`. Tyhjä lista on hyväksyntä.
+
+---
 
 ## Viestit roolien välillä
 
@@ -98,4 +133,3 @@ Kysymys kulkee aina ylöspäin: työntekijä ei kysy ihmiseltä, ihminen ei vast
 ## Milloin hierarkiaa ei käytetä
 
 Korjaus, joka koskee yhtä tiedostoa, ei lisää eikä muuta sääntöä eikä muuta julkista tyyppiä, saa olla sen kerroksen työntekijän tekemä ilman uutta suunnitelmaa. Katselmoija lukee silti diffin, ja johtaja commitoi. Johtaja ei tee korjausta itse missään tapauksessa.
-

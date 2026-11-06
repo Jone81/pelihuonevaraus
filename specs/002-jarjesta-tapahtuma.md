@@ -25,7 +25,7 @@ Vain viittaukset `Docs/domain.md`:n riveihin ja `ADR 0001`:een:
 - **2** (`SuperAdmin` saa varata myös aukioloaikojen ulkopuolelle) — `OpeningHours` / `ReservationService`
 - **4** (tila- ja tapahtumavarauksella on oltava `GameRoomId`, ei yksittäistä `GamingStationId`:tä) — `Reservation.Create` (Domain)
 - **7** (tapahtuman tai tilavarauksen aikana ei sallita yksittäisvarauksia, eikä normaalia tilavarausta voi luoda varatun laitteen päälle) — `ReservationService` (Use case)
-- **10** (`SuperAdmin`-override peruuttaa päällekkäiset varaukset syykoodilla) — `ReservationService.CreateWithAdminOverrideAsync` (Use case; `ADR 0001`)
+- **10** (`SuperAdmin`-override peruuttaa päällekkäiset varaukset syykoodilla) — `ReservationService.OverrideAndCreateEventAsync` (Use case; `ADR 0001`)
 - **11** (käyttöestossa oleva käyttäjä ei voi varata, eikä `SuperAdmin`-tiliä voi bannata) — `User.Ban` (Domain) + `ReservationService` (Use case)
 
 ## Hyväksymiskriteerit
@@ -49,8 +49,7 @@ Kriteerit 4 (kohdistussääntö) ja 6 (`SuperAdmin`-bannauskielto) ajetaan myös
 
 ## Tehtävät
 
-1. **Domain: `Reservation`-luontisääntö (#4) koko tilan ja tapahtuman varauksille sekä `User.Ban` / `Unban` (#11).** Valmis kun Domain-yksikkötestit ovat vihreitä.
-2. **Application: `ReservationService.CreateWithAdminOverrideAsync` (sääntö #10, `ADR 0001`) sekä koko tilan päällekkäisyyssäännöt (#7).** Valmis kun kriteerit 1–7 menevät läpi Application-yksikkötesteinä.
-3. **Infrastructure: `GetOverlappingRoomReservationsAsync` ja `GetAllOverlappingInRoomAsync` -kyselyt sekä `OutboxInterceptor`-tallennus peruutetuille varauksille.** Valmis kun integraatiotestit menevät läpi.
-4. **API: `POST /api/reservations/override`, `PUT /api/stations/{id}/status`, `PUT /api/users/{id}/ban` ja `PUT /api/settings` -päätepisteet.** Valmis kun kriteerit 1–7 menevät läpi HTTP-tasolla (`tests/Integration.Tests` ja `tests/E2E.Tests`).
-
+1. **Domain: `Reservation`-luontisääntö (#4) koko tilan ja tapahtuman varauksille sekä `User.Ban` / `Unban` (#11).** Valmis kun Domain-yksikkötestit ovat vihreitä (`tests/Application.Tests`).
+2. **Application: `ReservationService.OverrideAndCreateEventAsync` (sääntö #10, `ADR 0001`) sekä koko tilan päällekkäisyyssäännöt (#7).** Valmis kun kriteerit 1–7 menevät läpi Application-yksikkötesteinä (`tests/Application.Tests`).
+3. **Infrastructure: `GetOverlappingRoomReservationsAsync` ja `GetAllOverlappingInRoomAsync` -kyselyt sekä `OutboxInterceptor`-tallennus peruutetuille varauksille.** Valmis kun testit menevät läpi (`tests/Infrastructure.Tests` ja `tests/Integration.Tests`).
+4. **API: `POST /api/reservations/override`, `PUT /api/stations/{id}/status`, `PUT /api/users/{id}/ban` ja `PUT /api/settings` -päätepisteet.** Valmis kun kriteerit 1–7 menevät läpi HTTP-tasolla (`tests/WebApi.Tests`).

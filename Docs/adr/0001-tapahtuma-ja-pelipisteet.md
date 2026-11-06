@@ -26,6 +26,6 @@ Valitaan **Vaihtoehto 3**.
 
 - **Selkeä domain-vastuu (`Reservation.Create`):** Sääntö #4 varmistaa `Reservation`-entiteetissä, että `Individual`-varauksella on aina `GamingStationId` ja `Room`/`Event`-varauksella aina `GameRoomId`.
 - **Yksittäisvarausten esto tapahtuman aikana (Sääntö #7):** `ReservationService` tarkistaa sekä laitekohtaiset päällekkäisyydet että koko tilan (`Room`/`Event`) varaukset.
-- **Läpinäkyvä historia opiskelijalle (Sääntö #10):** Kun `SuperAdmin` kutsuu `CreateWithAdminOverrideAsync`-käyttötapausta, ristiriitaisia varauksia ei poisteta tietokannasta, vaan jokaiselle kutsutaan `reservation.Cancel(reason, nowUtc)`. Opiskelija näkee `Omat varaukset` -näkymässä peruutuksen syyn (esim. *"CS2-turnaus koko tilassa"*) ja jokaisesta peruutuksesta lähtee `ReservationCancelledDomainEvent` Outbox-tauluun.
+- **Läpinäkyvä historia opiskelijalle (Sääntö #10):** Kun `SuperAdmin` kutsuu `OverrideAndCreateEventAsync`-käyttötapausta (`POST /api/reservations/override`), ristiriitaisia varauksia ei poisteta tietokannasta, vaan jokaiselle kutsutaan `reservation.Cancel(reason, nowUtc)`. Opiskelija näkee `Omat varaukset` -näkymässä peruutuksen syyn (esim. *"CS2-turnaus koko tilassa"*) ja jokaisesta peruutuksesta lähtee `ReservationCancelledDomainEvent` Outbox-tauluun.
 - **Vapaa tila ("Vapaana nyt") pysyy yhtenäisenä:** Jos aikavälillä on yksikin aktiivinen `Room`- tai `Event`-varaus, `GamingStationService.GetAvailableStationsAsync` palauttaa tyhjän listan (0 vapaata laitetta).
 

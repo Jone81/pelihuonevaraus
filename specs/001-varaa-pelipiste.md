@@ -44,11 +44,11 @@ Lähtötila on `Docs/testaus.md`:n testiaineisto: kello on keskiviikko klo **09:
 6. **Given:** lähtötila. **When:** opiskelija 1 yrittää varata `PC 1`:n 5 tunniksi (klo 10:00–15:00). **Then:** hylätään (`400 Bad Request`, yksittäisvarauksen enimmäiskesto 4 h).
 7. **Given:** opiskelija 1 on varannut `PC 2`:n klo 10:00–12:00. **When:** opiskelija 2 yrittää varata `PC 2`:n klo 11:00–13:00. **Then:** hylätään (`409 Conflict`, `Reservation.StationOverlap`).
 8. **Given:** opiskelija 1 on varannut `PlayStation 5`:n klo 14:00–16:00. **When:** opiskelija 2 yrittää varata `Nintendo Switch`:n klo 15:00–17:00. **Then:** hylätään (`409 Conflict`, `Reservation.SharedTvConflict`), koska konsolit jakavat saman television, eikä `Nintendo Switch` näy vapaiden laitteiden listassa klo 14:00–16:00.
-9. **Given:** opiskelijalla 1 on varaus klo 14:00–16:00 ja kello on 09:00. **When:** opiskelija 1 peruu varauksensa. **Then:** peruutus onnistuu (`204 No Content`), varauksen tila on `Cancelled` ja laite on jälleen vapaa klo 14:00–16:00.
+9. **Given:** opiskelijalla 1 on varaus klo 14:00–16:00 ja kello on 09:00. **When:** opiskelija 1 peruu varauksensa. **Then:** peruutus onnistuu (`200 OK`), varauksen tila on `Cancelled` ja laite on jälleen vapaa klo 14:00–16:00.
 10. **Given:** opiskelijalla 1 on varaus klo 10:00–12:00 ja kello siirretään aikaan **10:30** (varaus on jo alkanut). **When:** opiskelija 1 yrittää perua varauksen. **Then:** hylätään (`409 Conflict`, `Reservation.AlreadyStarted`).
 11. **Given:** käyttäjä yrittää kirjautua sähköpostilla `pelaaja@gmail.com`. **When:** kutsutaan kirjautumista. **Then:** hylätään (`400 Bad Request`), koska vain `@edu.xamk.fi` ja `@xamk.fi` sallitaan.
 
-Kriteerit 2, 4, 9, 10 ja 11 todennetaan myös suoraan Domain-yksikkötesteinä ilman tietokantaa tai HTTP-palvelinta.
+Kriteerit 2, 4, 9, 10 ja 11 todennetaan myös suoraan yksikkötesteinä ilman tietokantaa tai HTTP-palvelinta.
 
 ## Ei-tavoitteet
 
@@ -60,10 +60,9 @@ Kriteerit 2, 4, 9, 10 ja 11 todennetaan myös suoraan Domain-yksikkötesteinä i
 
 Yksi askel kerrallaan. Jokaisella askeleella on oma todennettava valmiuskriteerinsä.
 
-1. **Domain: `TimeWindow`, `OpeningHours`, `SchoolEmail`, `Reservation`, `GamingStation`, `User` ja säännöt 1, 4, 5, 9.** Nykyhetki annetaan parametrina. Valmis kun `dotnet test tests/Domain.UnitTests` on vihreä eikä `src/Domain` viittaa ulkoisiin paketteihin.
+1. **Domain: `TimeWindow`, `OpeningHours`, `SchoolEmail`, `Reservation`, `GamingStation`, `User` ja säännöt 1, 4, 5, 9.** Nykyhetki annetaan parametrina. Valmis kun `tests/Application.Tests` Domain-testit ovat vihreitä eikä `src/Domain` viittaa ulkoisiin paketteihin.
 2. **Application (Abstraktiot & Sopimukset): repositorioiden rajapinnat (`IReservationRepository`, `IGamingStationRepository`, `IUserRepository`) ja DTO-tietueet (`src/Contracts`).** Valmis kun `src/Application` ja `src/Contracts` kääntyvät virheittä.
-3. **Application (Use caset): `ReservationService` ja `GamingStationService` (säännöt 2, 3, 6, 7, 8, 11 sekä "vapaana nyt" -laskenta).** Valmis kun kriteerit 1–10 menevät läpi `tests/Application.UnitTests`-testeissä.
-4. **Infrastructure: EF Core (`ApplicationDbContext`), repositoriot, `OutboxInterceptor`, `SystemDateTimeProvider` ja `DatabaseSeeder`.** Valmis kun `tests/Integration.Tests` (mukaan lukien 10 rinnakkaisen varauspyynnön kilpailutilannetesti) menee läpi.
-5. **API: `/api/auth`, `/api/stations` ja `/api/reservations` -päätepisteet sekä RFC 9457 `ProblemDetails` -virhemuunnokset.** Valmis kun kriteerit 1–11 menevät läpi HTTP-kutsuina (`tests/E2E.Tests`).
-6. **Siivous ja katselmointi:** `Docs/arkkitehtuuri.md`:n **Kiellot** ja **Valmis**-lauseet tarkistettu rivi riviltä diffiä vasten. Valmis kun `dotnet test --nologo` on 100 % vihreä nollalla varoituksella.
-
+3. **Application (Use caset): `ReservationService` ja `GamingStationService` (säännöt 2, 3, 6, 7, 8, 11 sekä "vapaana nyt" -laskenta).** Valmis kun kriteerit 1–10 menevät läpi `tests/Application.Tests`-testeissä.
+4. **Infrastructure: EF Core (`ApplicationDbContext`), repositoriot, `OutboxInterceptor`, `SystemDateTimeProvider` ja `DatabaseSeeder`.** Valmis kun `tests/Infrastructure.Tests` ja `tests/Integration.Tests` (mukaan lukien 10 rinnakkaisen varauspyynnön kilpailutilannetesti) menevät läpi.
+5. **API: `/api/auth`, `/api/stations` ja `/api/reservations` -päätepisteet sekä RFC 9457 `ProblemDetails` -virhemuunnokset.** Valmis kun kriteerit 1–11 menevät läpi HTTP-kutsuina (`tests/WebApi.Tests`).
+6. **Siivous ja katselmointi:** `Docs/arkkitehtuuri.md`:n **Kiellot** ja **Valmis**-lauseet tarkistettu rivi riviltä diffiä vasten. Valmis kun `dotnet test --no-restore --nologo` on 100 % vihreä nollalla varoituksella.

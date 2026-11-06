@@ -36,7 +36,7 @@ Varaukset on tähän asti kirjattu pelihuoneen oven ruutupaperille sekä `#pelih
 | Voiko konsoleita käyttää yhtä aikaa? | **Ei voi.** Molempien konsolien HDMI-kaapelit menevät samaan seinällä olevaan 4K-televisioon (`SharedTV`). Jos PS5 on varattu, Switchiä ei voi käyttää samanaikaisesti, ja päinvastoin. |
 | Miten rikkinäinen laite merkitään nyt? | Näytön päälle oli teipattu maalarinteipillä lappu *"PC 3 näyttö pimeänä"*. Kukaan Discordissa varannut ei tiennyt tästä ennen saapumistaan paikalle. |
 
-**Ristiriita tilauksen kanssa:** Tilauksessa puhuttiin vain siitä, että "samaa pelipistettä ei saa kahdelle samaan aikaan". Huoneessa paljastui, että PS5 ja Switch ovat kaksi eri pelipistettä, mutta ne jakavat saman fyysisen television (`SharedTV`). Tämä synnytti uuden ehdottoman säännön (`Docs/domain.md` sääntö #6).
+**Ristiriita tilauksen kanssa:** Tilauksessa puhuttiin vain siitä, että "samaa pelipistettä ei saa kahdelle samaan aikaan". Huoneessa paljastui, että PS5 ja Switch ovat kaksi eri pelipistettä, mutta ne jakavat saman fyysisen television (`SharedTV`). Tämä synnytti uuden ehdottoman säännön (`Docs/domain.md` sääntö #8).
 
 ## Avoimet
 
@@ -55,5 +55,5 @@ Spec 001 ja Spec 002 ajettu suunnittelutilassa askel kerrallaan ja todennettu au
 
 - **Missä agentti kysyi:** Askeleen suunnittelussa täsmennettiin, tallennetaanko tapahtuman jyräämät (`override`) opiskelijavaraukset poistettuina riveinä vai tilassa `Cancelled` syyn kanssa. Vahvistettiin `ADR 0001`:n mukaisesti, että varaukset merkitään tilaan `Cancelled` peruutussyyllä, jotta opiskelija näkee `Omat varaukset` -näkymässä miksi varaus peruuntui.
 - **Missä se arvasi:** Alkuperäisessä käyttöliittymäluonnoksessa aikataulumatriisi näytti kerrallaan vain yhden valitun laitteen rivin, jolloin konsolien yhteisen TV:n (`SharedTV`) varaukset eivät näkyneet samassa taulukossa. Lisättiin sääntö (`UI-6`), että aikataulumatriisi listaa aina kaikki 8 pelipistettä yhtä aikaa ja tukee aikavälin maalausta hiirellä.
-- **Mikä lause puuttui:** "PS5 ja Nintendo Switch jakavat saman television (`UsesSharedTv = true`): toisen konsolin varaus lukitsee molemmat konsolit samalle aikavälille tilakoodilla `409 Conflict` (`Reservation.SharedTvConflict`)." Lisätty `Docs/domain.md`:n sääntöön #6 ja `Docs/rajapinta.md`:n virhetaulukkoon.
+- **Mikä lause puuttui:** "PS5 ja Nintendo Switch jakavat saman television (`UsesSharedTv = true`): toisen konsolin varaus lukitsee molemmat konsolit samalle aikavälille tilakoodilla `409 Conflict` (`Reservation.SharedTvConflict`)." Lisätty `Docs/domain.md`:n sääntöön #8 ja `Docs/rajapinta.md`:n virhetaulukkoon.
 
