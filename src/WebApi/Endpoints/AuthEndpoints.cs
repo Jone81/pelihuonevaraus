@@ -4,6 +4,7 @@ using Pelihuone.Application.Users;
 using Pelihuone.Contracts.Users;
 using Pelihuone.Domain.Enums;
 using Pelihuone.WebApi.Extensions;
+using Pelihuone.WebApi.RateLimiting;
 
 namespace Pelihuone.WebApi.Endpoints;
 
@@ -39,7 +40,7 @@ public static class AuthEndpoints
             // Muunnetaan palvelukerroksen tulos RFC 9457 -yhteensopivaksi HTTP-vastaukseksi
             return result.ToHttpResult(httpContext);
         })
-        .RequireRateLimiting("AuthPolicy")
+        .RequireRateLimiting(RateLimitPolicies.Auth)
         .WithName("Login")
         .WithSummary("Kirjaudu koulun sähköpostitunnuksilla (@edu.xamk.fi / @xamk.fi)");
 
@@ -57,7 +58,7 @@ public static class AuthEndpoints
             return result.ToHttpResult(httpContext, code =>
                 Results.Ok(new { message = "Vahvistuskoodi lähetetty sähköpostiin.", devCode = code }));
         })
-        .RequireRateLimiting("AuthPolicy")
+        .RequireRateLimiting(RateLimitPolicies.Auth)
         .WithName("SendVerificationCode")
         .WithSummary("Lähetä 6-numeroinen varmistuskoodi koulun sähköpostiin");
 
@@ -77,7 +78,7 @@ public static class AuthEndpoints
 
             return result.ToHttpResult(httpContext);
         })
-        .RequireRateLimiting("AuthPolicy")
+        .RequireRateLimiting(RateLimitPolicies.Auth)
         .WithName("VerifyCodeAndLogin")
         .WithSummary("Vahvista koodi ja kirjaudu sisään");
 
