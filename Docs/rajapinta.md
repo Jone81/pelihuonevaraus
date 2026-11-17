@@ -1,4 +1,4 @@
-# Rajapinta — pelihuoneen varausjärjestelmä
+# Rajapinta, pelihuoneen varausjärjestelmä
 
 Tämä tiedosto kuvaa julkisen HTTP-rajapinnan lupaukset sanoina. Yksityiskohtaiset C#-tietosopimukset (`src/Contracts/`) ja päätepisteiden tarkat DTO-mallit löytyvät tiedostosta [`Docs/rajapinnat.md`](./rajapinnat.md).
 
@@ -12,32 +12,32 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
-| POST `/api/auth/send-code` | Lähettää 6-numeroisen vahvistuskoodin (OTP, 15 min) koulusähköpostiin | Kaikki (`@edu.xamk.fi` / `@xamk.fi`) |
+| POST `/api/auth/send-code` | Lähettää 6-numeroisen vahvistuskoodin (OTP, 15 min) koulusähköpostiin | Kaikki (`@edu.xamk.fi` ja `@xamk.fi`) |
 | POST `/api/auth/verify-code` | Vahvistaa koodin ja kirjaa käyttäjän sisään | Kaikki |
-| POST `/api/auth/login` | Pikakirjautuminen koulun sähköpostilla (taaksepäinyhteensopivuus ja kehitys) | Kaikki |
-| GET `/api/users` | Listaa järjestelmän käyttäjät | Admin / SuperAdmin |
-| GET `/api/users/{id}` | Hakee yksittäisen käyttäjän tiedot | Admin / SuperAdmin |
+| POST `/api/auth/login` | Pikakirjautuminen koulun sähköpostilla kehityskäytössä | Kaikki |
+| GET `/api/users` | Listaa järjestelmän käyttäjät | Admin ja SuperAdmin |
+| GET `/api/users/{id}` | Hakee yksittäisen käyttäjän tiedot | Admin ja SuperAdmin |
 | PUT `/api/users/{id}/role` | Muuttaa käyttäjän roolia (`User`, `Admin`, `SuperAdmin`) | SuperAdmin |
-| PUT `/api/users/{id}/ban` | Asettaa tai poistaa käyttäjän käyttöeston (bannin) syyn kera | Admin / SuperAdmin |
+| PUT `/api/users/{id}/ban` | Asettaa tai poistaa käyttäjän käyttöeston syyn kera | Admin ja SuperAdmin |
 
 ### Pelipisteet (`/api/stations`)
 
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
 | GET `/api/stations` | Listaa kaikki aktiiviset pelipisteet (8 kpl) | Kaikki |
-| GET `/api/stations/admin` | Listaa kaikki pelipisteet mukaan lukien huoltotilassa olevat | Admin / SuperAdmin |
+| GET `/api/stations/admin` | Listaa kaikki pelipisteet mukaan lukien huoltotilassa olevat | Admin ja SuperAdmin |
 | GET `/api/stations/available` | Laskee vapaana olevat pelipisteet aikavälille (`startUtc`, `endUtc`) huomioiden `UsesSharedTv` | Kaikki |
-| PUT `/api/stations/{id}/status` | Päivittää pelipisteen tilan (aktiivinen / huollossa) ja näyttönimen | Admin / SuperAdmin |
+| PUT `/api/stations/{id}/status` | Päivittää pelipisteen tilan (aktiivinen tai huollossa) ja näyttönimen | Admin ja SuperAdmin |
 
 ### Varaukset (`/api/reservations`)
 
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
 | GET `/api/reservations` | Listaa aktiiviset varaukset sivuina (tukee suodatusta: `userId`, `fromUtc`, `toUtc`) | Kaikki (julkinen listaus anonymisoitu) |
-| GET `/api/reservations/{id}` | Hakee yksittäisen varauksen tiedot | Varaaja / Admin |
-| POST `/api/reservations` | Luo uuden yksittäis- (`Individual`), tila- (`Room`) tai tapahtumavarauksen (`Event`) | Kirjautunut käyttäjä / Admin |
+| GET `/api/reservations/{id}` | Hakee yksittäisen varauksen tiedot | Varaaja ja Admin |
+| POST `/api/reservations` | Luo uuden yksittäis- (`Individual`), tila- (`Room`) tai tapahtumavarauksen (`Event`) | Kirjautunut käyttäjä ja Admin |
 | POST `/api/reservations/override` | Luo `SuperAdmin`-tapahtuman ja peruuttaa päällekkäiset varaukset peruutussyyllä | SuperAdmin |
-| DELETE `/api/reservations/{id}` | Peruuttaa tulevan varauksen ennen sen alkamista | Varaaja / Admin |
+| DELETE `/api/reservations/{id}` | Peruuttaa tulevan varauksen ennen sen alkamista | Varaaja ja Admin |
 
 ### Pelikirjasto ja toivelista (`/api/games`)
 
@@ -46,8 +46,8 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 | GET `/api/games` | Listaa pelikirjaston asennetut pelit | Kaikki |
 | GET `/api/games/wishlist` | Listaa käyttäjien ehdottamat toivelistapelit äänimäärän mukaan | Kaikki |
 | POST `/api/games/wishlist` | Ehdottaa uutta peliä toivelistalle | Kirjautunut käyttäjä |
-| POST `/api/games` | Lisää uuden pelin suoraan pelikirjastoon | Admin / SuperAdmin |
-| PUT `/api/games/{id}/toggle-wishlist` | Siirtää pelin toivelistan ja asennettujen välillä | Admin / SuperAdmin |
+| POST `/api/games` | Lisää uuden pelin suoraan pelikirjastoon | Admin ja SuperAdmin |
+| PUT `/api/games/{id}/toggle-wishlist` | Siirtää pelin toivelistan ja asennettujen välillä | Admin ja SuperAdmin |
 | POST `/api/games/{id}/vote` | Äänestää toivelistalla olevaa peliä | Kirjautunut käyttäjä |
 
 ### Tiedotteet (`/api/news`)
@@ -55,24 +55,24 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
 | GET `/api/news` | Listaa tiedotteet (kiinnitetyt ensin, sitten uusimmat) | Kaikki |
-| POST `/api/news` | Luo uuden tiedotteen | Admin / SuperAdmin |
-| DELETE `/api/news/{id}` | Poistaa tiedotteen | Admin / SuperAdmin |
+| POST `/api/news` | Luo uuden tiedotteen | Admin ja SuperAdmin |
+| DELETE `/api/news/{id}` | Poistaa tiedotteen | Admin ja SuperAdmin |
 
 ### Vikailmoitukset (`/api/issues`)
 
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
 | POST `/api/issues` | Lähettää vikailmoituksen rikkinäisestä laitteesta tai tilasta | Kaikki |
-| GET `/api/issues` | Listaa kaikki vikailmoitukset (ratkaisemattomat ensin) | Admin / SuperAdmin |
-| PUT `/api/issues/{id}/resolve` | Merkitsee vikailmoituksen ratkaistuksi | Admin / SuperAdmin |
+| GET `/api/issues` | Listaa kaikki vikailmoitukset (ratkaisemattomat ensin) | Admin ja SuperAdmin |
+| PUT `/api/issues/{id}/resolve` | Merkitsee vikailmoituksen ratkaistuksi | Admin ja SuperAdmin |
 
 ### Asetukset ja tilastot (`/api/settings` ja `/api/statistics`)
 
 | Verbi ja polku | Tekeminen | Kuka |
 |----------------|-----------|------|
 | GET `/api/settings` | Hakee järjestelmän aukioloajat, varauskiintiöt ja huoltotilan | Kaikki |
-| PUT `/api/settings` | Päivittää aukioloaikoja, kiintiöitä, huoltotilaa tai Discord-webhookia | Admin / SuperAdmin |
-| GET `/api/statistics` | Hakee varausmäärien ja suosituimpien pelipisteiden tilastot | Admin / SuperAdmin |
+| PUT `/api/settings` | Päivittää aukioloaikoja, kiintiöitä, huoltotilaa tai Discord-webhookia | Admin ja SuperAdmin |
+| GET `/api/statistics` | Hakee varausmäärien ja suosituimpien pelipisteiden tilastot | Admin ja SuperAdmin |
 
 ---
 
@@ -82,19 +82,19 @@ Vastauksessa palautetaan vain DTO-sopimuksen (`src/Contracts/`) kentät. Domain-
 
 | Reitti | Sisään | Ulos |
 |--------|--------|------|
-| Kirjaudu (`/api/auth/verify-code`) | sähköposti, 6-numeroinen koodi, valinnainen näyttönimi | käyttäjän tunniste (`Guid`), sähköposti, näyttönimi, rooli (`User`, `Admin`, `SuperAdmin`), banni-tiedot |
-| Kaikki pelipisteet (`GET /api/stations`) | — | lista: tunniste (`Id`), nimi (`Name`), tyyppi (`Type`), käyttääkö yhteistä TV:tä (`UsesSharedTv`), onko käytössä (`IsActive`) |
+| Kirjaudu (`/api/auth/verify-code`) | sähköposti, 6-numeroinen koodi, valinnainen näyttönimi | käyttäjän tunniste (`Guid`), sähköposti, näyttönimi, rooli (`User`, `Admin`, `SuperAdmin`), käyttöestotiedot |
+| Kaikki pelipisteet (`GET /api/stations`) | Ei syötettä | lista: tunniste (`Id`), nimi (`Name`), tyyppi (`Type`), käyttääkö yhteistä TV:tä (`UsesSharedTv`), onko käytössä (`IsActive`) |
 | Vapaat pelipisteet (`GET /api/stations/available`) | alkuhetki (`startUtc`), loppuhetki (`endUtc`) | lista vapaista pelipisteistä samassa muodossa kuin yllä |
 | Luo varaus (`POST /api/reservations`) | idempotenssiavain, käyttäjän tunniste, varaustyyppi (`1`=laite, `2`=tila, `3`=tapahtuma), pelipisteen tunniste (jos laitevaraus), alkuhetki, loppuhetki | `201 Created`: luodun varauksen täysi vastausmalli (`ReservationResponse`) |
-| Jyräysvaraus (`POST /api/reservations/override`) | varauspyyntö (`reservationRequest`) + peruutussyy (`reason`) | `201 Created`: luodun tapahtumavarauksen vastausmalli (`ReservationResponse`) |
+| Jyräysvaraus (`POST /api/reservations/override`) | varauspyyntö (`reservationRequest`) ja peruutussyy (`reason`) | `201 Created`: luodun tapahtumavarauksen vastausmalli (`ReservationResponse`) |
 | Peru varaus (`DELETE /api/reservations/{id}`) | varauksen tunniste polussa, pyynnön rungossa käyttäjän tunniste ja peruutussyy (`CancelReservationRequest`) | `200 OK`: peruutettu varaus päivitettynä (`ReservationResponse`, `Status = Cancelled`) |
-| Listaa varaukset (`GET /api/reservations`) | valinnaiset kyselyparametrit: `userId`, `fromUtc`, `toUtc`, `page`, `pageSize` | sivutettu vastaus (`PagedResult<ReservationResponse>`): varaukset (tunniste, varaustyyppi, laitetunniste, alku, loppu, kesto, tila) — **muiden opiskelijoiden sähköpostit ja nimet anonymisoitu julkisesta listasta** |
+| Listaa varaukset (`GET /api/reservations`) | valinnaiset kyselyparametrit: `userId`, `fromUtc`, `toUtc`, `page`, `pageSize` | sivutettu vastaus (`PagedResult<ReservationResponse>`): varaukset (tunniste, varaustyyppi, laitetunniste, alku, loppu, kesto, tila). Muiden opiskelijoiden sähköpostit ja nimet anonymisoidaan julkisesta listasta. |
 
 ---
 
 ## Virheet
 
-Kaikki virheet palautetaan RFC 9457 `ProblemDetails` -muodossa (`type`, `title`, `status`, `detail`). Sääntövirhe on **paluuarvo** (`Result<T>`) käyttötapauspalvelusta, ei poikkeus.
+Kaikki virheet palautetaan RFC 9457 ProblemDetails -muodossa (`type`, `title`, `status`, `detail`). Sääntövirhe on paluuarvo (`Result<T>`) käyttötapauspalvelusta, ei poikkeus.
 
 | Tilanne | Koodi | Virheen koodi (`title`) | Miksi |
 |---------|-------|-------------------------|-------|

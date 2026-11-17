@@ -1,20 +1,20 @@
-# AGENTS.md — pelihuoneen varausjärjestelmä
+# AGENTS.md, pelihuoneen varausjärjestelmä
 
-Tämä repo on kuvaus ennen koodia. Tämä tiedosto koskee jokaista agenttia roolista riippumatta. Roolikohtaiset rajat ovat `Docs/agentit.md`:ssä.
+Tämä repo on kuvaus ennen koodia. Tämä tiedosto koskee jokaista agenttia roolista riippumatta. Roolikohtaiset rajat ovat tiedostossa `Docs/agentit.md`.
 
 ## Lue tässä järjestyksessä
 
-1. `Docs/domain.md` — kieli, säännöt ja kenen vastuulla kukin sääntö on (`Paikka`-sarake)
-2. `Docs/arkkitehtuuri.md` — osat, riippuvuuden suunta, kiellot, elinkaari, ei-tavoitteet, valmis-kriteerit
-3. `Docs/rajapinta.md` — reitit, kentät sanoina, statuskoodit, paginaatio
-4. `Docs/testaus.md` — testiaineisto, kiinteä kello ajossa, kriteerien ajo, kattavuusmatriisi, kuka ajaa mitäkin
-5. `Docs/versiohallinta.md` — haarat, commit, pull request, mitä ei repoon, miten sessio päättyy
-6. `Docs/agentit.md` — oma roolisi: mitä luet, mitä saat muuttaa, mitä palautat
-7. `Docs/adr/` — tehdyt rakennepäätökset (mm. `0001-tapahtuma-ja-pelipisteet.md`)
-8. Se `specs/NNN-*.md`, jota pyydetty muutos koskee, ja vain sen **Tehtävät**-osion pyydetty askel
-9. `Docs/tilaus.md` ja `Docs/havainnot.md` — asiakkaan sanat, huoneessa tehdyt havainnot ja oletukset; näihin palataan, kun jokin tuntuu puuttuvan
+1. `Docs/domain.md`, kieli, säännöt ja kunkin säännön vastuutaho (`Paikka`-sarake).
+2. `Docs/arkkitehtuuri.md`, osat, riippuvuuden suunta, kiellot, elinkaari, ei-tavoitteet ja valmis-kriteerit.
+3. `Docs/rajapinta.md`, reitit, kentät sanoina, statuskoodit ja paginaatio.
+4. `Docs/testaus.md`, testiaineisto, kiinteä kello ajossa, kriteerien ajo, kattavuusmatriisi ja työnjako.
+5. `Docs/versiohallinta.md`, haarat, commit, pull request, kielletyt tiedostot ja session päätös.
+6. `Docs/agentit.md`, oma roolisi: mitä luet, mitä saat muuttaa ja mitä palautat.
+7. `Docs/adr/`, tehdyt rakennepäätökset (kuten `0001-tapahtuma-ja-pelipisteet.md`).
+8. Se `specs/NNN-*.md`, jota pyydetty muutos koskee, ja vain sen **Tehtävät**-osion pyydetty askel.
+9. `Docs/tilaus.md` ja `Docs/havainnot.md`, asiakkaan sanat, huoneessa tehdyt havainnot ja oletukset. Näihin palataan, kun jokin tuntuu puuttuvan.
 
-Työntekijä lukee kohdat 1–8 vain siltä osin kuin `Docs/agentit.md` sen roolille sallii. Johtaja ja katselmoija lukevat kaiken.
+Työntekijä lukee kohdat 1-8 vain siltä osin kuin `Docs/agentit.md` sen roolille sallii. Johtaja ja katselmoija lukevat kaiken.
 
 ## Roolit
 
@@ -32,7 +32,7 @@ flowchart TD
 
 - **Johtaja** on ainoa, joka puhuu ihmiselle, tekee git-toimia ja jakaa työtä. Johtaja ei kirjoita koodia itse.
 - **Työntekijä** saa yhden Tehtävät-askeleen ja kirjoittaa vain oman kerroksensa projektiin ja sen testiprojektiin (`src/Domain`, `src/Application`, `src/Infrastructure`, `src/WebApi` tai `src/Client`). Se palauttaa muutetut tiedostot, testien tulosteen ja kysymykset johtajalle.
-- **Katselmoija** lukee diffin `Docs/domain.md`:n `Paikka`-saraketta, `Docs/arkkitehtuuri.md`:n kieltoja ja specin kriteerejä vasten. Se ei muuta tiedostoja; se palauttaa löytölistan. Tyhjä lista on hyväksyntä.
+- **Katselmoija** lukee diffin `Docs/domain.md`:n `Paikka`-saraketta, `Docs/arkkitehtuuri.md`:n kieltoja ja specin kriteerejä vasten. Se ei muuta tiedostoja, vaan palauttaa löytölistan. Tyhjä lista on hyväksyntä.
 - Samaan projektiin kirjoittaa kerrallaan yksi työntekijä. Askel, joka koskee kahta kerrosta, jaetaan kahdeksi peräkkäiseksi tehtäväksi.
 
 ## Ensin suunnitelma
@@ -51,7 +51,7 @@ Johtaja odottaa ihmisen hyväksyntää ennen ensimmäistä tehtävänantoa.
 - Älä keksi käsitettä, projektia, reittiä, roolia tai haaraa, jota kuvaus ei nimeä.
 - Älä aloita tutoriaalista äläkä yleisestä Clean Architecture -pohjasta. Projektit ovat `Docs/arkkitehtuuri.md`:ssä määritellyt osat, ei enempää.
 - Älä tee useampaa tehtävälistan askelta yhdellä kertaa, äläkä anna samaa askelta kahdelle työntekijälle.
-- Älä kutsu järjestelmän kelloa (`DateTime.Now` / `DateTimeOffset.UtcNow`) suoraan Domainissa tai Applicationissa. Nykyhetki annetaan parametrina tai `IDateTimeProvider`-rajapinnan kautta.
+- Älä kutsu järjestelmän kelloa (`DateTime.Now` tai `DateTimeOffset.UtcNow`) suoraan Domainissa tai Applicationissa. Nykyhetki annetaan parametrina tai `IDateTimeProvider`-rajapinnan kautta.
 - Älä käytä `var`-avainsanaa C#- tai TypeScript-koodissa (`.editorconfig` ja `Directory.Build.props` pakottavat eksplisiittiset tyypit: `IDE0008 = error`).
 - Älä tallenna "vapaana nyt" -tilaa tietokantaan; se on laskettu näkymä aktiivisista varauksista ja kellonajasta.
 - Älä muuta `Docs/`- tai `specs/`-tiedostoa työntekijänä. Kuvauksen muutos on johtajan ja ihmisen asia ja oma commit.
@@ -65,16 +65,17 @@ Johtaja odottaa ihmisen hyväksyntää ennen ensimmäistä tehtävänantoa.
 - joudut valitsemaan statuskoodin, kentän nimen tai kirjaston, jota `Docs/rajapinta.md` tai `Docs/arkkitehtuuri.md` ei mainitse
 - askel vaatii kirjoittamista projektiin, johon roolisi ei saa kirjoittaa
 
-Työntekijä kysyy johtajalta, johtaja ihmiseltä. Työntekijä ei arvaa eikä kysy ihmiseltä suoraan. Arvaus näyttää aivan koodilta; kysymys on halvempi.
+Työntekijä kysyy johtajalta, johtaja ihmiseltä. Työntekijä ei arvaa eikä kysy ihmiseltä suoraan. Työntekijä kysyy johtajalta aina kohdatessaan epäselvyyden.
 
 ## Tarkistukset
 
-- **Backend-käännös:** `dotnet build --nologo` repon juuressa (tai kerroskohtaisesti `/nr:false`), `0 Warning(s)`, `0 Error(s)`.
-- **Backend-testit:** `dotnet test --nologo` — Domain-testit eivät käynnistä web-palvelinta eivätkä avaa tietokantaa.
-- **Frontend-käännös ja linttaus:** `npm --prefix src/Client run build && npm --prefix src/Client run lint` — `0 errors, 0 warnings`.
-- **Hyväksymiskriteerit:** specin Given–When–Then-rivit ajetaan HTTP-kutsuina käynnissä olevaa APIa vasten `Docs/testaus.md`:n testiaineistolla ja kellolla. Ihminen ajaa ne; "valmis" ilman ajoa ei kelpaa.
+- Backend-käännös ajetaan komennolla `dotnet build --nologo` repon juuressa tai kerroskohtaisesti parametrilla `/nr:false`. Tulos on 0 varoitusta ja 0 virhettä.
+- Backend-testit ajetaan komennolla `dotnet test --nologo`. Domain-testit eivät käynnistä web-palvelinta eivätkä avaa tietokantaa.
+- Frontend-käännös ja linttaus ajetaan komennolla `npm --prefix src/Client run build && npm --prefix src/Client run lint`. Tulos on 0 virhettä ja 0 varoitusta.
+- Hyväksymiskriteerit: specin Given-When-Then-rivit ajetaan HTTP-kutsuina käynnissä olevaa rajapintaa vasten `Docs/testaus.md`:n testiaineistolla ja kellolla. Ihminen ajaa ne. Valmis ilman ajoa ei kelpaa.
 
-## Definition of Done (sama joka askeleelle)
+## Definition of done
 
-Askeleen kriteerit ajettu · katselmoija palauttanut tyhjän löytölistan · jokaiselle askeleen säännölle testi · yksi commit per askel, viesti asiakkaan sanoin · ei tietokantatiedostoa, käännöstulosta eikä tokenia repossa · johtajan lopetusviesti `Docs/versiohallinta.md`:n muodossa: haara, commitit, ajettujen tarkistusten tuloste, avoimet kysymykset.
+Askeleen kriteerit on ajettu. Katselmoija on palauttanut tyhjän löytölistan. Jokaiselle askeleen säännölle on testi. Jokainen askel muodostaa yhden commitin, jonka viesti on kirjoitettu asiakkaan sanoin. Repoon ei viedä tietokantatiedostoa, käännöstulosta eikä tokenia. Johtajan lopetusviesti noudattaa `Docs/versiohallinta.md`:n muotoa: haara, commitit, tarkistusten tuloste ja avoimet kysymykset.
+
 

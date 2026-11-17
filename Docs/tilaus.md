@@ -1,10 +1,10 @@
-# Tilaus — pelihuoneen varausjärjestelmä
+# Tilaus, pelihuoneen varausjärjestelmä
 
-Kirjattu luokassa ennen pelihuoneessa käyntiä. Asiakas on opiskelijakunnan ja kampuksen pelihuoneen vastuuhenkilö (opettaja asiakkaan roolissa). Vastaukset sanatarkasti; tulkinnat ja säännöt ovat `Docs/domain.md`:ssä.
+Kirjattu luokassa ennen pelihuoneessa käyntiä. Asiakas on opiskelijakunnan ja kampuksen pelihuoneen vastuuhenkilö (opettaja asiakkaan roolissa). Vastaukset sanatarkasti; tulkinnat ja säännöt ovat tiedostossa `Docs/domain.md`.
 
 ## Tilaus
 
-Opiskelijakunta ylläpitää kampuksen **pelihuonetta**. Siellä on pelitietokoneita ja konsoleita. Nyt varaukset tehdään Discord-kanavalla ja oven paperilapulla. Se ei toimi: sama kone on luvattu kahdelle, joku istuu koneella koko iltapäivän, ja turnauspäivänä tilassa on ihmisiä, jotka "varasivat koneen viime viikolla".
+Opiskelijakunta ylläpitää kampuksen pelihuonetta. Siellä on pelitietokoneita ja konsoleita. Nyt varaukset tehdään Discord-kanavalla ja oven paperilapulla. Se ei toimi: sama kone on luvattu kahdelle, joku istuu koneella koko iltapäivän, ja turnauspäivänä tilassa on ihmisiä, jotka varasivat koneen viime viikolla.
 
 Asiakas kuvaa tarpeen näin:
 
@@ -20,7 +20,7 @@ Asiakas kuvaa tarpeen näin:
 
 | Kysymys | Vastaus |
 |---------|---------|
-| Mitkä ovat pelihuoneen aukioloajat? | "Arkisin maanantaista perjantaihin klo 08:00–18:00. Viikonloppuisin ovi on lukossa, paitsi jos opettaja järjestää turnauksen." |
+| Mitkä ovat pelihuoneen aukioloajat? | "Arkisin maanantaista perjantaihin klo 08:00-18:00. Viikonloppuisin ovi on lukossa, paitsi jos opettaja järjestää turnauksen." |
 | Mikä on yksittäisen varauksen vähimmäis- ja enimmäiskesto? | "Puoli tuntia on lyhin varaus, ja opiskelija saa varata yhden pelipisteen enintään neljäksi tunniksi kerrallaan." |
 | Kuinka pitkälle tulevaisuuteen varauksen saa tehdä? | "Enintään kaksi kuukautta etukäteen. Muuten joku varaa koko lukukauden perjantait." |
 | Miten opiskelija ja henkilökunta tunnistetaan? | "Koulun sähköpostilla: opiskelijoilla `@edu.xamk.fi` ja henkilökunnalla `@xamk.fi`. Ulkopuolisilla sähköposteilla ei ole asiaa tilaan." |
@@ -35,17 +35,16 @@ Asiakas kuvaa tarpeen näin:
 Asiakas vastasi "katsokaa itse huoneesta":
 
 - Montako pelipistettä huoneessa tarkalleen on ja mitkä ovat niiden nimet ja tarrat?
-- Miten konsolit (PlayStation 5 ja Nintendo Switch) on kytketty televisioon — onko niillä omat näytöt vai yhteinen TV?
+- Miten konsolit (PlayStation 5 ja Nintendo Switch) on kytketty televisioon: onko niillä omat näytöt vai yhteinen TV?
 - Miten nykyinen paperilappu ovessa ja Discord-kanava toimivat käytännössä, ja missä kohtaa ristiriidat syntyvät?
 - Onko jokin pelipiste huollossa tai pois käytöstä, ja miten se merkitään?
 
 ## Kysymättä jääneet
 
-Huomattiin vasta `Docs/domain.md`:tä ja `specs/`-tiedostoja kirjoittaessa:
+Huomattiin vasta tiedostoja `Docs/domain.md` ja `specs/` kirjoittaessa:
 
 | Kysymys | Vastaus |
 |---------|---------|
-| Saako samalla opiskelijalla olla monta varausta samana päivänä eri aikoihin? | Päiväkohtainen kiintiö on oletuksena 4 tuntia (`MaxIndividualHours`), jota ylläpitäjä voi säätää asetuksista. Ks. `Docs/havainnot.md`. |
+| Saako samalla opiskelijalla olla monta varausta samana päivänä eri aikoihin? | Päiväkohtainen kiintiö on oletuksena 4 tuntia (`MaxIndividualHours`), jota ylläpitäjä voi säätää asetuksista. Katso `Docs/havainnot.md`. |
 | Miten opiskelijat tietävät, mitä pelejä millekin koneelle tai konsolille on asennettu? | Lisätty pelikatalogi ja toivelista (`Game`), jossa ylläpitäjä ylläpitää asennettuja pelejä ja opiskelijat voivat äänestää pelitoiveita. |
 | Miten rikkinäisestä ohjaimesta tai näytöstä ilmoitetaan? | Lisätty vikailmoituslomake (`IssueReport`), josta viat menevät suoraan ylläpitäjän hallintapaneeliin. |
-
