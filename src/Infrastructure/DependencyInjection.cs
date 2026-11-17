@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Abstractions.Time;
-using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Abstractions.Email;
 using Pelihuone.Infrastructure.Outbox;
 using Pelihuone.Infrastructure.Persistence;
 using Pelihuone.Infrastructure.Repositories;

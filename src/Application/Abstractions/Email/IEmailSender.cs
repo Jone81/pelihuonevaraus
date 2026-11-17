@@ -1,4 +1,4 @@
-namespace Pelihuone.Application.Notifications;
+namespace Pelihuone.Application.Abstractions.Email;
 
 /// <summary>
 /// Rajapinta sähköpostiviestien lähettämiseen SMTP-palvelimen tai taustajärjestelmän kautta.

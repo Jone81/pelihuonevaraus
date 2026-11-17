@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Settings;
 
-namespace Pelihuone.Application.Settings;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta sivuston yleisten asetusten (kuten Discord-webhookin ja aukioloaikojen) hakemiseen ja päivittämiseen.

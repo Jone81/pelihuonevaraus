@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Domain.Common;
 
 namespace Pelihuone.WebApi.Middleware;

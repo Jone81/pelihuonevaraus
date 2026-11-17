@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Domain.Common;
 using Pelihuone.Domain.Exceptions;
 using Pelihuone.WebApi.Middleware;

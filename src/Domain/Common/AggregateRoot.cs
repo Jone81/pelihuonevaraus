@@ -1,3 +1,5 @@
+using Pelihuone.Domain.Abstractions;
+
 namespace Pelihuone.Domain.Common;
 
 /// <summary>

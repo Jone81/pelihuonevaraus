@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.GamingStations;
 
-namespace Pelihuone.Application.GamingStations;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta pelipisteiden, niiden saatavuustietojen sekä huoltotilan hallintaan.

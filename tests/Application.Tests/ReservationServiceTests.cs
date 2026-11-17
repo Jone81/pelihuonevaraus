@@ -8,7 +8,7 @@ using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Application.Reservations;
 using Pelihuone.Application.Reservations.Validators;
-using Pelihuone.Application.Settings;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Reservations;
 using Pelihuone.Contracts.Settings;
 using Pelihuone.Domain.Enums;

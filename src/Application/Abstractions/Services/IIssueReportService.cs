@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Issues;
 
-namespace Pelihuone.Application.Issues;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta vikailmoitusten ja palautteiden hallintaan.

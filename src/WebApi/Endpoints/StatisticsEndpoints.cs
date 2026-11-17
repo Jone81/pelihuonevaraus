@@ -1,5 +1,5 @@
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Statistics;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Statistics;
 using Pelihuone.WebApi.Extensions;
 

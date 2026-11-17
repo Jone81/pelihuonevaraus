@@ -1,4 +1,4 @@
-using Pelihuone.Domain.Common;
+using Pelihuone.Domain.Abstractions;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.ValueObjects;
 

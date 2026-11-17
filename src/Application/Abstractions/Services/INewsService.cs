@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.News;
 
-namespace Pelihuone.Application.News;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta uutisten ja tiedotteiden julkaisuun sekä hallintaan.

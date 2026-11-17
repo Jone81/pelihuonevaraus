@@ -5,7 +5,7 @@ using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
 using Pelihuone.Application.Issues;
-using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Issues;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.Models;

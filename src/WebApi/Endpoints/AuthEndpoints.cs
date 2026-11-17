@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Users;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Users;
 using Pelihuone.Domain.Enums;
 using Pelihuone.WebApi.Extensions;
-using Pelihuone.WebApi.RateLimiting;
+using Pelihuone.WebApi.Abstractions;
 
 namespace Pelihuone.WebApi.Endpoints;
 

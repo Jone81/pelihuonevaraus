@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Pelihuone.Application.Notifications;
+using Pelihuone.Application.Abstractions.Email;
 
 namespace Pelihuone.Infrastructure.Services.Email;
 

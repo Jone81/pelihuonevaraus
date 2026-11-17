@@ -76,8 +76,8 @@ AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledException
         try
         {
             using IServiceScope emergencyScope = app.Services.CreateScope();
-            Pelihuone.Application.Notifications.IErrorNotificationService errorNotifier =
-                emergencyScope.ServiceProvider.GetRequiredService<Pelihuone.Application.Notifications.IErrorNotificationService>();
+            Pelihuone.Application.Abstractions.Services.IErrorNotificationService errorNotifier =
+                emergencyScope.ServiceProvider.GetRequiredService<Pelihuone.Application.Abstractions.Services.IErrorNotificationService>();
             errorNotifier.SendErrorAlertAsync(
                 fatalException,
                 "AppDomain.UnhandledException (Kriittinen palvelinkaatuminen)",

@@ -4,6 +4,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Pelihuone.WebApi.Abstractions;
 using Pelihuone.WebApi.Endpoints;
 using Pelihuone.WebApi.RateLimiting;
 

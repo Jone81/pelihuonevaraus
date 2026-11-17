@@ -1,3 +1,4 @@
+using Pelihuone.WebApi.Abstractions;
 using Pelihuone.WebApi.RateLimiting;
 
 namespace Pelihuone.WebApi.Extensions;

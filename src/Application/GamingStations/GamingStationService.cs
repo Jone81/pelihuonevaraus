@@ -1,7 +1,7 @@
 using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Settings;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.GamingStations;
 using Pelihuone.Contracts.Settings;
 using Pelihuone.Domain.Enums;

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.News;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.News;
 using Pelihuone.WebApi.Extensions;
 

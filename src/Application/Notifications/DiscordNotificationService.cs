@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Settings;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Settings;
 
 namespace Pelihuone.Application.Notifications;
