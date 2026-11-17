@@ -1,9 +1,7 @@
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Pelihuone.Application;
 using Pelihuone.Infrastructure;
 using Pelihuone.WebApi.Endpoints;
+using Pelihuone.WebApi.Extensions;
 using Pelihuone.WebApi.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -33,52 +31,7 @@ builder.Services.AddCors(options =>
 });
 
 // 5. Rate Limiting (Pyyntöjen rajoitus turhic- ja spämmiskriptejä vastaan)
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-    options.OnRejected = async (context, cancellationToken) =>
-    {
-        ProblemDetails problem = new ProblemDetails
-        {
-            Status = StatusCodes.Status429TooManyRequests,
-            Title = "Liikaa pyyntöjä",
-            Detail = "Olet ylittänyt sallitun pyyntömäärän. Yritä uudelleen hetken kuluttua.",
-            Type = "https://tools.ietf.org/html/rfc6585#section-4",
-            Instance = context.HttpContext.Request.Path
-        };
-        await context.HttpContext.Response.WriteAsJsonAsync(
-            problem,
-            typeof(ProblemDetails),
-            options: null,
-            contentType: "application/problem+json",
-            cancellationToken: cancellationToken);
-    };
-
-    // Varauspäätepisteiden rajoitus: 10 pyyntöä per minuutti per IP
-    options.AddPolicy("ReservationPolicy", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 10,
-                Window = TimeSpan.FromMinutes(1),
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0
-            }));
-
-    // Autentikointipäätepisteen rajoitus: 5 pyyntöä per minuutti per IP
-    options.AddPolicy("AuthPolicy", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(1),
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0
-            }));
-});
+builder.Services.AddApiRateLimiting();
 
 WebApplication app = builder.Build();
 

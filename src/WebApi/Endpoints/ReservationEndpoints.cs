@@ -3,6 +3,7 @@ using Pelihuone.Application.Common;
 using Pelihuone.Application.Reservations;
 using Pelihuone.Contracts.Reservations;
 using Pelihuone.WebApi.Extensions;
+using Pelihuone.WebApi.RateLimiting;
 
 namespace Pelihuone.WebApi.Endpoints;
 
@@ -34,7 +35,7 @@ public static class ReservationEndpoints
             return result.ToHttpResult(httpContext, response =>
                 Results.Created($"/api/reservations/{response.Id}", response));
         })
-        .RequireRateLimiting("ReservationPolicy")
+        .RequireRateLimiting(RateLimitPolicies.Reservation)
         .WithName("CreateReservation")
         .WithSummary("Luo uusi varaus pelipisteelle, tilalle tai tapahtumalle");
 
@@ -50,7 +51,7 @@ public static class ReservationEndpoints
             Result<ReservationResponse> result = await reservationService.CancelReservationAsync(id, request, cancellationToken);
             return result.ToHttpResult(httpContext);
         })
-        .RequireRateLimiting("ReservationPolicy")
+        .RequireRateLimiting(RateLimitPolicies.Reservation)
         .WithName("CancelReservation")
         .WithSummary("Peruuta voimassa oleva varaus ennen sen alkamisaikaa");
 
