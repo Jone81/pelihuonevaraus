@@ -1,4 +1,4 @@
-namespace Pelihuone.Domain.Common;
+namespace Pelihuone.Domain.Abstractions;
 
 /// <summary>
 /// Rajapinta domain-tapahtumille, jotka kuvaavat järjestelmän liiketoimintalogiikassa tapahtuneita merkittäviä muutoksia.

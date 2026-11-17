@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Statistics;
 
-namespace Pelihuone.Application.Statistics;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta järjestelmän käyttötilastojen ja analytiikan kokoamiseen.

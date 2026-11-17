@@ -5,8 +5,10 @@ using Pelihuone.Application.Abstractions.Data;
 using Pelihuone.Application.Abstractions.Repositories;
 using Pelihuone.Application.Abstractions.Time;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Notifications;
-using Pelihuone.Application.Settings;
+using Pelihuone.Application.Abstractions.Email;
+using Pelihuone.Application.Abstractions.Services;
+
+
 using Pelihuone.Contracts.Reservations;
 using Pelihuone.Contracts.Settings;
 using Pelihuone.Domain.Common;

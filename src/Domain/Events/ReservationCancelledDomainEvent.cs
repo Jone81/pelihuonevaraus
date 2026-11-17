@@ -1,4 +1,4 @@
-using Pelihuone.Domain.Common;
+using Pelihuone.Domain.Abstractions;
 using Pelihuone.Domain.ValueObjects;
 
 namespace Pelihuone.Domain.Events;

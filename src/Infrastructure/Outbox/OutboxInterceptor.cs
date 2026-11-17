@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Pelihuone.Domain.Common;
+using Pelihuone.Domain.Abstractions;
 
 namespace Pelihuone.Infrastructure.Outbox;
 

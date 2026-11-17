@@ -1,7 +1,7 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Pelihuone.WebApi.RateLimiting;
+namespace Pelihuone.WebApi.Abstractions;
 
 /// <summary>
 /// Sisältää WebApi-kerroksen pyyntörajoituskäytäntöjen (Rate Limiting) vakiotunnisteet.

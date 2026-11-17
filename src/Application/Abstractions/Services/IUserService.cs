@@ -2,7 +2,7 @@ using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Users;
 using Pelihuone.Domain.Enums;
 
-namespace Pelihuone.Application.Users;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta käyttäjien tunnistautumiseen, rekisteröintiin ja roolien hallintaan.

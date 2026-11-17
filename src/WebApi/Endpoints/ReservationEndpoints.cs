@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Reservations;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Reservations;
 using Pelihuone.WebApi.Extensions;
-using Pelihuone.WebApi.RateLimiting;
+using Pelihuone.WebApi.Abstractions;
 
 namespace Pelihuone.WebApi.Endpoints;
 

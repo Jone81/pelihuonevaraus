@@ -1,4 +1,4 @@
-namespace Pelihuone.Application.Notifications;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Rajapinta järjestelmän vakavien virheiden, käsittelemättömien poikkeusten ja kaatumisten

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Pelihuone.Application.Common;
-using Pelihuone.Application.Issues;
+using Pelihuone.Application.Abstractions.Services;
 using Pelihuone.Contracts.Issues;
 using Pelihuone.WebApi.Extensions;
 

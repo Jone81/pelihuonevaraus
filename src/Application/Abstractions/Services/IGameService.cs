@@ -2,7 +2,7 @@ using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Games;
 using Pelihuone.Domain.Enums;
 
-namespace Pelihuone.Application.Games;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta pelivalikoiman ja toivelistapelien hallintaan.

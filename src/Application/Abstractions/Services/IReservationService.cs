@@ -1,7 +1,7 @@
 using Pelihuone.Application.Common;
 using Pelihuone.Contracts.Reservations;
 
-namespace Pelihuone.Application.Reservations;
+namespace Pelihuone.Application.Abstractions.Services;
 
 /// <summary>
 /// Sovelluspalvelurajapinta pelihuoneen varausten luomiseen, perumiseen ja hakemiseen.
