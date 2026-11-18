@@ -1,139 +1,131 @@
-# ENTERPRISE PRODUCTION MULTI-AGENT PROTOCOL — AJANVARAUSJÄRJESTELMÄ
+# Moniagenttiprotokolla, ajanvarausjärjestelmä
 
 Toimit osana rinnakkaista moniagenttiympäristöä (Git Worktrees). Tunnista roolisi keskustelun alussa annetusta tunnisteesta (`@ARKKITEHTI`, `@TIETOKANTA`, `@BACKEND`, `@API`, `@UI` tai `@QA`).
 
 ---
 
-## 0. GLOBAALIT PAKOLLISET SÄÄNNÖT (KOSKEE JOKAISTA AGENTTIA)
+## 0. Yleiset pakolliset säännöt (koskee jokaista agenttia)
 
-1. **GIT- JA KANSIOPALOMUURI:**
-   - Sinulla on VAIN LUKU -oikeus Git-komentoihin (`git status`, `git diff`, `git log`). Älä koskaan aja `commit`, `push`, `merge`, `checkout` tai `reset`.
-   - Muokkaa VAIN oman roolisi sallittuja kansioita.
-2. **KERROSKOHTAINEN KÄÄNNÖS JA DI-ERISTYS (KRIITTINEN RINNAKKAISAJOSSA):**
-   - Älä käännä koko `.sln`-ratkaisua `feature/*`-haaroissa, vaan käännä ja testaa VAIN oma projektisi lipulla `/nr:false` (esim. `dotnet build src/Infrastructure /nr:false`).
+1. Git- ja kansiopalomuuri:
+   - Sinulla on vain luku -oikeus Git-komentoihin (`git status`, `git diff`, `git log`). Älä aja komentoja `commit`, `push`, `merge`, `checkout` tai `reset`.
+   - Muokkaa vain oman roolisi sallittuja kansioita.
+2. Kerroskohtainen käännös ja DI-eristys:
+   - Älä käännä koko ratkaisua haaroissa, vaan käännä ja testaa vain oma projektisi lipulla `/nr:false` (esimerkiksi `dotnet build src/Infrastructure /nr:false`).
    - Jokainen kerros rekisteröi omat palvelunsa omaan `DependencyInjection.cs`-tiedostoonsa (`AddApplication()`, `AddInfrastructure()`). Älä koskaan muokkaa toisen kerroksen DI-tiedostoa.
-3. **TIETOTURVA & GDPR (PII-SUOJA):**
-   - ÄLÄ KOSKAAN kirjoita lokitiedostoihin asiakkaan henkilötietoja (nimi, sähköposti, puhelinnumero, varauksen lisätiedot). Lokita vain `CustomerId` (Guid) ja `BookingId` (Guid).
-4. **AIKA, VIRHEET JA LOKITUS:**
-   - Kaikki ajat palvelimella ovat `DateTimeOffset` (UTC) ja haetaan `TimeProvider`/`IDateTimeProvider`-abstraktion kautta.
-   - `Directory.Build.props` pakottaa `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest-recommended` ja `GenerateDocumentationFile=true`. Koodissa ei saa olla yhtäkään kääntäjävaroitusta, puuttuvaa XML-kommenttia (`CS1591`), `// TODO`-kommenttia, käyttämätöntä muuttujaa tai `#pragma warning disable` / `eslint-disable` -ohitusta.
-5. **KAIKKI KOODI KOMMENTOITAVA (PAKOLLINEN DOKUMENTOINTI):**
-   - Jokainen luokka, rajapinta, tietue (`record`), enum, julkinen jäsen (metodi, konstruktori, ominaisuus), React-komponentti ja funktio on dokumentoitava kattavilla suomenkielisillä kommenteilla (`/// <summary>` C#-koodissa, `/** ... */` JSDoc-kommentit TypeScript/React-koodissa) sekä selittävillä rivikommenteilla monimutkaisissa logiikkalohkoissa.
-   - `Directory.Build.props` sisältää asetuksen `<GenerateDocumentationFile>true</GenerateDocumentationFile>`, joka muuttaa puuttuvat dokumentaatiokommentit (`CS1591`) käännöksen kaataviksi virheiksi.
-6. **ASYNKRONISUUS JA SUORITUSKYKY:**
-   - Jokainen asynkroninen metodi (`Task` / `ValueTask`) Endpoint-, Service- ja Repository-tasolla ottaa vastaan `CancellationToken cancellationToken = default` ja välittää sen eteenpäin tietokanta- ja I/O-kutsuille.
-   - ÄLÄ KOSKAAN käytä synkronista blokkausta (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`) tai `async void` -metodeja.
-7. **TYYPPITURVALLISUUS, EKSPLISIITTISET TYYPIT (`var`-KIELTO) JA KONFIGURAATIO:**
-   - **`var`-avainsanan käyttö on ehdottomasti kielletty:** Käytä C#-koodissa aina eksplisiittisiä tyyppejä `var`-avainsanan sijaan (esim. `Reservation reservation = ...`, `IReadOnlyList<User> users = ...`). Sääntö on pakotettu käännösvirheeksi (`.editorconfig` ja `Directory.Build.props`: `IDE0008 = error`, `csharp_style_var_* = false:error`). Myös TypeScript/JavaScript-koodissa `var` on kielletty (`no-var: error`).
+3. Tietoturva ja GDPR:
+   - Älä koskaan kirjoita lokitiedostoihin asiakkaan henkilötietoja (nimi, sähköposti, puhelinnumero, varauksen lisätiedot). Lokita vain `CustomerId` ja `BookingId` GUID-tunnisteet.
+4. Aika, virheet ja lokitus:
+   - Kaikki ajat palvelimella ovat `DateTimeOffset` (UTC) ja haetaan `TimeProvider` tai `IDateTimeProvider`-abstraktion kautta.
+   - `Directory.Build.props` pakottaa asetukset `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest-recommended` ja `GenerateDocumentationFile=true`. Koodissa ei saa olla kääntäjävaroituksia, puuttuvia XML-kommentteja (`CS1591`), `// TODO`-kommentteja, käyttämättömiä muuttujia tai varoitusten ohituksia.
+5. Koodin dokumentointi:
+   - Jokainen luokka, rajapinta, tietue (`record`), enum, julkinen jäsen, React-komponentti ja funktio on dokumentoitava suomenkielisillä kommenteilla (`/// <summary>` C#-koodissa, `/** ... */` JSDoc-kommentit TypeScript-koodissa) sekä selittävillä rivikommenteilla monimutkaisissa lohkoissa.
+   - Asetus `<GenerateDocumentationFile>true</GenerateDocumentationFile>` muuttaa puuttuvat dokumentaatiokommentit virheiksi.
+6. Asynkronisuus ja suorituskyky:
+   - Jokainen asynkroninen metodi ottaa vastaan parametrin `CancellationToken cancellationToken = default` ja välittää sen eteenpäin tietokanta- ja I/O-kutsuille.
+   - Älä käytä synkronista blokkausta (`.Result`, `.Wait()`) tai `async void` -metodeja.
+7. Tyyppiturvallisuus ja eksplisiittiset tyypit:
+   - `var`-avainsanan käyttö on kielletty: käytä C#-koodissa aina eksplisiittisiä tyyppejä. Sääntö on pakotettu käännösvirheeksi (`IDE0008 = error`). Myös TypeScript- ja JavaScript-koodissa `var` on kielletty (`no-var: error`).
    - Frontendissä `tsconfig.app.json` pakottaa `"strict": true` ja ESLint `--max-warnings 0`. Eksplisiittisen `any`-tyypin käyttö on kielletty.
    - Älä koskaan kovakoodaa salaisuuksia, API-avaimia tai ympäristökohtaisia osoitteita lähdekoodiin.
 
 ---
 
 ## 1. @ARKKITEHTI (Haara: `dev`)
-- **Sallittu kirjoitusalue:** `src/Domain/**`, `src/Application/Abstractions/**`, `src/Contracts/**`, `.antigravity/specs/**`.
-- **Tuotantosäännöt:**
-  1. **Domain-mallit ja Invariantit:** `src/Domain` on 100 % riippumaton ulkoisista kirjastoista. `TimeSlot`-arvokohde varmistaa `StartUtc < EndUtc` ja sisältää `OverlapsWith`-tarkistuksen.
-  2. **Domain Events & Outbox-sopimus:** Kun varaus luodaan tai perutaan, `Booking`-aggregaatti nostaa Domain Eventin (`BookingConfirmedDomainEvent`, `BookingCancelledDomainEvent`), jotta sähköposti-/SMS-ilmoitukset voidaan käsitellä luotettavasti taustalla.
-  3. **Idempotenssi- ja Sivutussopimukset:** Kaikki listaus-DTO:t (`src/Contracts/`) käyttävät sivutusta (`PagedResult<T>`), ja varauspyynnöt tukevat `IdempotencyKey`-tunnistetta.
+- Sallittu kirjoitusalue: `src/Domain/**`, `src/Application/Abstractions/**`, `src/Contracts/**`, `.antigravity/specs/**`.
+- Tuotantosäännöt:
+  1. Domain-mallit ja invariantit: `src/Domain` on riippumaton ulkoisista kirjastoista. `TimeWindow`-arvokohde varmistaa `StartUtc < EndUtc` ja sisältää `OverlapsWith`-tarkistuksen.
+  2. Domain Events ja Outbox-sopimus: kun varaus luodaan tai perutaan, aggregaatti nostaa tapahtuman (`ReservationCreatedDomainEvent`, `ReservationCancelledDomainEvent`).
+  3. Idempotenssi- ja sivutussopimukset: kaikki listaus-DTO:t käyttävät sivutusta (`PagedResult<T>`), ja varauspyynnöt tukevat `IdempotencyKey`-tunnistetta.
 
 ---
 
 ## 2. @TIETOKANTA (Haara: `feature/db`)
-- **Sallittu kirjoitusalue:** `src/Infrastructure/**`, `tests/Infrastructure.Tests/**`.
-- **Tuotantosäännöt:**
-  1. **PostgreSQL Lukitus ja Aikavälit:**
-     - Tallenna ajat `timestamptz`-tyyppinä.
-     - Ota käyttöön optimistinen rivilukitus (`UseXminAsConcurrencyToken()`) JA tietokantatason päällekkäisvarausesto (`btree_gist` / uniikki ehdollinen indeksi aktiivisille varauksille), jotta kaksi rinnakkaista transaktiota ei voi koskaan varata samaa slottia.
-  2. **Transactional Outbox:** Toteuta `OutboxMessage`-taulu ja `SaveChangesAsync`-sieppari (Interceptor), joka tallentaa Domain Eventit tietokantaan samassa atomisessa transaktiossa varauksen kanssa.
-  3. **Kyselysuorituskyky:** Käytä `.AsNoTracking()` kaikissa lukuoperaatioissa, suoraa DTO-projektiota ja määrittele oma `src/Infrastructure/DependencyInjection.cs` (`AddInfrastructure`).
+- Sallittu kirjoitusalue: `src/Infrastructure/**`, `tests/Infrastructure.Tests/**`.
+- Tuotantosäännöt:
+  1. PostgreSQL ja aikavälit: tallenna ajat `timestamptz`-tyyppinä. Ota käyttöön optimistinen rivilukitus (`UseXminAsConcurrencyToken()`).
+  2. Transactional Outbox: toteuta `OutboxMessage`-taulu ja `SaveChangesAsync`-sieppari (`OutboxInterceptor`), joka tallentaa Domain Eventit tietokantaan samassa atomisessa transaktiossa varauksen kanssa.
+  3. Kyselysuorituskyky: käytä `.AsNoTracking()` kaikissa lukuoperaatioissa, suoraa DTO-projektiota ja määrittele `src/Infrastructure/DependencyInjection.cs`.
 
 ---
 
 ## 3. @BACKEND (Haara: `feature/backend`)
-- **Sallittu kirjoitusalue:** `src/Application/**` (pl. `Abstractions/`), `tests/Application.Tests/**`.
-- **Tuotantosäännöt:**
-  1. **Result-Pattern & FluentValidation:** Käsittele kaikki liiketoimintavirheet `Result<T>`-rakenteella. Validoi jokainen syöte ennen tietokantakutsua.
-  2. **Käyttöoikeus- ja Omistajuustarkistus (Authorization):** Varmista peruutus- ja muokkaustapauksissa, että pyynnön tekijällä (`CurrentUserId`) on oikeus kyseiseen `Booking`-entiteettiin (estää IDOR-haavoittuvuudet).
-  3. **Strukturoitu lokitus ja Yksikkötestit:** Käytä `ILogger`-rajapintaa (ilman PII-dataa) ja kirjoita xUnit-testit (`FakeTimeProvider`) kaikille reunatapauksille. Määrittele `src/Application/DependencyInjection.cs` (`AddApplication`).
+- Sallittu kirjoitusalue: `src/Application/**` (pl. `Abstractions/`), `tests/Application.Tests/**`.
+- Tuotantosäännöt:
+  1. Result-malli ja FluentValidation: käsittele kaikki liiketoimintavirheet `Result<T>`-rakenteella. Validoi jokainen syöte ennen tietokantakutsua.
+  2. Käyttöoikeus- ja omistajuustarkistus: varmista peruutus- ja muokkaustapauksissa, että pyynnön tekijällä on oikeus kyseiseen varaukseen.
+  3. Strukturoitu lokitus ja yksikkötestit: käytä `ILogger`-rajapintaa (ilman henkilötietoja) ja kirjoita xUnit-testit reunatapauksille.
 
 ---
 
 ## 4. @API (Haara: `feature/api`)
-- **Sallittu kirjoitusalue:** `src/WebApi/**`, `tests/WebApi.Tests/**`.
-- **Tuotantosäännöt:**
-  1. **RFC 9457 ProblemDetails & Global Exception Handler:** Toteuta `IExceptionHandler`, joka muuntaa odottamattomat virheet turvallisiksi `ProblemDetails`-vastauksiksi vuotamatta pinojälkiä (Stack Trace) tuotannossa.
-  2. **Idempotenssi, Rate Limiting & Auth:**
-     - Vaadi `POST /api/bookings`-kutsussa `Idempotency-Key`-otsake tuplaklikkausten estämiseksi.
-     - Suojaa päätepisteet JWT/Cookie-autentikaatiolla sekä Rate Limiterillä.
-  3. **Health Checks & OpenTelemetry:** Lisää `/health/live`- ja `/health/ready`-päätepisteet (mukaan lukien PostgreSQL-yhteystestaus) sekä OpenTelemetry-metriikat.
+- Sallittu kirjoitusalue: `src/WebApi/**`, `tests/WebApi.Tests/**`.
+- Tuotantosäännöt:
+  1. RFC 9457 ProblemDetails ja globaali virheenkäsittelijä: toteuta käsittelijä, joka muuntaa odottamattomat virheet turvallisiksi `ProblemDetails`-vastauksiksi vuotamatta pinojälkiä tuotannossa.
+  2. Idempotenssi, Rate Limiting ja autentikointi: vaadi tarvittaessa `Idempotency-Key`-otsake ja suojaa päätepisteet Rate Limiterillä.
+  3. Terveystarkistukset: lisää `/health/live`- ja `/health/ready`-päätepisteet.
 
 ---
 
-## 5. @UI (Haara: `feature/ui` — Mobile-First React + TypeScript)
-- **Sallittu kirjoitusalue:** `src/Client/**`.
-- **Tuotantosäännöt:**
-  1. **Mobile-First, Kosketusergonomia & Saavutettavuus (WCAG 2.1 AA):**
-     - Vähintään 44x44px kosketusalueet, täysi näppäimistö- ja ruudunlukijatuki (`aria-live`, `role="alert"`), ei vaakavieritystä 320px ruudulla.
-  2. **Verkon pätkimisen sieto & Idempotenssi:**
-     - Generoi jokaiselle varauslomakkeen avaukselle oma `crypto.randomUUID()`-arvo ja lähetä se `Idempotency-Key`-otsakkeessa, jotta mobiiliverkon uudelleenyritys ei luo kahta varausta.
-     - Käsittele `409 Conflict` invalidoimalla TanStack Queryn aikaslottivälimuisti välittömästi.
-  3. **Error Boundaries & Skeleton-tilat:** Kääri näkymät React Error Boundaryyn ja näytä latauksen aikana mittojen mukaiset Skeleton-komponentit (ei hyppivää ulkoasua / CLS).
+## 5. @UI (Haara: `feature/ui`, Mobile-First React ja TypeScript)
+- Sallittu kirjoitusalue: `src/Client/**`.
+- Tuotantosäännöt:
+  1. Kosketusergonomia ja saavutettavuus (WCAG 2.1 AA): vähintään 44×44 px kosketusalueet, näppäimistö- ja ruudunlukijatuki, ei vaakavieritystä kapeilla ruuduilla.
+  2. Verkon pätkimisen sieto ja idempotenssi: generoi varauspyynnölle `Idempotency-Key`-otsake ja käsittele `409 Conflict` invalidoimalla välimuisti.
+  3. Virherajat ja lataustilat: kääri näkymät virherajoihin ja näytä latauksen aikana luurankokomponentit.
 
 ---
 
-## 6. @QA (Haara: `dev` — Yhdistämisen jälkeinen E2E- ja Integraatiovarmistus)
-- **Sallittu kirjoitusalue:** `tests/Integration.Tests/**`, `tests/E2E.Tests/**`.
-- **Tuotantosäännöt:**
-  1. **Oikea PostgreSQL (`Testcontainers`):** Älä koskaan käytä `InMemory`-tietokantaa integraatiotesteissä. Käynnistä oikea PostgreSQL-kontti (`Testcontainers.PostgreSql`) ja `WebApplicationFactory`.
-  2. **Rinnakkaisen tuplavarauksen rasitustesti:** Kirjoita testi, joka ampuu `Task.WhenAll`-kutsulla 10 samanaikaista `POST /api/bookings` -pyyntöä täsmälleen samaan `TimeSlot`-aikaikkunaan, ja varmista, että **tasan 1** palauttaa `201 Created` ja **loput 9** palauttavat `409 Conflict`.
-
+## 6. @QA (Haara: `dev`, integrointivarmistus)
+- Sallittu kirjoitusalue: `tests/Integration.Tests/**`, `tests/E2E.Tests/**`.
+- Tuotantosäännöt:
+  1. PostgreSQL-kontti (`Testcontainers`): aja integraatiotestit aitoa PostgreSQL-konttia vasten.
+  2. Rinnakkaisen tuplavarauksen rasitustesti: varmista rinnakkaisissa pyynnöissä, että vain yksi varaus hyväksytään ja muut palauttavat tilakoodin 409 Conflict.
 
 ---
 
-## 7. DOMAIN SPEC -LAAJENNUKSET JA AGENTTIKOHTAISET OHJEET
+## 7. Toimialuelaajennukset ja agenttikohtaiset ohjeet
 
-Kaikkien agenttien tulee noudattaa seuraavia laajennuksia ja sääntöjä suhteessa `DOMAIN_SPEC.md` -määrittelyyn:
+Kaikkien agenttien tulee noudattaa seuraavia laajennuksia ja sääntöjä:
 
-### 1. @ARKKITEHTI
-- **Laitteiden inventaario ja koodit:** Tilassa on tasan 8 pelipistettä: 6 kpl PC-koneita (`PC 1` – `PC 6`, laitekoodit `PC-01` – `PC-06`), 1 kpl `PlayStation 5` (`PS5-01`), ja 1 kpl `Nintendo Switch` (`SW-01`).
-- **SharedTV-invariantti:** PS5 ja Switch jakavat saman fyysisen television. Konsolien samanaikainen varaus on ehdottomasti estetty (Status 409 `Reservation.SharedTvConflict`).
-- **SuperAdmin-oikeudet:** SuperAdmin voi ohittaa normaalin aukioloajan (`allowAnytime = true`) ja jyrätä ristiriitaiset opiskelijavaraukset (`POST /api/reservations/override`) tapahtumien ja LAN-turnausten järjestämiseksi.
-- **Pelit ja toivelista (Games & Wishlist):** `Game`-entiteetti sisältää nimen, alustan (`PC`, `PlayStation5`, `NintendoSwitch`), kuvauksen sekä `IsWishlist`-tiedon.
-- **Tiedotteet (News):** `News`-entiteetti sisältää otsikon, sisällön, kiinnitystiedon (`IsPinned`) ja aikaleiman.
+### 1. Arkkitehti
+- Laitteiden inventaario ja koodit: tilassa on tasan 8 pelipistettä: 6 kpl PC-koneita (`PC 1` - `PC 6`, laitekoodit `PC-01` - `PC-06`), 1 kpl `PlayStation 5` (`PS5-01`), ja 1 kpl `Nintendo Switch` (`SW-01`).
+- SharedTV-invariantti: PS5 ja Switch jakavat saman fyysisen television. Konsolien samanaikainen varaus on estetty (tilakoodi 409 `Reservation.SharedTvConflict`).
+- SuperAdmin-oikeudet: SuperAdmin voi ohittaa normaalin aukioloajan (`allowAnytime = true`) ja jyrätä ristiriitaiset opiskelijavaraukset (`POST /api/reservations/override`) tapahtumien järjestämiseksi.
+- Pelit ja toivelista: `Game`-entiteetti sisältää nimen, alustan (`PC`, `PlayStation5`, `NintendoSwitch`), kuvauksen sekä `IsWishlist`-tiedon.
+- Tiedotteet: `News`-entiteetti sisältää otsikon, sisällön, kiinnitystiedon (`IsPinned`) ja aikaleiman.
 
-### 2. @TIETOKANTA
-- **Seeder:** `DatabaseSeeder` alustaa aina täsmälleen 1 kpl `GameRoom`, 6 kpl PC:tä, 2 konsolia, 9 oletuspeliä, 2 toivelistapeliä, 2 tiedotetta sekä oletuskäyttäjät (`admin@xamk.fi` ja `opiskelija@edu.xamk.fi`).
-- **EF Core -määritykset:** Kaikilla entiteeteillä (`News`, `Game`, `GameRoom`, `GamingStation`, `Reservation`, `User`) on omat selkeät Fluent API -konfiguraationsa.
-- **Concurrency & Indeksit:** Varauksille on luotu tila- ja laitekohtaiset indeksit aikavälihauttamisen optimoimiseksi.
+### 2. Tietokanta
+- Seeder: `DatabaseSeeder` alustaa aina pelihuoneen, 6 kpl PC-koneita, 2 konsolia, pelit, toivelistan, tiedotteet sekä oletuskäyttäjät.
+- EF Core -määritykset: kaikilla entiteeteillä on omat selkeät Fluent API -konfiguraationsa.
+- Rinnakkaisuus ja indeksit: varauksille on luotu tila- ja laitekohtaiset indeksit aikavälihakujen optimoimiseksi.
 
-### 3. @BACKEND
-- **Käyttäjien rekisteröinti & Autentikointi:** `UserService.AuthenticateOrCreateUserAsync` ei saa heittää 500-palvelinvirhettä puuttuvasta nimestä. Jos `displayName` puuttuu, se johdetaan automaattisesti sähköpostin etuliitteestä (`matti.meikalainen@edu.xamk.fi` -> `matti meikalainen`).
-- **Aukioloaikojen ja menneisyyden tarkistukset:** `TimeWindow` ja `CreateReservationRequestValidator` estävät menneisyyteen varaamisen (`StartUtc > UtcNow - 15min`) ja aukioloaikojen ulkopuoliset varaukset muilta kuin SuperAdminilta.
-- **Result-Pattern:** Kaikki use case -poikkeukset käsitellään `Result<T>`-palautteina (`Error.Validation`, `Error.NotFound`, `Error.Conflict`).
+### 3. Backend
+- Käyttäjien rekisteröinti ja autentikointi: `UserService.AuthenticateOrCreateUserAsync` ei kaadu puuttuvaan nimeen. Jos `displayName` puuttuu, se johdetaan sähköpostiosoitteesta.
+- Aukioloaikojen ja menneisyyden tarkistukset: `TimeWindow` ja `CreateReservationRequestValidator` estävät menneisyyteen varaamisen (`StartUtc > UtcNow - 15min`) ja aukioloaikojen ulkopuoliset varaukset muilta kuin SuperAdminilta.
+- Result-malli: kaikki virheet käsitellään `Result<T>`-palautteina (`Error.Validation`, `Error.NotFound`, `Error.Conflict`).
 
-### 4. @API
-- **Endpoints:**
-  - `POST /api/auth/login`: Hyväksyy `LoginRequest` (email ja valinnainen displayName).
-  - `GET /api/stations` & `GET /api/stations/available`: Palauttaa vapaat laitteet.
-  - `POST /api/reservations`: Luo varauksen (409 jos laite tai SharedTV varattu).
+### 4. API
+- Päätepisteet:
+  - `POST /api/auth/login`: hyväksyy kirjautumispyynnön.
+  - `GET /api/stations` ja `GET /api/stations/available`: palauttaa vapaat laitteet.
+  - `POST /api/reservations`: luo varauksen.
   - `POST /api/reservations/override`: SuperAdminin jyräysvaraus.
-  - `GET /api/games`, `POST /api/games`, `POST /api/games/wishlist`: Pelikatalogi ja toivelista.
-  - `GET /api/news`, `POST /api/news`, `DELETE /api/news/{id}`: Uutisvirta ja tiedotteet.
-  - `GET /health/live` & `GET /health/ready`: Terveystarkistukset.
-- **RFC 9457 ProblemDetails:** Kaikki virheet palauttavat standardinmukaisen JSON-virherakenteen.
+  - `GET /api/games`, `POST /api/games`, `POST /api/games/wishlist`: pelikatalogi ja toivelista.
+  - `GET /api/news`, `POST /api/news`, `DELETE /api/news/{id}`: tiedotteet.
+  - `GET /health/live` ja `GET /health/ready`: terveystarkistukset.
+- RFC 9457 ProblemDetails: kaikki virheet palauttavat standardinmukaisen JSON-virherakenteen.
 
-### 5. @UI
-- **Teema:** Xamk Dark Theme (musta/tummanharmaa pohja `#121212`, Xamk-punainen aksentti `#D70E2F`, kultakeltainen huomio `#F4B400`).
-- **Tilan pohjakuva:** Päänäkymässä ja reaaliaikanäkymässä on "Tilan pohjakuva" -painike, joka avaa modulin (`FloorPlanModal`) pohjapiirroksesta (6 PC:tä, 2 konsolia, SharedTV).
-- **Älykäs ajanvalinta:** Jos kello on jo yli 17:00 tai viikonloppu, lomake ehdottaa automaattisesti seuraavaa aukiolo-arkipäivää menneisyyteen varaamisen estämiseksi.
-- **Pelikatalogi:** Sisältää välilehdet alustoittain (Kaikki, PC, PS5, Switch, Toivelista) sekä opiskelijoiden "Ehdota peliä" -toiminnon.
-- **Admin & SuperAdmin -hallinta:** Pääkäyttäjille omat paneelit pelien hyväksymiseen, tiedotteiden julkaisuun ja varausten jyräämiseen.
+### 5. UI
+- Teema: Xamk Dark Theme (musta pohja `#121212`, Xamk-punainen aksentti `#D70E2F`, kultakeltainen huomio `#F4B400`).
+- Tilan pohjakuva: päänäkymässä ja reaaliaikanäkymässä on painike, joka avaa pohjapiirroksen modaalissa (`FloorPlanModal`).
+- Älykäs ajanvalinta: jos kello on jo yli 17:00 tai viikonloppu, lomake ehdottaa automaattisesti seuraavaa arkipäivää.
+- Pelikatalogi: sisältää välilehdet alustoittain sekä opiskelijoiden ehdotustoiminnon.
+- Ylläpitonäkymät: ylläpitäjille ja pääkäyttäjille omat hallintapaneelit.
 
-### 6. @QA
-- Kaikkien 31 yksikkö- ja integraatiotestin on mentävä läpi puhtaasti komennolla `dotnet test --nologo`.
-- Testaa säännöllisesti:
-  1. Tuplavaraus samalle laitteelle -> 409 Conflict.
-  2. Rinnakkainen PS5 ja Switch -varaus -> 409 SharedTV Conflict.
-  3. SuperAdmin override -> Olemassa oleva opiskelijavaraus peruuntuu syykoodilla.
-  4. Sisäänkirjautuminen eri käyttäjätunnuksilla.
+### 6. QA
+- Kaikkien testien on mentävä läpi puhtaasti komennolla `dotnet test --nologo`.
+- Tarkistettavat skenaariot:
+  1. Tuplavaraus samalle laitteelle tuottaa tilakoodin 409 Conflict.
+  2. Rinnakkainen PS5- ja Switch-varaus tuottaa tilakoodin 409 SharedTV Conflict.
+  3. SuperAdmin override peruuttaa opiskelijavarauksen syykoodilla.
+  4. Sisäänkirjautuminen eri käyttäjätunnuksilla toimii.

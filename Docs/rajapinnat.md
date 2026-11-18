@@ -1,31 +1,29 @@
-# 🔌 Rajapinnat ja Tietosopimukset (`rajapinnat.md`)
+# Rajapinnat ja tietosopimukset (rajapinnat.md)
 
-Tämä dokumentti määrittelee **Pelihuonevaraus (Xamk Game Room)** -järjestelmän kaikki ulkoiset **REST HTTP -rajapinnat (Endpoints)**, jaetut **tietosopimukset (`src/Contracts`)**, sisäiset **sovelluspalvelurajapinnat (`I*Service`)**, **repositoriorajapinnat (`I*Repository`)** sekä **käyttöliittymän API-asiakkaan (`src/Client/src/api/client.ts`)**.
+Tämä dokumentti määrittelee Pelihuonevaraus (Xamk Game Room) -järjestelmän kaikki ulkoiset REST HTTP -rajapinnat (Endpoints), jaetut tietosopimukset (`src/Contracts`), sisäiset sovelluspalvelurajapinnat (`I*Service`), repositoriorajapinnat (`I*Repository`) sekä käyttöliittymän API-asiakkaan (`src/Client/src/api/client.ts`).
 
 ---
 
 ## 1. Yleiset HTTP REST API -käytännöt
 
-- **Perusosoite (Kehitys):** `http://localhost:5134/api` (Vite-kehityspalvelin välittää `/api`-kutsut automaattisesti proxylla osoitteesta `http://localhost:5173`).
-- **Sisältötyyppi:** `application/json` (virhevastauksissa `application/problem+json` RFC 9457 -standardin mukaisesti).
-- **Tunnistautumis- ja valtuutusotsake:**
-  - `X-User-Id: <Guid>` — välitetään ylläpitäjän (`Admin` ja `SuperAdmin`) operaatioissa sekä käyttäjäkohtaisissa pyynnöissä.
-- **Idempotenssiotsake:**
-  - `Idempotency-Key: <Guid>` — tuettu `POST /api/reservations`-varauspyynnöissä estämään mobiiliverkon pätkimisestä tai tuplaklikkauksesta johtuvat kaksoisvaraukset.
+- Perusosoite kehityksessä: `http://localhost:5134/api` (Vite-kehityspalvelin välittää `/api`-kutsut automaattisesti välityspalvelimella osoitteesta `http://localhost:5173`).
+- Sisältötyyppi: `application/json` (virhevastauksissa `application/problem+json` RFC 9457 -standardin mukaisesti).
+- Tunnistautumis- ja valtuutusotsake: `X-User-Id: <Guid>`, välitetään ylläpitäjän (`Admin` ja `SuperAdmin`) operaatioissa sekä käyttäjäkohtaisissa pyynnöissä.
+- Idempotenssiotsake: `Idempotency-Key: <Guid>`, tuettu `POST /api/reservations`-varauspyynnöissä estämään kaksoisvaraukset verkon pätkiessä.
 
-### 1.1 Roolit ja Rajapintojen Lupatasot (API Authorization Levels)
+### 1.1 Roolit ja rajapintojen lupatasot
 
 Jokainen REST-päätepiste ja palvelumetodi noudattaa yhtä seuraavista viidestä valtuutustasosta:
 
-| Lupataso | Vaadittu otsake / tila | Kuvaus ja sallitut kutsujat | Virhekoodi puuttuessa |
+| Lupataso | Vaadittu otsake tai tila | Kuvaus ja sallitut kutsujat | Virhekoodi puuttuessa |
 | :--- | :--- | :--- | :--- |
-| **1. Julkinen (`Public`)** | Ei vaadita | Lukuoperaatiot (`GET /api/stations`, `GET /api/reservations`, `GET /api/games`, `GET /api/news`, `/health/*`), OTP-kirjautuminen sekä vikailmoituksen jättö (`POST /api/issues`). | — |
-| **2. Aktiivinen käyttäjä (`Authenticated User`)** | Kirjautunut `userId` (`!user.IsBanned(nowUtc)`) | Uuden varauksen luonti (`POST /api/reservations`), omien varausten haku ja peruutus, pelitoiveiden lisäys ja äänestys. Jos käyttäjällä on voimassa oleva banni, kutsu estetään. | `401 Unauthorized` / `403 Forbidden (User.Banned)` |
+| **1. Julkinen (`Public`)** | Ei vaadita | Lukuoperaatiot (`GET /api/stations`, `GET /api/reservations`, `GET /api/games`, `GET /api/news`, `/health/*`), OTP-kirjautuminen sekä vikailmoituksen jättö (`POST /api/issues`). | Ei virhettä |
+| **2. Aktiivinen käyttäjä (`Authenticated User`)** | Kirjautunut `userId` (`!user.IsBanned(nowUtc)`) | Uuden varauksen luonti (`POST /api/reservations`), omien varausten haku ja peruutus, pelitoiveiden lisäys ja äänestys. Jos käyttäjällä on voimassa oleva käyttöesto, kutsu estetään. | `401 Unauthorized` tai `403 Forbidden (User.Banned)` |
 | **3. Omistaja tai Admin (`Owner or Admin`)** | `request.UserId == reservation.UserId` TAI `user.IsAdmin` | Varauksen peruutus (`DELETE /api/reservations/{id}`). Opiskelija voi perua vain oman varauksensa; `Admin` ja `SuperAdmin` voivat perua minkä tahansa varauksen. | `403 Forbidden (Reservation.Forbidden)` |
-| **4. Ylläpitäjä (`Admin` / `SuperAdmin`)** | `X-User-Id: <Guid>` (`Role` on `Admin` tai `SuperAdmin`) | Pelien ja toivelistan ylläpito, tiedotteiden julkaisu/poisto, varauskiintiöiden ja huoltotilan muokkaus (`PUT /api/settings`), laitekohtainen huoltotila (`PUT /api/stations/{id}/status`), vikailmoitusten kuittaus, käyttäjälistaus (`GET /api/users`) ja käyttäjien bannaus (`PUT /api/users/{id}/ban`). | `401 Unauthorized` / `403 Forbidden` |
+| **4. Ylläpitäjä (`Admin` ja `SuperAdmin`)** | `X-User-Id: <Guid>` (`Role` on `Admin` tai `SuperAdmin`) | Pelien ja toivelistan ylläpito, tiedotteiden julkaisu ja poisto, varauskiintiöiden ja huoltotilan muokkaus (`PUT /api/settings`), laitekohtainen huoltotila (`PUT /api/stations/{id}/status`), vikailmoitusten kuittaus, käyttäjälistaus (`GET /api/users`) ja käyttäjien käyttöestot (`PUT /api/users/{id}/ban`). | `401 Unauthorized` tai `403 Forbidden` |
 | **5. Pääkäyttäjä (`SuperAdmin Only`)** | `X-User-Id: <Guid>` (`Role == "SuperAdmin"`) | Käyttäjien roolien muuttaminen (`PUT /api/users/{id}/role`), päällekkäisten opiskelijavarausten jyrääminen (`POST /api/reservations/override`) sekä aukioloaikojen ohitus (`allowAnytime = true`). | `403 Forbidden` |
 
-### Standardoidut virhevastaukset (`ProblemDetails` — RFC 9457)
+### Standardoidut virhevastaukset (ProblemDetails, RFC 9457)
 
 Kaikki epäonnistuneet API-kutsut palauttavat rakenteisen JSON-virheen:
 
@@ -41,25 +39,25 @@ Kaikki epäonnistuneet API-kutsut palauttavat rakenteisen JSON-virheen:
 
 ---
 
-## 2. REST API -päätepisteet ja Tietosopimukset (Endpoints & DTOs)
+## 2. REST API -päätepisteet ja tietosopimukset
 
-### 2.1 Autentikointi & Käyttäjähallinta (`/api/auth` & `/api/users`)
+### 2.1 Autentikointi ja käyttäjähallinta (`/api/auth` ja `/api/users`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/AuthEndpoints.cs`](../src/WebApi/Endpoints/AuthEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Users/UserContracts.cs`](../src/Contracts/Users/UserContracts.cs).
 
 #### `POST /api/auth/send-code`
-Lähettää 6-numeroisen kertakäyttöisen vahvistuskoodin (OTP, voimassa 15 min) koulusähköpostiin (`@edu.xamk.fi` tai `@xamk.fi`). Rate limit: `AuthPolicy` (5 pyyntöä / min / IP).
-- **Request (`SendVerificationCodeRequest`):**
+Lähettää 6-numeroisen kertakäyttöisen vahvistuskoodin (OTP, voimassa 15 min) koulusähköpostiin (`@edu.xamk.fi` tai `@xamk.fi`). Rajoitus: `AuthPolicy` (5 pyyntöä minuutissa per IP).
+- Request (`SendVerificationCodeRequest`):
   ```json
   { "email": "opiskelija@edu.xamk.fi" }
   ```
-- **Response (`200 OK`):**
+- Response (`200 OK`):
   ```json
   { "message": "Vahvistuskoodi lähetetty sähköpostiin.", "devCode": "482910" }
   ```
 
 #### `POST /api/auth/verify-code`
-Varmistaa 6-numeroisen vahvistuskoodin, tarkistaa mahdollisen käyttöeston (bannin) ja kirjaa käyttäjän sisään (tai luo uuden käyttäjän).
-- **Request (`VerifyCodeRequest`):**
+Varmistaa 6-numeroisen vahvistuskoodin, tarkistaa mahdollisen käyttöeston ja kirjaa käyttäjän sisään tai luo uuden käyttäjän.
+- Request (`VerifyCodeRequest`):
   ```json
   {
     "email": "opiskelija@edu.xamk.fi",
@@ -67,7 +65,7 @@ Varmistaa 6-numeroisen vahvistuskoodin, tarkistaa mahdollisen käyttöeston (ban
     "displayName": "Matti Meikäläinen"
   }
   ```
-- **Response (`200 OK` — `UserResponse`):**
+- Response (`200 OK`, `UserResponse`):
   ```json
   {
     "id": "b5a1c2d3-e4f5-6789-abcd-ef0123456789",
@@ -79,32 +77,32 @@ Varmistaa 6-numeroisen vahvistuskoodin, tarkistaa mahdollisen käyttöeston (ban
     "isBanned": false
   }
   ```
-- **Virhevastaukset:** `400 Bad Request` (`Auth.InvalidCode` / `User.InvalidEmail`), `403 Forbidden` (`User.Banned` — jos käyttäjä on bannattu).
+- Virhevastaukset: `400 Bad Request` (`Auth.InvalidCode` tai `User.InvalidEmail`), `403 Forbidden` (`User.Banned`, jos käyttäjä on asetettu käyttöestoon).
 
 #### `POST /api/auth/login`
-Suora sisäänkirjautuminen koulusähköpostilla ja valinnaisella näyttönimellä. Tarkistaa myös käyttäjän mahdollisen bannin.
-- **Request (`LoginRequest`):** `{ "email": "admin@xamk.fi", "displayName": "Pelihuone Vastaava" }`
-- **Response (`200 OK`):** `UserResponse`
+Suora sisäänkirjautuminen koulusähköpostilla ja valinnaisella näyttönimellä. Tarkistaa myös käyttäjän mahdollisen käyttöeston.
+- Request (`LoginRequest`): `{ "email": "admin@xamk.fi", "displayName": "Pelihuone Vastaava" }`
+- Response (`200 OK`): `UserResponse`
 
 #### `GET /api/users`
-Palauttaa kaikki järjestelmän käyttäjät, heidän roolinsa sekä mahdollisen käyttöeston (bannin) tilan.
-- **Vaadittu otsake:** `X-User-Id` (`Admin` tai `SuperAdmin`)
-- **Response (`200 OK`):** `IReadOnlyList<UserResponse>`
+Palauttaa kaikki järjestelmän käyttäjät, heidän roolinsa sekä mahdollisen käyttöeston tilan.
+- Vaadittu otsake: `X-User-Id` (`Admin` tai `SuperAdmin`)
+- Response (`200 OK`): `IReadOnlyList<UserResponse>`
 
 #### `GET /api/users/{id:guid}`
 Palauttaa yksittäisen käyttäjän profiilitiedot.
-- **Response (`200 OK`):** `UserResponse` (`404 Not Found`, jos käyttäjää ei löydy).
+- Response (`200 OK`): `UserResponse` (`404 Not Found`, jos käyttäjää ei löydy).
 
 #### `PUT /api/users/{id:guid}/role`
 Päivittää käyttäjän käyttöoikeusroolin (`User`, `Admin`, `SuperAdmin`).
-- **Vaadittu otsake:** `X-User-Id` (vain `SuperAdmin`)
-- **Request (`UpdateUserRoleRequest`):** `{ "role": "Admin" }`
-- **Response (`200 OK`):** `UserResponse`
+- Vaadittu otsake: `X-User-Id` (vain `SuperAdmin`)
+- Request (`UpdateUserRoleRequest`): `{ "role": "Admin" }`
+- Response (`200 OK`): `UserResponse`
 
 #### `PUT /api/users/{id:guid}/ban`
-Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston (bannin / porttikiellon) valitulla tuntimäärällä ja syyllä, tai poistaa voimassa olevan eston (`durationHours <= 0` tai `null` kun `isPermanent: false`). Pääkäyttäjää (`SuperAdmin`) ei voi bannata.
-- **Vaadittu otsake:** `X-User-Id` (`Admin` tai `SuperAdmin`)
-- **Request (`BanUserRequest`):**
+Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston valitulla tuntimäärällä ja syyllä, tai poistaa voimassa olevan eston (`durationHours <= 0` tai `null` kun `isPermanent: false`). Pääkäyttäjää (`SuperAdmin`) ei voi asettaa käyttöestoon.
+- Vaadittu otsake: `X-User-Id` (`Admin` tai `SuperAdmin`)
+- Request (`BanUserRequest`):
   ```json
   {
     "durationHours": 72,
@@ -112,21 +110,21 @@ Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston (bannin / por
     "isPermanent": false
   }
   ```
-- **Response (`200 OK`):** `UserResponse`
+- Response (`200 OK`): `UserResponse`
 
 ---
 
-### 2.2 Pelipisteet & Laitetila (`/api/stations`)
+## 2.2 Pelipisteet ja laitetila (`/api/stations`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/StationEndpoints.cs`](../src/WebApi/Endpoints/StationEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/GamingStations/GamingStationResponse.cs`](../src/Contracts/GamingStations/GamingStationResponse.cs).
 
-| Metodi & Polku | Kuvaus | Kyselyparametrit / Runko | Vastaus (`200 OK`) |
+| Metodi ja polku | Kuvaus | Kyselyparametrit tai runko | Vastaus (`200 OK`) |
 | :--- | :--- | :--- | :--- |
-| `GET /api/stations` | Hakee kaikki aktiiviset (`IsActive = true`) pelipisteet. | — | `IReadOnlyList<GamingStationResponse>` |
-| `GET /api/stations/admin` | Hakee kaikki 8 pelipistettä mukaan lukien huoltotilassa olevat. | — | `IReadOnlyList<GamingStationResponse>` |
+| `GET /api/stations` | Hakee kaikki aktiiviset (`IsActive = true`) pelipisteet. | Ei parametreja | `IReadOnlyList<GamingStationResponse>` |
+| `GET /api/stations/admin` | Hakee kaikki 8 pelipistettä mukaan lukien huoltotilassa olevat. | Ei parametreja | `IReadOnlyList<GamingStationResponse>` |
 | `GET /api/stations/available` | Hakee valitulla aikavälillä vapaana olevat pelipisteet (huomioi tilavaraukset, laitehuollon ja jaetun TV:n). | `?startUtc=<ISO>&endUtc=<ISO>` | `IReadOnlyList<GamingStationResponse>` |
-| `PUT /api/stations/{id:guid}/status` | Asettaa pelipisteen käyttöön (`true`) tai huoltotilaan (`false`). Vaatii `X-User-Id` (`Admin`/`SuperAdmin`). | `UpdateGamingStationStatusRequest`: `{ "isActive": false }` | `GamingStationResponse` |
+| `PUT /api/stations/{id:guid}/status` | Asettaa pelipisteen käyttöön (`true`) tai huoltotilaan (`false`). Vaatii otsakkeen `X-User-Id` (`Admin` tai `SuperAdmin`). | `UpdateGamingStationStatusRequest`: `{ "isActive": false }` | `GamingStationResponse` |
 
-**`GamingStationResponse`-rakenne:**
+`GamingStationResponse`-rakenne:
 ```json
 {
   "id": "11111111-1111-1111-1111-111111111111",
@@ -140,13 +138,13 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/StationEndpoints.cs`](../src/Web
 
 ---
 
-### 2.3 Varaukset & SuperAdmin-jyräys (`/api/reservations`)
+## 2.3 Varaukset ja pääkäyttäjän jyräys (`/api/reservations`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/ReservationEndpoints.cs`](../src/WebApi/Endpoints/ReservationEndpoints.cs) ja sopimukset tiedostoissa [`CreateReservationRequest.cs`](../src/Contracts/Reservations/CreateReservationRequest.cs), [`CancelReservationRequest.cs`](../src/Contracts/Reservations/CancelReservationRequest.cs), [`OverrideReservationRequest.cs`](../src/Contracts/Reservations/OverrideReservationRequest.cs) ja [`ReservationResponse.cs`](../src/Contracts/Reservations/ReservationResponse.cs).
 
 #### `POST /api/reservations`
-Luo uuden laite-, tila- tai tapahtumavarauksen. Rate limit: `ReservationPolicy` (10 pyyntöä / min / IP).
-- **Valinnainen otsake:** `Idempotency-Key: <Guid>`
-- **Request (`CreateReservationRequest`):**
+Luo uuden laite-, tila- tai tapahtumavarauksen. Rajoitus: `ReservationPolicy` (10 pyyntöä minuutissa per IP).
+- Valinnainen otsake: `Idempotency-Key: <Guid>`
+- Request (`CreateReservationRequest`):
   ```json
   {
     "idempotencyKey": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -157,8 +155,8 @@ Luo uuden laite-, tila- tai tapahtumavarauksen. Rate limit: `ReservationPolicy` 
     "endUtc": "2026-11-06T12:00:00.000Z"
   }
   ```
-  *(Huom: `reservationType`: `1` = Individual, `2` = Room, `3` = Event)*
-- **Response (`201 Created` — `ReservationResponse`):**
+  *(Varaustyypit: `1` = Individual, `2` = Room, `3` = Event)*
+- Response (`201 Created`, `ReservationResponse`):
   ```json
   {
     "id": "99999999-8888-7777-6666-555555555555",
@@ -178,63 +176,63 @@ Luo uuden laite-, tila- tai tapahtumavarauksen. Rate limit: `ReservationPolicy` 
   ```
 
 #### `POST /api/reservations/override`
-SuperAdmin-toiminto: peruuttaa kaikki aikavälille osuvat opiskelijavaraukset annetulla syyllä ja luo tilalle uuden tapahtuma-/tilavarauksen.
-- **Request (`OverrideReservationRequest`):**
+Pääkäyttäjän toiminto: peruuttaa kaikki aikavälille osuvat opiskelijavaraukset annetulla syyllä ja luo tilalle uuden tapahtuma- tai tilavarauksen.
+- Request (`OverrideReservationRequest`):
   ```json
   {
     "reservationRequest": { ...CreateReservationRequest },
     "reason": "Xamk CS2 LAN -turnaus"
   }
   ```
-- **Response (`201 Created`):** `ReservationResponse`
+- Response (`201 Created`): `ReservationResponse`
 
 #### `DELETE /api/reservations/{id:guid}`
 Peruuttaa aktiivisen varauksen. Sallittu varauksen omistajalle sekä `Admin`- ja `SuperAdmin`-käyttäjille.
-- **Request (`CancelReservationRequest`):** `{ "userId": "<Guid>", "reason": "Este" }`
-- **Response:** `204 No Content`
+- Request (`CancelReservationRequest`): `{ "userId": "<Guid>", "reason": "Este" }`
+- Response: `204 No Content`
 
 #### `GET /api/reservations`
 Palauttaa aikavälin aktiiviset varaukset kalenteria ja tilanäkymää varten.
-- **Kyselyparametrit:** `?startUtc=<ISO>&endUtc=<ISO>&stationId=<Guid (valinnainen)>`
-- **Response (`200 OK`):** `IReadOnlyList<ReservationResponse>`
+- Kyselyparametrit: `?startUtc=<ISO>&endUtc=<ISO>&stationId=<Guid (valinnainen)>`
+- Response (`200 OK`): `IReadOnlyList<ReservationResponse>`
 
 #### `GET /api/users/{userId:guid}/reservations`
 Palauttaa käyttäjän omat varaukset sivutettuna.
-- **Kyselyparametrit:** `?page=1&pageSize=20`
-- **Response (`200 OK`):** `PagedResult<ReservationResponse>` (`items`, `page`, `pageSize`, `totalCount`, `totalPages`, `hasNextPage`, `hasPreviousPage`).
+- Kyselyparametrit: `?page=1&pageSize=20`
+- Response (`200 OK`): `PagedResult<ReservationResponse>` (`items`, `page`, `pageSize`, `totalCount`, `totalPages`, `hasNextPage`, `hasPreviousPage`).
 
 ---
 
-### 2.4 Pelivalikoima & Toivelista (`/api/games`)
+## 2.4 Pelivalikoima ja toivelista (`/api/games`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/GameEndpoints.cs`](../src/WebApi/Endpoints/GameEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Games/GameContracts.cs`](../src/Contracts/Games/GameContracts.cs).
 
-| Metodi & Polku | Suojaus | Request DTO | Response DTO | Kuvaus |
+| Metodi ja polku | Suojaus | Request DTO | Response DTO | Kuvaus |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET /api/games` | Julkinen | `?platform=PC&isWishlist=false` | `IReadOnlyList<GameResponse>` | Hakee pelikatalogin ja/tai toivelistan pelit. |
-| `POST /api/games` | `X-User-Id` (`Admin`/`SuperAdmin`) | `CreateGameRequest` | `GameResponse` (`201`) | Lisää uuden pelin suoraan asennettuun valikoimaan. |
+| `GET /api/games` | Julkinen | `?platform=PC&isWishlist=false` | `IReadOnlyList<GameResponse>` | Hakee pelikatalogin tai toivelistan pelit. |
+| `POST /api/games` | `X-User-Id` (`Admin` tai `SuperAdmin`) | `CreateGameRequest` | `GameResponse` (`201`) | Lisää uuden pelin asennettuun valikoimaan. |
 | `POST /api/games/wishlist` | Kirjautunut | `WishGameRequest` | `GameResponse` (`201`) | Lisää opiskelijan pelitoiveen toivelistalle (1 ääni). |
-| `POST /api/games/{id:guid}/upvote` | Kirjautunut | — | `GameResponse` (`200`) | Kasvattaa toivelistapelin äänimäärää (`VotesCount + 1`). |
-| `PUT /api/games/{id:guid}/toggle-wishlist` | `X-User-Id` (`Admin`/`SuperAdmin`) | — | `GameResponse` (`200`) | Siirtää pelin toivelistalta asennetuksi (tai päinvastoin). |
-| `DELETE /api/games/{id:guid}` | `X-User-Id` (`Admin`/`SuperAdmin`) | — | `204 No Content` | Poistaa pelin tai pelitoiveen. |
+| `POST /api/games/{id:guid}/upvote` | Kirjautunut | Ei runkoa | `GameResponse` (`200`) | Kasvattaa toivelistapelin äänimäärää (`VotesCount + 1`). |
+| `PUT /api/games/{id:guid}/toggle-wishlist` | `X-User-Id` (`Admin` tai `SuperAdmin`) | Ei runkoa | `GameResponse` (`200`) | Siirtää pelin toivelistalta asennetuksi tai päinvastoin. |
+| `DELETE /api/games/{id:guid}` | `X-User-Id` (`Admin` tai `SuperAdmin`) | Ei runkoa | `204 No Content` | Poistaa pelin tai pelitoiveen. |
 
 ---
 
-### 2.5 Uutiset & Tiedotteet (`/api/news`)
+## 2.5 Uutiset ja tiedotteet (`/api/news`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/NewsEndpoints.cs`](../src/WebApi/Endpoints/NewsEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/News/NewsContracts.cs`](../src/Contracts/News/NewsContracts.cs).
 
-- `GET /api/news` → `IReadOnlyList<NewsResponse>` (kiinnitetyt `isPinned: true` ensin, sitten uusimmat).
-- `POST /api/news` (`X-User-Id`: `Admin`/`SuperAdmin`, runko `CreateNewsRequest`: `{ title, content, isPinned }`) → `NewsResponse` (`201 Created`).
-- `DELETE /api/news/{id:guid}` (`X-User-Id`: `Admin`/`SuperAdmin`) → `204 No Content`.
+- `GET /api/news` palauttaa `IReadOnlyList<NewsResponse>` (kiinnitetyt `isPinned: true` ensin, sitten uusimmat).
+- `POST /api/news` (`X-User-Id`: `Admin` tai `SuperAdmin`, runko `CreateNewsRequest`: `{ title, content, isPinned }`) palauttaa `NewsResponse` (`201 Created`).
+- `DELETE /api/news/{id:guid}` (`X-User-Id`: `Admin` tai `SuperAdmin`) palauttaa `204 No Content`.
 
 ---
 
-### 2.6 Sivustoasetukset & Varauskiintiöt (`/api/settings`)
+## 2.6 Sivustoasetukset ja varauskiintiöt (`/api/settings`)
 Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/WebApi/Endpoints/SettingsEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Settings/SiteSettingsContracts.cs`](../src/Contracts/Settings/SiteSettingsContracts.cs).
 
-- `GET /api/settings` → `SiteSettingsResponse`
-- `PUT /api/settings` (`X-User-Id`: `Admin`/`SuperAdmin`, runko `UpdateSiteSettingsRequest`) → `SiteSettingsResponse`
+- `GET /api/settings` palauttaa `SiteSettingsResponse`
+- `PUT /api/settings` (`X-User-Id`: `Admin` tai `SuperAdmin`, runko `UpdateSiteSettingsRequest`) palauttaa `SiteSettingsResponse`
 
-**`SiteSettingsResponse` / `UpdateSiteSettingsRequest` -kentät:**
+`SiteSettingsResponse`-kentät:
 ```json
 {
   "discordWebhookUrl": "https://discord.com/api/webhooks/...",
@@ -253,19 +251,15 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/We
 
 ---
 
-### 2.7 Käyttötilastot (`/api/statistics`) & Vikailmoitukset (`/api/issues`)
-- **`GET /api/statistics`** ([`StatisticsEndpoints.cs`](../src/WebApi/Endpoints/StatisticsEndpoints.cs), [`StatisticsContracts.cs`](../src/Contracts/Statistics/StatisticsContracts.cs)):
-  - Palauttaa `StatisticsResponse`-olion: `TotalUsers`, `ActiveReservationsCount`, `TotalReservedHoursThisMonth`, `InstalledGamesCount`, `WishlistGamesCount`, `StationUtilizations` (`StationName`, `ReservationCount`, `TotalHours`).
-- **`POST /api/issues`** ([`IssueEndpoints.cs`](../src/WebApi/Endpoints/IssueEndpoints.cs), [`IssueContracts.cs`](../src/Contracts/Issues/IssueContracts.cs)):
-  - Runko `CreateIssueReportRequest`: `{ reporterEmail, reporterName, target, title, description }` → `IssueReportResponse` (`201 Created`).
-- **`GET /api/issues`** (`X-User-Id`: `Admin`/`SuperAdmin`):
-  - Palauttaa `IReadOnlyList<IssueReportResponse>`.
-- **`PUT /api/issues/{id:guid}/resolve`** (`X-User-Id`: `Admin`/`SuperAdmin`):
-  - Runko `ResolveIssueReportRequest`: `{ adminNotes }` → merkitsee vikailmoituksen ratkaistuksi (`IsResolved = true`).
+## 2.7 Käyttötilastot ja vikailmoitukset (`/api/statistics` ja `/api/issues`)
+- `GET /api/statistics` ([`StatisticsEndpoints.cs`](../src/WebApi/Endpoints/StatisticsEndpoints.cs)): palauttaa `StatisticsResponse`-olion: `TotalUsers`, `ActiveReservationsCount`, `TotalReservedHoursThisMonth`, `InstalledGamesCount`, `WishlistGamesCount`, `StationUtilizations`.
+- `POST /api/issues` ([`IssueEndpoints.cs`](../src/WebApi/Endpoints/IssueEndpoints.cs)): runko `CreateIssueReportRequest`: `{ reporterEmail, reporterName, target, title, description }`, palauttaa `IssueReportResponse` (`201 Created`).
+- `GET /api/issues` (`X-User-Id`: `Admin` tai `SuperAdmin`): palauttaa `IReadOnlyList<IssueReportResponse>`.
+- `PUT /api/issues/{id:guid}/resolve` (`X-User-Id`: `Admin` tai `SuperAdmin`): runko `ResolveIssueReportRequest`: `{ adminNotes }`, merkitsee vikailmoituksen ratkaistuksi (`IsResolved = true`).
 
 ---
 
-## 3. Sisäiset Sovellus- ja Repositoriorajapinnat (`src/Application`)
+## 3. Sisäiset sovellus- ja repositoriorajapinnat (`src/Application`)
 
 ### 3.1 Sovelluspalvelurajapinnat (`I*Service`)
 
@@ -283,7 +277,7 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/We
 | [`IErrorNotificationService`](../src/Application/Notifications/IErrorNotificationService.cs) | [`ErrorNotificationService`](../src/Application/Notifications/ErrorNotificationService.cs) | `SendErrorAlertAsync(exception, path, traceId)` |
 | [`IEmailSender`](../src/Application/Notifications/IEmailSender.cs) | [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) | `SendEmailAsync(recipients, subject, body, isHtml)` |
 
-### 3.2 Repositorio- ja Infrastruktuuriabstraktiot (`src/Application/Abstractions`)
+### 3.2 Repositorio- ja infrastruktuuriabstraktiot (`src/Application/Abstractions`)
 
 | Rajapinta | Toteuttava luokka (`src/Infrastructure`) | Keskeiset metodit |
 | :--- | :--- | :--- |

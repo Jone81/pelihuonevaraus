@@ -1,27 +1,27 @@
-# 🎮 Pelihuonevaraus — Xamk Game Room
+# Pelihuonevaraus, Xamk Game Room
 
-Oppilaitoksen (Xamk) pelitilan ja pelipisteiden nykyaikainen ajanvarausjärjestelmä.
+Oppilaitoksen (Xamk) pelitilan ja pelipisteiden ajanvarausjärjestelmä.
 
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query
-- **Backend:** .NET 10 Web API (Clean Architecture, Result-Pattern, FluentValidation)
-- **Tietokanta:** PostgreSQL (EF Core) automaattisella InMemory-varajärjestelmällä kehitykseen
-- **Testit:** xUnit-testisarja (37 yksikkö- ja integraatiotestiä)
-- **Dokumentaatio:** Kaikki arkkitehtuuri-, domain- ja UI-dokumentit löytyvät [`Docs/`](./Docs/README.md)-kansiosta.
+- Frontend toteutettu teknologioilla React 19, TypeScript, Vite ja TanStack Query.
+- Backend toteutettu .NET 10 Web API -ratkaisuna (Clean Architecture, Result-malli, FluentValidation).
+- Tietokantana toimii PostgreSQL (EF Core) sekä InMemory-tietokanta paikalliseen kehitykseen.
+- Testit sisältävät 37 yksikkö- ja integraatiotestiä xUnit-kehyksellä.
+- Kaikki arkkitehtuuri-, domain- ja käyttöliittymädokumentit löytyvät kansiosta [`Docs/`](./Docs/README.md).
 
 ---
 
-## 🚀 Pikaohje: Projektin käynnistäminen toisella koneella
+## Pikaohje projektin käynnistämiseen toisella koneella
 
 ### 1. Esivaatimukset
-Varmista, että koneellesi on asennettu:
+Varmista, että koneelle on asennettu:
 - [Git](https://git-scm.com/)
 - [.NET SDK 10](https://dotnet.microsoft.com/download)
-- [Node.js (v18 tai uudempi)](https://nodejs.org/)
+- [Node.js (versio 18 tai uudempi)](https://nodejs.org/)
 
 ---
 
 ### 2. Koodin lataaminen
-Kloonaa repository (tai aja `git pull`):
+Kloonaa repository tai aja `git pull`:
 ```bash
 git clone https://github.com/Jone81/pelihuonevaraus.git
 cd pelihuonevaraus
@@ -31,49 +31,47 @@ cd pelihuonevaraus
 
 ### 3. Palveluiden käynnistäminen
 
-Sovellus koostuu kahdesta osasta: **Backend (.NET)** ja **Frontend (React)**. Käynnistä molemmat omiin terminaali-ikkunoihinsa:
+Sovellus koostuu kahdesta osasta: backend (.NET) ja frontend (React). Käynnistä molemmat omiin terminaali-ikkunoihinsa.
 
-#### Terminaali 1: Backend (.NET Web API)
-Projektin juurihakemistossa aja:
+#### Terminaali 1, backend (.NET Web API)
+Aja projektin juurihakemistossa:
 ```bash
 dotnet run --project src/WebApi
 ```
-> 💡 **Huom:** Erillistä tietokanta-asennusta ei vaadita kehityskäytössä! Jos PostgreSQL ei ole päällä, järjestelmä käyttää automaattisesti InMemory-tietokantaa ja alustaa oletuslaitteet, -pelit ja -käyttäjät (`DatabaseSeeder`).
-> 
-> Palvelin käynnistyy osoitteeseen: **http://localhost:5134**
+Erillistä tietokanta-asennusta ei vaadita kehityskäytössä. Jos PostgreSQL ei ole käynnissä, järjestelmä käyttää automaattisesti InMemory-tietokantaa ja alustaa oletuslaitteet, pelit ja käyttäjät (`DatabaseSeeder`).
+
+Palvelin käynnistyy osoitteeseen http://localhost:5134.
 
 ---
 
-#### Terminaali 2: Frontend (React + Vite)
-Projektin juurihakemistossa aja:
+#### Terminaali 2, frontend (React ja Vite)
+Aja projektin juurihakemistossa:
 ```bash
 cd src/Client
 npm install
 npm run dev
 ```
-> Käyttöliittymä aukeaa selaimeen osoitteeseen: **http://localhost:5173**  
-> (Vite välittää `/api`-kutsut automaattisesti paikalliseen backendiin).
+Käyttöliittymä avautuu osoitteeseen http://localhost:5173. Vite välittää `/api`-kutsut automaattisesti paikalliseen backend-palveluun.
 
 ---
 
-## 🔑 Sisäänkirjautuminen ja pikanapit
+## Sisäänkirjautuminen ja pikanapit
 
-> ⚡ **Helpoin tapa kirjautua:**  
-> Kirjautumisikkunassa ja etusivulla on suoraan valmiit **pikapainikkeet**, joita klikkaamalla pääsee sisään ilman tietojen kirjoittamista:
-> - **Opiskelija** (peruskäyttäjän näkymä ja omat varaukset)
-> - **Pääkäyttäjä** (Admin- ja SuperAdmin-hallintavalikot)
+Kirjautumisikkunassa ja etusivulla on suoraan valmiit pikapainikkeet:
+- Opiskelija (peruskäyttäjän näkymä ja omat varaukset)
+- Pääkäyttäjä (Admin- ja SuperAdmin-hallintavalikot)
 
-Halutessasi voit kirjautua myös manuaalisesti millä tahansa koulun osoitteella (`@edu.xamk.fi` tai `@xamk.fi`):
-1. **Opiskelijatunnus:** `opiskelija@edu.xamk.fi` (koodi: `123456`)
-2. **Pääkäyttäjätunnus:** `admin@xamk.fi` (koodi: `123456`)
+Voit kirjautua myös manuaalisesti koulun osoitteella (`@edu.xamk.fi` tai `@xamk.fi`):
+1. Opiskelijatunnus: `opiskelija@edu.xamk.fi` (koodi `123456`)
+2. Pääkäyttäjätunnus: `admin@xamk.fi` (koodi `123456`)
 
-*(Kehitystilassa vahvistuskoodi `123456` toimii aina yleisenä testikoodina, tai koodin voi lukea suoraan API-vastauksesta).*
+Kehitystilassa vahvistuskoodi `123456` toimii aina testikoodina, tai koodin voi lukea suoraan rajapinnan vastauksesta.
 
 ---
 
-## 🧪 Testien ajaminen
+## Testien ajaminen
 
-Voit ajaa koko ratkaisun testit (37 kpl) yhdellä komennolla:
+Voit ajaa koko ratkaisun 37 testiä komennolla:
 ```bash
 dotnet test --nologo
 ```
