@@ -104,8 +104,8 @@ public static class DatabaseSeeder
                     Game.Create(GameId.New(), "Super Smash Bros. Ultimate", GamingPlatform.NintendoSwitch, "Klassinen taistelupeli Nintendon hahmoilla.", isWishlist: false),
 
                     // Toivelistapelit (Wishlist)
-                    Game.Create(GameId.New(), "Tekken 8", GamingPlatform.PlayStation5, "Opiskelijoiden toivelistalla: turnaussuosikki taistelupeli.", isWishlist: true, votesCount: 9),
-                    Game.Create(GameId.New(), "Helldivers 2", GamingPlatform.PC, "Opiskelijoiden toivelistalla: 4 pelaajan co-op räiskintä.", isWishlist: true, votesCount: 16),
+                    Game.Create(GameId.New(), "Tekken 8", GamingPlatform.PlayStation5, "Turnaussuosikki taistelupeli opiskelijoiden toivelistalla.", isWishlist: true, votesCount: 9),
+                    Game.Create(GameId.New(), "Helldivers 2", GamingPlatform.PC, "Neljän pelaajan yhteistyöräiskintä opiskelijoiden toivelistalla.", isWishlist: true, votesCount: 16),
                 };
 
                 await context.Games.AddRangeAsync(games);
@@ -124,8 +124,8 @@ public static class DatabaseSeeder
                 {
                     News.Create(
                         NewsId.New(),
-                        "🏆 Perjantain CS2-turnaus tulossa!",
-                        "SuperAdmin järjestää perjantaina opiskelijaturnauksen klo 14–18. Tilassa saattaa olla turnauksen aikana tavallista enemmän pelaajia. Tervetuloa kannustamaan!",
+                        "Perjantain CS2-turnaus klo 14:00-18:00",
+                        "SuperAdmin järjestää perjantaina opiskelijaturnauksen klo 14:00-18:00. Koko pelitila on varattu turnauksen ajaksi.",
                         authorId,
                         now.AddHours(-2),
                         isPinned: true),
