@@ -7,6 +7,20 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Clock,
+  Monitor,
+  Map,
+  MessageSquare,
+  AlertTriangle,
+  CheckCircle2,
+  Wrench,
+  User,
+  Zap,
+  Calendar,
+  Lock,
+  Tv,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
@@ -114,7 +128,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     e.preventDefault();
     if (!email.trim()) {
       setErrorMessage(
-        isEn ? 'Please enter your university email address.' : 'Anna koulun sähköpostiosoite.'
+        isEn ? 'Enter your university email address.' : 'Anna koulun sähköpostiosoite.'
       );
       return;
     }
@@ -137,7 +151,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       } else {
         setErrorMessage(
           isEn
-            ? 'Failed to send verification code. Please check your email address.'
+            ? 'Failed to send verification code. Check your email address.'
             : 'Koodin lähetys epäonnistui. Tarkista sähköpostiosoite.'
         );
       }
@@ -170,7 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setErrorMessage(err.message);
       } else {
         setErrorMessage(
-          isEn ? 'Login failed. Please check the code.' : 'Kirjautuminen epäonnistui. Tarkista koodi.'
+          isEn ? 'Login failed. Check the verification code.' : 'Kirjautuminen epäonnistui. Tarkista koodi.'
         );
       }
     } finally {
@@ -236,7 +250,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <span className="hidden sm:inline">{t('nav.login')}</span>
               <span className="sm:hidden">{isEn ? 'Log in' : 'Kirjaudu'}</span>
-              <span className="confirm-arrow hidden sm:inline" aria-hidden="true">→</span>
             </Button>
           </div>
         </div>
@@ -253,7 +266,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {isEn ? 'Welcome to Xamk' : 'Tervetuloa Xamk'}
                 </span>
                 <span className="xamk-highlight-strip">
-                  {isEn ? 'Game Room!' : 'Game Roomiin!'}
+                  {isEn ? 'Game Room' : 'Game Roomiin'}
                 </span>
               </h1>
             </div>
@@ -265,8 +278,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="xamk-hero-info-text">
                 <h2 className="xamk-hero-info-heading">
                   {isEn
-                    ? 'Opening hours Mon–Fri 08:00–18:00'
-                    : 'Aukioloajat ma–pe klo 08:00–18:00'}
+                    ? 'Opening hours Mon-Fri 08:00-18:00'
+                    : 'Aukioloajat ma-pe klo 08:00-18:00'}
                 </h2>
                 <p
                   className="xamk-hero-info-sub"
@@ -295,7 +308,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* 4-Column Quick Highlights Bar */}
           <div className="xamk-landing-features-row">
             <div className="xamk-feature-mini-card">
-              <span className="feature-mini-icon" aria-hidden="true">⏰</span>
+              <span className="feature-mini-icon" aria-hidden="true">
+                <Clock className="w-5 h-5 shrink-0" aria-hidden="true" />
+              </span>
               <span className="feature-mini-title">{t('landing.hoursTitle')}</span>
               <span className="feature-mini-sub">{t('landing.hoursValue')}</span>
               <button
@@ -304,12 +319,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={focusLoginInput}
               >
                 <span>{t('nav.login')}</span>
-                <span aria-hidden="true">→</span>
               </button>
             </div>
 
             <div className="xamk-feature-mini-card">
-              <span className="feature-mini-icon" aria-hidden="true">🖥️</span>
+              <span className="feature-mini-icon" aria-hidden="true">
+                <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+              </span>
               <span className="feature-mini-title">{t('landing.equipmentTitle')}</span>
               <span className="feature-mini-sub">{t('landing.equipmentValue')}</span>
               <button
@@ -318,15 +334,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={() => setShowRealtimeStatus((prev) => !prev)}
               >
                 <span>{showRealtimeStatus ? t('common.close') : t('landing.statusPreview')}</span>
-                <span aria-hidden="true">→</span>
               </button>
             </div>
 
             <div className="xamk-feature-mini-card">
-              <span className="feature-mini-icon" aria-hidden="true">🗺️</span>
+              <span className="feature-mini-icon" aria-hidden="true">
+                <Map className="w-5 h-5 shrink-0" aria-hidden="true" />
+              </span>
               <span className="feature-mini-title">{t('floorplan.title')}</span>
               <span className="feature-mini-sub">
-                {isEn ? '6 PCs, PS5, Switch & Shared 4K TV' : '6 PC-pistettä, PS5, Switch & 4K TV'}
+                {isEn ? '6 PCs, PS5, Switch, and shared 4K TV' : '6 PC-pistettä, PS5, Switch ja yhteinen 4K-TV'}
               </span>
               <button
                 type="button"
@@ -334,15 +351,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={onOpenFloorPlan}
               >
                 <span>{t('floorplan.title')}</span>
-                <span aria-hidden="true">→</span>
               </button>
             </div>
 
             <div className="xamk-feature-mini-card">
-              <span className="feature-mini-icon" aria-hidden="true">💬</span>
+              <span className="feature-mini-icon" aria-hidden="true">
+                <MessageSquare className="w-5 h-5 shrink-0" aria-hidden="true" />
+              </span>
               <span className="feature-mini-title">Xamk Gaming Discord</span>
               <span className="feature-mini-sub">
-                {isEn ? 'Tournaments, LFG & announcements' : 'Turnaukset, peliseura & tiedotteet'}
+                {isEn ? 'Tournaments, matchmaking, and announcements' : 'Turnaukset, peliseura ja tiedotteet'}
               </span>
               <a
                 href="https://discord.gg/xamk"
@@ -351,7 +369,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 className="xamk-mini-pill-btn btn-touch"
               >
                 <span>Discord</span>
-                <span aria-hidden="true">→</span>
               </a>
             </div>
           </div>
@@ -376,20 +393,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
 
               {errorMessage && (
-                <div className="alert alert-error" role="alert">
-                  ⚠️ {errorMessage}
+                <div className="alert alert-error flex items-center gap-2" role="alert">
+                  <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
 
               {statusMessage && (
-                <div className="alert alert-success" role="status">
-                  ✉️ {statusMessage}
+                <div className="alert alert-success flex items-center gap-2" role="status">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>{statusMessage}</span>
                 </div>
               )}
 
               {devCodeHint && (
-                <div className="alert alert-warning" role="status">
-                  🛠️ {t('login.devCodeHint')} <strong>{devCodeHint}</strong>
+                <div className="alert alert-warning flex items-center gap-2" role="status">
+                  <Wrench className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>
+                    {t('login.devCodeHint')} <strong>{devCodeHint}</strong>
+                  </span>
                 </div>
               )}
 
@@ -409,12 +431,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 >
                   <TabsList>
                     <TabsTrigger value="1">
-                      <span className="hidden sm:inline">{isEn ? '1. University Email' : '1. Koulun sähköposti'}</span>
+                      <span className="hidden sm:inline">{isEn ? '1. University email' : '1. Koulun sähköposti'}</span>
                       <span className="sm:hidden">{isEn ? '1. Email' : '1. Sähköposti'}</span>
                     </TabsTrigger>
                     <TabsTrigger value="2">
-                      <span className="hidden sm:inline">{isEn ? '2. Verification Code' : '2. Vahvistuskoodi'}</span>
-                      <span className="sm:hidden">{isEn ? '2. Koodi' : '2. Koodi'}</span>
+                      <span className="hidden sm:inline">{isEn ? '2. Verification code' : '2. Vahvistuskoodi'}</span>
+                      <span className="sm:hidden">{isEn ? '2. Code' : '2. Koodi'}</span>
                     </TabsTrigger>
                     <TabsTrigger value="floorplan">
                       <span className="hidden sm:inline">{t('floorplan.title')}</span>
@@ -464,8 +486,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <Label>{t('login.allowedHint')}</Label>
                     <div className="xamk-double-gold-box">
                       <div className="xamk-double-box-top px-3 py-2.5 text-xs text-[#cfd2d8] flex items-center justify-between">
-                        <span>📧 @edu.xamk.fi / @xamk.fi</span>
-                        <span className="text-[#d49a15] font-semibold">OTP / Kertakoodi</span>
+                        <span>@edu.xamk.fi / @xamk.fi</span>
+                        <span className="text-[#d49a15] font-semibold">
+                          {isEn ? 'One-time code' : 'Kertakoodi'}
+                        </span>
                       </div>
                       <div className="xamk-double-box-bottom px-3 py-2 text-xs text-[#9da3ae]">
                         <span>{t('login.sessionNotice')}</span>
@@ -476,7 +500,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="xamk-submit-row">
                     <Button type="submit" variant="pill" disabled={isLoading}>
                       <span>{isLoading ? t('common.submitting') : t('login.sendCode')}</span>
-                      <span className="confirm-arrow" aria-hidden="true">→</span>
                     </Button>
                   </div>
                 </form>
@@ -505,7 +528,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="xamk-submit-row flex items-center gap-3">
                     <Button type="submit" variant="pill" disabled={isLoading}>
                       <span>{isLoading ? t('common.verifying') : t('login.verifyCode')}</span>
-                      <span className="confirm-arrow" aria-hidden="true">→</span>
                     </Button>
 
                     <Button
@@ -530,10 +552,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     disabled={isLoading}
                   >
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">🎓</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">Matti Meikäläinen</span>
                     </div>
-                    <Badge variant="status">USER →</Badge>
+                    <Badge variant="status">USER</Badge>
                   </Button>
 
                   <Button
@@ -543,16 +567,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     disabled={isLoading}
                   >
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">⚡</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">SuperAdmin</span>
                     </div>
-                    <Badge variant="status">ADMIN →</Badge>
+                    <Badge variant="status">ADMIN</Badge>
                   </Button>
                 </div>
               </div>
             </section>
 
-            {/* RIGHT COLUMN: Uutiset & Tiedotteet + Pelisäännöt */}
+            {/* RIGHT COLUMN: Uutiset ja tiedotteet + Pelisäännöt */}
             <section
               id="landing-news-col"
               className="xamk-booking-right-col"
@@ -609,19 +635,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="xamk-stations-8grid">
                   <div className="xamk-station-row-card">
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">📅</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">
-                        {isEn ? 'Book Before Playing' : 'Varaus ennen peliä'}
+                        {isEn ? 'Book before playing' : 'Varaus ennen peliä'}
                       </span>
                     </div>
-                    <Badge variant="status">Max 4h</Badge>
+                    <Badge variant="status">{isEn ? 'Up to 4 h' : 'Enintään 4 h'}</Badge>
                   </div>
 
                   <div className="xamk-station-row-card">
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">🔒</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <Lock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">
-                        {isEn ? 'Always Sign Out' : 'Muista uloskirjaus'}
+                        {isEn ? 'Always sign out' : 'Muista uloskirjaus'}
                       </span>
                     </div>
                     <Badge variant="status">Steam</Badge>
@@ -629,22 +659,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                   <div className="xamk-station-row-card">
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">📺</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <Tv className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">
-                        {isEn ? 'Shared 4K TV' : 'Yhteinen 4K TV'}
+                        {isEn ? 'Shared 4K TV' : 'Yhteinen 4K-TV'}
                       </span>
                     </div>
-                    <Badge variant="status">PS5 / SW</Badge>
+                    <Badge variant="status">PS5 / Switch</Badge>
                   </div>
 
                   <div className="xamk-station-row-card">
                     <div className="xamk-station-card-left">
-                      <span className="station-svg-icon" aria-hidden="true">⏰</span>
+                      <span className="station-svg-icon" aria-hidden="true">
+                        <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      </span>
                       <span className="xamk-station-card-name">
-                        {isEn ? 'Mon–Fri 08–18' : 'Avoinna ma–pe'}
+                        {isEn ? 'Mon-Fri 08:00-18:00' : 'Avoinna ma-pe'}
                       </span>
                     </div>
-                    <Badge variant="status">08–18</Badge>
+                    <Badge variant="status">08:00-18:00</Badge>
                   </div>
                 </div>
               </div>
@@ -664,17 +698,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <ul className="xamk-footer-links">
               <li>
                 <button type="button" onClick={focusLoginInput}>
-                  {isEn ? 'Book Station' : 'Varaa laite'}
+                  {isEn ? 'Book station' : 'Varaa laite'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setShowRealtimeStatus(true)}>
-                  {isEn ? 'Live Status' : 'Tilan tilanne'}
+                  {isEn ? 'Live status' : 'Tilan tilanne'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={focusLoginInput}>
-                  {isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}
+                  {isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}
                 </button>
               </li>
             </ul>
@@ -690,18 +724,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </li>
               <li>
                 <button type="button" onClick={() => scrollToSection('landing-rules-grid')}>
-                  {isEn ? 'Rules & Guide' : 'Pelisäännöt'}
+                  {isEn ? 'Rules and guide' : 'Pelisäännöt'}
                 </button>
               </li>
             </ul>
           </div>
 
           <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'Floor Plan' : 'Pohjakuva'}</h3>
+            <h3 className="xamk-footer-heading">{isEn ? 'Floor plan' : 'Pohjakuva'}</h3>
             <ul className="xamk-footer-links">
               <li>
                 <button type="button" onClick={() => onOpenFloorPlan?.()}>
-                  {isEn ? 'Room Layout' : 'Tilan pohjakuva'}
+                  {isEn ? 'Room layout' : 'Tilan pohjakuva'}
                 </button>
               </li>
               <li>
@@ -723,7 +757,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {onOpenIssueModal && (
                 <li>
                   <button type="button" onClick={onOpenIssueModal}>
-                    {isEn ? 'Report Issue' : 'Ilmoita viasta'}
+                    {isEn ? 'Report issue' : 'Ilmoita viasta'}
                   </button>
                 </li>
               )}
@@ -744,7 +778,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span>Xamk Game Room</span>
               </li>
               <li>
-                <span>Kotka • Kouvola • Mikkeli • Savonlinna</span>
+                <span>Kotka, Kouvola, Mikkeli, Savonlinna</span>
               </li>
             </ul>
           </div>
@@ -781,8 +815,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <div className="xamk-footer-bottom-bar">
           <span>
-            {t('footer.school')} • Xamk Game Room •{' '}
-            {isEn ? 'All for the future' : 'Tulevaisuutta varten'}
+            {t('footer.school')}, Xamk Game Room,{' '}
+            {isEn ? 'all for the future' : 'tulevaisuutta varten'}
           </span>
         </div>
       </footer>

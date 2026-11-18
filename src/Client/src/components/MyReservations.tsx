@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Gamepad2, Building2, Trophy, Calendar, Clock } from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -119,12 +120,23 @@ export const MyReservations: React.FC = () => {
               >
                 <div className="booking-card-main">
                   <div className="booking-card-header flex items-center justify-between">
-                    <span className="booking-title font-bold text-base">
-                      {booking.reservationType === 'Individual'
-                        ? `🎮 ${station?.name || 'PC / Konsoli'}`
-                        : booking.reservationType === 'Room'
-                        ? t('booking.type.room')
-                        : t('booking.type.event')}
+                    <span className="booking-title font-bold text-base inline-flex items-center gap-2">
+                      {booking.reservationType === 'Individual' ? (
+                        <>
+                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <span>{station?.name || 'PC tai konsoli'}</span>
+                        </>
+                      ) : booking.reservationType === 'Room' ? (
+                        <>
+                          <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <span>{t('booking.type.room')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Trophy className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <span>{t('booking.type.event')}</span>
+                        </>
+                      )}
                     </span>
                     <Badge
                       variant={booking.status === 'Active' ? 'success' : 'destructive'}
@@ -135,11 +147,17 @@ export const MyReservations: React.FC = () => {
                   </div>
 
                   <div className="booking-time-info">
-                    <span className="booking-date">
-                      📅 {start.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fi-FI', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })}
+                    <span className="booking-date inline-flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <span>
+                        {start.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fi-FI', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })}
+                      </span>
                     </span>
-                    <span className="booking-hours">
-                      ⏰ {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <span className="booking-hours inline-flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <span>
+                        {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}-{end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </span>
                   </div>
 

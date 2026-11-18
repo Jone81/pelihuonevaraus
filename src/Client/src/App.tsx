@@ -198,22 +198,22 @@ export const AppContent: React.FC = () => {
             <ul className="xamk-footer-links">
               <li>
                 <button type="button" onClick={() => setActiveTab('book')}>
-                  {isEn ? 'Book Station' : 'Varaa laite'}
+                  {isEn ? 'Book station' : 'Varaa laite'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setActiveTab('status')}>
-                  {isEn ? 'Live Status' : 'Tilan tilanne'}
+                  {isEn ? 'Live status' : 'Tilan tilanne'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setActiveTab('games')}>
-                  {isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}
+                  {isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setActiveTab('book')}>
-                  {isEn ? 'Reservation System' : 'Maksuton varausjärjestelmä'}
+                  {isEn ? 'Reservation system' : 'Maksuton varausjärjestelmä'}
                 </button>
               </li>
             </ul>
@@ -225,7 +225,7 @@ export const AppContent: React.FC = () => {
             <ul className="xamk-footer-links">
               <li>
                 <button type="button" onClick={() => setActiveTab('games')}>
-                  {isEn ? 'Game Wishlist' : 'Pelien toivelista'}
+                  {isEn ? 'Game wishlist' : 'Pelien toivelista'}
                 </button>
               </li>
               <li>
@@ -243,7 +243,7 @@ export const AppContent: React.FC = () => {
 
           {/* Column 3: Pohjakuva */}
           <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'Floor Plan' : 'Pohjakuva'}</h3>
+            <h3 className="xamk-footer-heading">{isEn ? 'Floor plan' : 'Pohjakuva'}</h3>
             <ul className="xamk-footer-links">
               <li>
                 <button type="button" onClick={() => setActiveTab('rules')}>
@@ -252,12 +252,12 @@ export const AppContent: React.FC = () => {
               </li>
               <li>
                 <button type="button" onClick={() => setActiveTab('rules')}>
-                  {isEn ? 'Rules & Guide' : 'Säännöt & Ohjeet'}
+                  {isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setIsFloorPlanOpen(true)}>
-                  {isEn ? 'Room Layout' : 'Tilan pohjakuva'}
+                  {isEn ? 'Room layout' : 'Tilan pohjakuva'}
                 </button>
               </li>
             </ul>
@@ -265,7 +265,7 @@ export const AppContent: React.FC = () => {
 
           {/* Column 4: Omat tiedot */}
           <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'My Links' : 'Omat tiedot'}</h3>
+            <h3 className="xamk-footer-heading">{isEn ? 'My links' : 'Omat tiedot'}</h3>
             <ul className="xamk-footer-links">
               <li>
                 <a href="https://discord.gg/xamk" target="_blank" rel="noopener noreferrer">
@@ -274,12 +274,12 @@ export const AppContent: React.FC = () => {
               </li>
               <li>
                 <button type="button" onClick={() => setIsIssueModalOpen(true)}>
-                  {isEn ? 'Report Issue' : 'Ilmoita viasta'}
+                  {isEn ? 'Report issue' : 'Ilmoita viasta'}
                 </button>
               </li>
               <li>
                 <button type="button" onClick={() => setActiveTab('my-bookings')}>
-                  {isEn ? 'My Bookings' : 'Omat varaukset'}
+                  {isEn ? 'My bookings' : 'Omat varaukset'}
                 </button>
               </li>
             </ul>
@@ -305,7 +305,7 @@ export const AppContent: React.FC = () => {
                 <span>{isEn ? 'Campus Game Room' : 'Kampuksen pelitila'}</span>
               </li>
               <li>
-                <span>Kotka • Kouvola • Mikkeli • Savonlinna</span>
+                <span>Kotka, Kouvola, Mikkeli, Savonlinna</span>
               </li>
             </ul>
           </div>
@@ -321,7 +321,7 @@ export const AppContent: React.FC = () => {
               </li>
               <li>
                 <span>
-                  Xamk Game Room — {isEn ? 'All for the future' : 'Tulevaisuutta varten'}
+                  Xamk Game Room, {isEn ? 'all for the future' : 'tulevaisuutta varten'}
                 </span>
               </li>
               <li>
@@ -343,8 +343,8 @@ export const AppContent: React.FC = () => {
 
         <div className="xamk-footer-bottom-bar">
           <span>
-            {t('footer.school')} • Xamk Game Room •{' '}
-            {isEn ? 'All for the future' : 'Tulevaisuutta varten'}
+            {t('footer.school')}, Xamk Game Room,{' '}
+            {isEn ? 'all for the future' : 'tulevaisuutta varten'}
           </span>
         </div>
       </footer>

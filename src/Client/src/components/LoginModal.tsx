@@ -4,6 +4,7 @@
  * OTP-vahvistuskoodikirjautumista (`@edu.xamk.fi` ja `@xamk.fi`) sekä kehitystilan pikatunnuksia.
  */
 import React, { useState } from 'react';
+import { User, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -155,10 +156,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         >
           <TabsList className="w-full">
             <TabsTrigger value="1">
-              {isEn ? '1. University Email' : '1. Koulusähköposti'}
+              {isEn ? '1. University email' : '1. Koulusähköposti'}
             </TabsTrigger>
             <TabsTrigger value="2" disabled={!email.trim() && step === 1}>
-              {isEn ? '2. Verification Code' : '2. Vahvistuskoodi'}
+              {isEn ? '2. Verification code' : '2. Vahvistuskoodi'}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -203,20 +204,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               </Button>
               <Button type="submit" variant="pill" disabled={loading}>
                 <span>{loading ? t('common.submitting') : t('login.sendCode')}</span>
-                <span className="confirm-arrow" aria-hidden="true">
-                  →
-                </span>
               </Button>
             </DialogFooter>
           </form>
         ) : (
           <form onSubmit={handleVerifyCode} className="xamk-modal-form">
             <div className="alert alert-info">
-              {t('login.codeSentAlert')} <strong>{email}</strong>!
+              {t('login.codeSentAlert')} <strong>{email}</strong>.
               {devCodeHint && (
                 <div style={{ marginTop: '6px' }}>
-                  🔑 <em>{t('login.devCodeHint')}</em> <strong>{devCodeHint}</strong>{' '}
-                  ({isEn ? 'or use master test code' : 'tai käytä yleistä koodia'} <code>123456</code>).
+                  <em>{t('login.devCodeHint')}</em> <strong>{devCodeHint}</strong>{' '}
+                  ({isEn ? 'or use test code' : 'tai käytä testikoodia'} <code>123456</code>).
                 </div>
               )}
             </div>
@@ -247,9 +245,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               </Button>
               <Button type="submit" variant="pill" disabled={loading}>
                 <span>{loading ? t('common.verifying') : t('login.verifyCode')}</span>
-                <span className="confirm-arrow" aria-hidden="true">
-                  →
-                </span>
               </Button>
             </DialogFooter>
           </form>
@@ -267,7 +262,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             >
               <div className="xamk-station-card-left">
                 <span className="xamk-station-card-icon" aria-hidden="true">
-                  🎓
+                  <User className="w-4 h-4 shrink-0" aria-hidden="true" />
                 </span>
                 <span className="xamk-station-card-name">
                   {isEn ? 'Student' : 'Opiskelija'}
@@ -283,7 +278,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             >
               <div className="xamk-station-card-left">
                 <span className="xamk-station-card-icon" aria-hidden="true">
-                  ⚡
+                  <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
                 </span>
                 <span className="xamk-station-card-name">SuperAdmin</span>
               </div>
