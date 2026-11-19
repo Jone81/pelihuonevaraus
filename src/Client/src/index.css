@@ -3487,23 +3487,47 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   box-sizing: border-box;
 }
 
-.xamk-clean-input,
-.xamk-clean-select {
+.xamk-clean-input {
   width: 100%;
   max-width: 100%;
   min-height: 42px;
   padding: 8px 12px;
-  background-color: transparent;
+  background-color: #16171b;
   border: none;
-  color: #f3f4f6;
+  color: #f5f6f8;
   font-size: 0.85rem;
   outline: none;
   box-sizing: border-box;
+  color-scheme: dark;
 }
 
-.xamk-clean-select option {
+.xamk-clean-select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 42px;
+  padding: 8px 34px 8px 12px;
   background-color: #16171b;
-  color: #f3f4f6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d49a2a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  border: none;
+  color: #f5f6f8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.xamk-clean-select option,
+.xamk-clean-select optgroup {
+  background-color: #16171b;
+  color: #f5f6f8;
 }
 
 .xamk-double-gold-box {
@@ -4212,18 +4236,24 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 select,
 .xamk-clean-select,
+.xamk-sub-select,
 .xamk-native-select {
-  color-scheme: dark;
+  background-color: #16171b !important;
+  color: #f5f6f8 !important;
+  color-scheme: dark !important;
 }
 
 select option,
 select optgroup,
 .xamk-clean-select option,
 .xamk-clean-select optgroup,
+.xamk-sub-select option,
+.xamk-sub-select optgroup,
 .xamk-native-select option,
 .xamk-native-select optgroup {
-  background-color: #16171b;
-  color: #f5f6f8;
+  background-color: #16171b !important;
+  color: #f5f6f8 !important;
+  color-scheme: dark !important;
 }
 
 .xamk-input-box {
