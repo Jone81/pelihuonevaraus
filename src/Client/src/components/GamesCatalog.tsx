@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Gamepad2, Monitor, Star, ThumbsUp, Plus } from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -58,8 +59,8 @@ export const GamesCatalog: React.FC = () => {
     onSuccess: (createdGame) => {
       setWishSuccess(
         isEn
-          ? `Wish added successfully: "${createdGame.name}". Admins will review the suggestion.`
-          : `Toive lisätty onnistuneesti: "${createdGame.name}". Ylläpito käy toiveet läpi.`
+          ? `Wish added: "${createdGame.name}". Administrators will review the suggestion.`
+          : `Toive lisätty: "${createdGame.name}". Ylläpito käy toiveet läpi.`
       );
       setWishError(null);
       setWishName('');
@@ -133,7 +134,7 @@ export const GamesCatalog: React.FC = () => {
     <div className="games-catalog-container">
       <div className="section-header flex justify-between items-center flex-wrap gap-4">
         <div>
-          <h2>🎮 {t('games.title')}</h2>
+          <h2>{t('games.title')}</h2>
           <p className="section-description">{t('games.subtitle')}</p>
         </div>
         <Button
@@ -141,8 +142,8 @@ export const GamesCatalog: React.FC = () => {
           variant="pill"
           onClick={() => setIsWishModalOpen(true)}
         >
+          <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>{t('wishlist.propose')}</span>
-          <span className="confirm-arrow" aria-hidden="true">→</span>
         </Button>
       </div>
 
@@ -156,13 +157,23 @@ export const GamesCatalog: React.FC = () => {
       >
         <TabsList aria-label="Pelialustat">
           <TabsTrigger value="ALL">{t('games.filterAll')}</TabsTrigger>
-          <TabsTrigger value="PC">🖥️ PC</TabsTrigger>
-          <TabsTrigger value="PlayStation5">🎮 PlayStation 5</TabsTrigger>
-          <TabsTrigger value="NintendoSwitch">🕹️ Nintendo Switch</TabsTrigger>
-          <TabsTrigger value="WISHLIST">
+          <TabsTrigger value="PC" className="inline-flex items-center gap-1.5">
+            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>PC</span>
+          </TabsTrigger>
+          <TabsTrigger value="PlayStation5" className="inline-flex items-center gap-1.5">
+            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>PlayStation 5</span>
+          </TabsTrigger>
+          <TabsTrigger value="NintendoSwitch" className="inline-flex items-center gap-1.5">
+            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>Nintendo Switch</span>
+          </TabsTrigger>
+          <TabsTrigger value="WISHLIST" className="inline-flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>{t('wishlist.tabWishlist')}</span>
             {wishlistCount > 0 && (
-              <Badge variant="wishlist" className="ml-2">
+              <Badge variant="wishlist" className="ml-1">
                 {wishlistCount}
               </Badge>
             )}
@@ -181,8 +192,8 @@ export const GamesCatalog: React.FC = () => {
             variant="pill"
             onClick={() => setIsWishModalOpen(true)}
           >
+            <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span>{t('wishlist.proposeNew')}</span>
-            <span className="confirm-arrow" aria-hidden="true">→</span>
           </Button>
         </Card>
       )}
@@ -207,16 +218,27 @@ export const GamesCatalog: React.FC = () => {
             <Card key={game.id} className={`game-card ${game.isWishlist ? 'game-card-wish' : ''}`}>
               <CardHeader className="p-0">
                 <div className="game-card-header flex items-center justify-between">
-                  <span className="xamk-platform-chip">
-                    {game.platform === 'PC'
-                      ? '🖥️ PC'
-                      : game.platform === 'PlayStation5'
-                      ? '🎮 PS5'
-                      : '🕹️ Switch'}
+                  <span className="xamk-platform-chip inline-flex items-center gap-1.5">
+                    {game.platform === 'PC' ? (
+                      <>
+                        <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>PC</span>
+                      </>
+                    ) : game.platform === 'PlayStation5' ? (
+                      <>
+                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>PS5</span>
+                      </>
+                    ) : (
+                      <>
+                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>Switch</span>
+                      </>
+                    )}
                   </span>
                   {game.isWishlist ? (
                     <Badge variant="wishlist">
-                      🔥 {game.votesCount || 0} {t('wishlist.votes')}
+                      {game.votesCount || 0} {t('wishlist.votes')}
                     </Badge>
                   ) : (
                     <Badge variant="installed">{t('games.installed')}</Badge>
@@ -240,7 +262,8 @@ export const GamesCatalog: React.FC = () => {
                     onClick={() => handleVote(game.id)}
                     disabled={votedGameIds.has(game.id) || voteMutation.isPending}
                   >
-                    {votedGameIds.has(game.id) ? '👍 ' + t('wishlist.voted') : t('wishlist.vote')}
+                    <ThumbsUp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>{votedGameIds.has(game.id) ? t('wishlist.voted') : t('wishlist.vote')}</span>
                   </Button>
                 </CardFooter>
               )}
@@ -255,7 +278,7 @@ export const GamesCatalog: React.FC = () => {
           <DialogHeader>
             <div className="xamk-modal-header-row">
               <div className="xamk-modal-icon-badge" aria-hidden="true">
-                ⭐
+                <Star className="w-5 h-5 shrink-0" aria-hidden="true" />
               </div>
               <div className="xamk-modal-title-group">
                 <DialogTitle>{t('wishlist.modalTitle')}</DialogTitle>
@@ -288,9 +311,9 @@ export const GamesCatalog: React.FC = () => {
                 value={wishPlatform}
                 onChange={(e) => setWishPlatform(e.target.value)}
               >
-                <option value="PC">🖥️ PC</option>
-                <option value="PlayStation5">🎮 PlayStation 5</option>
-                <option value="NintendoSwitch">🕹️ Nintendo Switch</option>
+                <option value="PC">PC</option>
+                <option value="PlayStation5">PlayStation 5</option>
+                <option value="NintendoSwitch">Nintendo Switch</option>
               </NativeSelect>
             </div>
 
@@ -320,9 +343,6 @@ export const GamesCatalog: React.FC = () => {
               >
                 <span>
                   {wishMutation.isPending ? t('common.submitting') : t('wishlist.submitWish')}
-                </span>
-                <span className="confirm-arrow" aria-hidden="true">
-                  →
                 </span>
               </Button>
             </DialogFooter>

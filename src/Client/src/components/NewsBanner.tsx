@@ -58,7 +58,7 @@ export const NewsBanner: React.FC = () => {
                 {isEn ? 'Welcome to Xamk' : 'Tervetuloa Xamk'}
               </span>
               <span className="xamk-highlight-strip">
-                {isEn ? 'Game Room!' : 'Game Roomiin!'}
+                {isEn ? 'Game Room' : 'Game Roomiin'}
               </span>
             </h1>
           </div>
@@ -72,8 +72,8 @@ export const NewsBanner: React.FC = () => {
             <div className="xamk-hero-info-text">
               <h2 className="xamk-hero-info-heading">
                 {isEn
-                  ? 'Opening hours Mon–Fri 08:00–18:00'
-                  : 'Aukioloajat ma–pe klo 08:00–18:00'}
+                  ? 'Opening hours Mon-Fri 08:00-18:00'
+                  : 'Aukioloajat ma-pe klo 08:00-18:00'}
               </h2>
               <p className="xamk-hero-info-sub">
                 {pinnedNews && !pinnedNews.title.includes('Tervetuloa Xamk Game Roomiin')

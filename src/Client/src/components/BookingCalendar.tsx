@@ -2,11 +2,12 @@
  * @file BookingCalendar.tsx
  * @description Pelitilan ensisijainen varausnäkymä ja interaktiivinen tuntimatriisi.
  * Vasemmalla puolella on varauslomake (yksittäinen laite, koko tila tai admin-tapahtuma)
- * ja oikealla puolella kaikkien pelipisteiden reaaliaikainen tuntimatriisi (08:00–18:00),
+ * ja oikealla puolella kaikkien pelipisteiden reaaliaikainen tuntimatriisi (08:00-18:00),
  * jossa aikavälin voi maalata hiirellä tai kosketuksella (drag-to-select).
  */
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Gamepad2, Monitor, Building2 } from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -45,7 +46,7 @@ const DISPLAY_ORDER = [
 ];
 
 /**
- * Tuntimatriisin alkamistunnit aukioloajan (08:00–18:00) puitteissa.
+ * Tuntimatriisin alkamistunnit aukioloajan (08:00-18:00) puitteissa.
  */
 const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
@@ -56,20 +57,20 @@ const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) =
   if (type === 'NintendoSwitch' || name.includes('Switch')) {
     return (
       <span className="station-svg-icon icon-switch" aria-hidden="true">
-        🕹️
+        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
       </span>
     );
   }
   if (type === 'PlayStation5' || name.includes('PlayStation')) {
     return (
       <span className="station-svg-icon icon-ps5" aria-hidden="true">
-        🎮
+        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
       </span>
     );
   }
   return (
     <span className="station-svg-icon icon-pc" aria-hidden="true">
-      🖥️
+      <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
     </span>
   );
 };
@@ -247,7 +248,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         // Käsitellään 409 Conflict -tilanne (kilpajuoksu kahden varaajan välillä)
         if (err.status === 409 || err.problem?.status === 409) {
           setConflictMessage(
-            '⚠️ 409 Ristiriita: Valittu pelipiste tai konsolien yhteinen TV ehdittiin varata toisen käyttäjän toimesta hetki sitten! Välimuisti on päivitetty, valitse toinen laite tai aikaväli.'
+            isEn
+              ? '409 Conflict. The selected station or shared console TV was just booked by another user. Availability has been refreshed. Select another station or time.'
+              : '409 Ristiriita. Valittu pelipiste tai konsolien yhteinen TV ehdittiin varata toiselle käyttäjälle. Välimuisti on päivitetty. Valitse toinen laite tai aikaväli.'
           );
           queryClient.invalidateQueries({ queryKey: ['available-stations'] });
           queryClient.invalidateQueries({ queryKey: ['available-now'] });
@@ -275,14 +278,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       return;
     }
 
-    // Tarkistetaan, että valittu päivä on arkipäivä (ma–pe)
+    // Tarkistetaan, että valittu päivä on arkipäivä (ma-pe)
     const selectedDate = new Date(`${date}T12:00:00`);
     const dayOfWeek = selectedDate.getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       setGeneralError(
         isEn
-          ? 'The Game Room is open Mon–Fri only. Please choose a weekday.'
-          : 'Pelihuone on avoinna vain arkisin (ma–pe). Valitse arkipäivä.'
+          ? 'The Game Room is open Mon-Fri only. Choose a weekday.'
+          : 'Pelihuone on avoinna vain arkisin ma-pe. Valitse arkipäivä.'
       );
       return;
     }
@@ -326,7 +329,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         return;
       }
       if (durationMinutes > 600) {
-        setGeneralError('Tilavarauksen enimmäiskesto on 10 tuntia (aukioloajan puitteissa).');
+        setGeneralError('Tilavarauksen enimmäiskesto on 10 tuntia aukioloajan puitteissa.');
         return;
       }
     }
@@ -559,18 +562,18 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             >
               <TabsList aria-label={t('booking.typeLabel')}>
                 <TabsTrigger value="1">
-                  {isEn ? 'Single Station' : 'Yksittäinen laite'}
+                  {isEn ? 'Single station' : 'Yksittäinen laite'}
                 </TabsTrigger>
                 <TabsTrigger value="2">
-                  {isEn ? 'Whole Room' : 'Koko tila'}
+                  {isEn ? 'Whole room' : 'Koko tila'}
                 </TabsTrigger>
                 {isAdmin ? (
                   <TabsTrigger value="3">
-                    {isEn ? 'Event (Admin)' : 'Tapahtuma'}
+                    {isEn ? 'Event, Admin' : 'Tapahtuma'}
                   </TabsTrigger>
                 ) : (
                   <TabsTrigger value="my-bookings">
-                    {isEn ? 'My Bookings' : 'Omat varaukset'}
+                    {isEn ? 'My bookings' : 'Omat varaukset'}
                   </TabsTrigger>
                 )}
               </TabsList>
@@ -665,14 +668,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   >
                     {orderedStations.map((st) => (
                       <option key={st.id} value={st.id}>
-                        {st.name} ({startHour}–{endHour})
+                        {st.name} ({startHour}-{endHour})
                       </option>
                     ))}
                   </select>
                 ) : (
-                  <div className="xamk-room-summary-line">
+                  <div className="xamk-room-summary-line flex items-center gap-1.5">
+                    <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
                     <span>
-                      🏢 {reservationType === 2 ? t('booking.type.room') : t('booking.type.event')} ({startHour}–{endHour})
+                      {reservationType === 2 ? t('booking.type.room') : t('booking.type.event')} ({startHour}-{endHour})
                     </span>
                   </div>
                 )}
@@ -692,7 +696,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   ? t('booking.processing')
                   : t('booking.submit')}
               </span>
-              <span className="confirm-arrow" aria-hidden="true">→</span>
             </Button>
           </div>
         </form>
@@ -707,17 +710,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
         <div className="xamk-schedule-sublabel-row">
           <span className="xamk-schedule-sublabel">
-            {isEn ? 'Available TV & Station Schedule' : 'Aikataulu ja TV-varaukset'}
+            {isEn ? 'Available TV and station schedule' : 'Aikataulu ja TV-varaukset'}
           </span>
           <span className="xamk-schedule-drag-hint hidden sm:inline">
             {isEn
-              ? `Drag across hours to select time (max 4h) • ${startHour}–${endHour}`
-              : `Maalaa aikaväli vetämällä (max 4 h) • ${startHour}–${endHour}`}
+              ? `Drag across hours to select time, up to 4 hours, ${startHour}-${endHour}`
+              : `Maalaa aikaväli vetämällä, enintään 4 h, ${startHour}-${endHour}`}
           </span>
           <span className="xamk-schedule-drag-hint sm:hidden text-[11px]">
             {isEn
-              ? `👉 Drag slots to select (max 4h) • ${startHour}–${endHour}`
-              : `👉 Valitse vetämällä sormella (max 4 h) • ${startHour}–${endHour}`}
+              ? `Drag slots to select, up to 4 hours, ${startHour}-${endHour}`
+              : `Valitse vetämällä sormella, enintään 4 h, ${startHour}-${endHour}`}
           </span>
         </div>
 
@@ -740,9 +743,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       key={h}
                       data-hour-index={hourIdx}
                       className="matrix-hour-th"
-                      title={`${h}–${endNum}:00`}
+                      title={`${h}-${endNum}:00`}
                     >
-                      {`${startNum}–${endNum}`}
+                      {`${startNum}-${endNum}`}
                     </th>
                   );
                 })}
@@ -824,7 +827,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                           title={
                             busy
                               ? `${station.name} ${h}: ${t('schedule.busy')}`
-                              : `${station.name} ${h}–${String(
+                              : `${station.name} ${h}-${String(
                                   parseInt(h.split(':')[0], 10) + 1
                                 ).padStart(2, '0')}:00: ${t('schedule.free')}`
                           }
@@ -864,7 +867,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   <span className="xamk-station-card-name">{station.name}</span>
                 </div>
                 <Badge variant={!isAvailable ? 'occupied' : 'status'}>
-                  {!isAvailable ? (isEn ? 'Booked' : 'Varattu') : 'Status'}
+                  {!isAvailable ? (isEn ? 'Booked' : 'Varattu') : isEn ? 'Free' : 'Vapaa'}
                 </Badge>
               </Button>
             );

@@ -5,6 +5,7 @@
  * suoraan ylläpidolle.
  */
 import React, { useState, useMemo } from 'react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
@@ -107,7 +108,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
       } else {
         setErrorMessage(
           isEn
-            ? 'Failed to send bug report. Please try again.'
+            ? 'Failed to send issue report. Try again.'
             : 'Vikailmoituksen lähetys epäonnistui. Yritä uudelleen.'
         );
       }
@@ -122,7 +123,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
         <DialogHeader>
           <div className="xamk-modal-header-row">
             <div className="xamk-modal-icon-badge" aria-hidden="true">
-              ⚠️
+              <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
             </div>
             <div className="xamk-modal-title-group">
               <DialogTitle>{t('issue.title')}</DialogTitle>
@@ -133,8 +134,8 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
         </DialogHeader>
 
         {successMessage ? (
-          <div className="alert alert-success">
-            <span>✅</span>
+          <div className="alert alert-success flex items-start gap-2.5">
+            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <strong>{successMessage}</strong>
               <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
@@ -145,8 +146,8 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
         ) : (
           <form onSubmit={handleSubmit} className="xamk-modal-form">
             {errorMessage && (
-              <div className="alert alert-error">
-                <span>⚠️</span>
+              <div className="alert alert-error flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -230,9 +231,6 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
                 disabled={isSubmitting}
               >
                 <span>{isSubmitting ? t('common.submitting') : t('issue.submitBtn')}</span>
-                <span className="confirm-arrow" aria-hidden="true">
-                  →
-                </span>
               </Button>
             </DialogFooter>
           </form>

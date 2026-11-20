@@ -5,6 +5,24 @@
  * käyttäjävalikon sekä mobiililaitteiden sivuvalikon (Drawer).
  */
 import React, { useState, useEffect } from 'react';
+import {
+  Calendar,
+  Gamepad2,
+  BookOpen,
+  Map,
+  MessageSquare,
+  ClipboardList,
+  Settings,
+  ChevronDown,
+  Newspaper,
+  Users,
+  BarChart3,
+  AlertTriangle,
+  Zap,
+  User,
+  LogOut,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -145,8 +163,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`xamk-nav-link btn-touch ${activeTab === 'book' ? 'xamk-nav-active' : ''}`}
               onClick={() => setActiveTab('book')}
             >
-              <span className="nav-item-icon" aria-hidden="true">📅</span>
-              <span>{isEn ? 'Book Station' : 'Varaa laite'}</span>
+              <Calendar className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Book station' : 'Varaa laite'}</span>
             </button>
 
             <button
@@ -155,7 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setActiveTab('status')}
             >
               <span className="nav-dot-green" aria-hidden="true" />
-              <span>{isEn ? 'Live Status' : 'Tilan tilanne'}</span>
+              <span>{isEn ? 'Live status' : 'Tilan tilanne'}</span>
             </button>
 
             <button
@@ -163,8 +181,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`xamk-nav-link btn-touch ${activeTab === 'games' ? 'xamk-nav-active' : ''}`}
               onClick={() => setActiveTab('games')}
             >
-              <span className="nav-item-icon" aria-hidden="true">🎮</span>
-              <span>{isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}</span>
+              <Gamepad2 className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}</span>
             </button>
 
             <button
@@ -172,8 +190,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`xamk-nav-link btn-touch ${activeTab === 'rules' ? 'xamk-nav-active' : ''}`}
               onClick={() => setActiveTab('rules')}
             >
-              <span className="nav-item-icon" aria-hidden="true">💬</span>
-              <span>{isEn ? 'Rules & Guide' : 'Säännöt & Ohjeet'}</span>
+              <BookOpen className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}</span>
             </button>
 
             <button
@@ -181,8 +199,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="xamk-nav-link btn-touch"
               onClick={onOpenFloorPlan}
             >
-              <span className="nav-item-icon nav-icon-blue" aria-hidden="true">🗺️</span>
-              <span>{isEn ? 'Floor Plan' : 'Tilan pohjakuva'}</span>
+              <Map className="nav-item-icon nav-icon-blue w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Floor plan' : 'Tilan pohjakuva'}</span>
             </button>
 
             <a
@@ -192,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="xamk-nav-link btn-touch"
               title="Xamk Gaming Discord"
             >
-              <span className="nav-item-icon" aria-hidden="true">👾</span>
+              <MessageSquare className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>Discord</span>
             </a>
 
@@ -201,8 +219,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`xamk-nav-link btn-touch ${activeTab === 'my-bookings' ? 'xamk-nav-active' : ''}`}
               onClick={() => setActiveTab('my-bookings')}
             >
-              <span className="nav-item-icon" aria-hidden="true">📋</span>
-              <span>{isEn ? 'My Bookings' : 'Omat varaukset'}</span>
+              <ClipboardList className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'My bookings' : 'Omat varaukset'}</span>
             </button>
 
             {/* Admin-pudotusvalikko ylläpitäjille ja pääkäyttäjille */}
@@ -216,14 +234,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }`}
                     aria-label="Ylläpitovalikko"
                   >
-                    <span className="nav-item-icon" aria-hidden="true">⚙️</span>
+                    <Settings className="nav-item-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                     <span>Admin</span>
-                    <span className="text-[10px] opacity-75">▼</span>
+                    <ChevronDown className="w-3 h-3 opacity-75 shrink-0" aria-hidden="true" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="xamk-dropdown-menu">
                   <DropdownMenuLabel>
-                    {isEn ? 'Admin Control Panel' : 'Ylläpidon hallinta'}
+                    {isEn ? 'Admin control panel' : 'Ylläpidon hallinta'}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -232,8 +250,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('games')}
                   >
-                    <span>🎮</span>
-                    <span>{isEn ? 'Games & Wishlist' : 'Pelit & Toivelista'}</span>
+                    <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={
@@ -241,8 +259,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('news')}
                   >
-                    <span>📰</span>
-                    <span>{isEn ? 'News & Announcements' : 'Uutiset & Tiedotteet'}</span>
+                    <Newspaper className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'News and announcements' : 'Uutiset ja tiedotteet'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={
@@ -250,8 +268,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('users')}
                   >
-                    <span>👥</span>
-                    <span>{isEn ? 'Users & Roles' : 'Käyttäjät & Roolit'}</span>
+                    <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Users and roles' : 'Käyttäjät ja roolit'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={
@@ -259,8 +277,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('settings')}
                   >
-                    <span>⚙️</span>
-                    <span>{isEn ? 'Settings & Discord' : 'Asetukset & Discord'}</span>
+                    <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Settings and Discord' : 'Asetukset ja Discord'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={
@@ -268,8 +286,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('statistics')}
                   >
-                    <span>📊</span>
-                    <span>{isEn ? 'Statistics & Usage' : 'Tilastot & Käyttöaste'}</span>
+                    <BarChart3 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Statistics and usage' : 'Tilastot ja käyttöaste'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={
@@ -277,8 +295,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                     onClick={() => handleAdminSubTabClick('issues')}
                   >
-                    <span>⚠️</span>
-                    <span>{isEn ? 'Issue Reports' : 'Vikailmoitukset'}</span>
+                    <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Issue reports' : 'Vikailmoitukset'}</span>
                   </DropdownMenuItem>
                   {isSuperAdmin && (
                     <>
@@ -287,7 +305,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className={activeTab === 'superadmin' ? 'dropdown-item-active' : ''}
                         onClick={() => handleTabClick('superadmin')}
                       >
-                        <span>⚡</span>
+                        <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
                         <span>{t('nav.superadmin')}</span>
                       </DropdownMenuItem>
                     </>
@@ -308,7 +326,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onOpenIssueModal}
               title={t('issue.desc')}
             >
-              <span className="issue-warn-icon" aria-hidden="true">⚠️</span>
+              <AlertTriangle className="issue-warn-icon w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>{isEn ? 'Report issue' : 'Ilmoita viasta'}</span>
             </button>
           )}
@@ -336,19 +354,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleTabClick('my-bookings')}>
-                  <span>📋</span>
-                  <span>{isEn ? 'My Bookings' : 'Omat varaukset'}</span>
+                  <ClipboardList className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'My bookings' : 'Omat varaukset'}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onOpenLogin}>
-                  <span>🔑</span>
-                  <span>{isEn ? 'Switch Account' : 'Vaihda käyttäjää'}</span>
+                  <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'Switch account' : 'Vaihda käyttäjää'}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="dropdown-item-danger"
                   onClick={handleLogout}
                 >
-                  <span>🚪</span>
+                  <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span>{t('nav.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -361,7 +379,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onOpenLogin}
             >
               <span>{t('nav.login')}</span>
-              <span className="confirm-arrow" aria-hidden="true">→</span>
             </button>
           )}
         </div>
@@ -422,7 +439,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-label={t('nav.closeMenu')}
               >
-                ✕
+                <X className="w-4 h-4 shrink-0" aria-hidden="true" />
               </button>
             </div>
 

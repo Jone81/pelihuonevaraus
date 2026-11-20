@@ -2,9 +2,17 @@
  * @file RulesAndGuide.tsx
  * @description Pelitilan säännöt, laiteohjeet ja visuaalinen tilakatsaus.
  * Esittää yleiset käyttösäännöt, PC-koneiden ja Steamin ohjeet, konsolikaapin ja
- * yhteisen 4K TV:n (SharedTV) toimintaperiaatteet sekä linkit Discord-yhteisöön.
+ * yhteisen 4K-TV:n (SharedTV) toimintaperiaatteet sekä linkit Discord-yhteisöön.
  */
 import React from 'react';
+import {
+  BookOpen,
+  Monitor,
+  Gamepad2,
+  MessageSquare,
+  Tv,
+  Map,
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,9 +48,11 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           <Button
             type="button"
             variant="secondary"
+            className="inline-flex items-center gap-1.5"
             onClick={onOpenFloorPlan}
           >
-            {t('rules.openFloorPlan')}
+            <Map className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>{t('rules.openFloorPlan')}</span>
           </Button>
           <Button asChild variant="pill">
             <a
@@ -51,7 +61,6 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
               rel="noopener noreferrer"
             >
               <span>{t('rules.joinDiscord')}</span>
-              <span className="confirm-arrow" aria-hidden="true">→</span>
             </a>
           </Button>
         </div>
@@ -62,7 +71,9 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
         {/* 1. Yleiset säännöt */}
         <div className="rule-card">
           <div className="rule-card-header">
-            <span className="rule-icon">📜</span>
+            <span className="rule-icon" aria-hidden="true">
+              <BookOpen className="w-5 h-5 shrink-0" aria-hidden="true" />
+            </span>
             <div>
               <h3>{t('rules.generalTitle')}</h3>
               <span className="rule-badge">{t('rules.generalBadge')}</span>
@@ -70,42 +81,44 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           </div>
           <ul className="rule-list">
             <li>
-              <strong>🍕 {isEn ? 'No food at stations:' : 'Ei ruokailua koneilla:'}</strong>{' '}
+              <strong>{isEn ? 'No food at stations.' : 'Ei ruokailua koneilla.'}</strong>{' '}
               {isEn
-                ? 'Eating at gaming stations is strictly prohibited. Only resealable drink bottles (with caps) are permitted on desks.'
-                : 'Laitteiden äärellä syöminen on ehdottomasti kielletty. Ainoastaan suljettavat juomapullot (korkilla) ovat sallittuja pöydillä.'}
+                ? 'Eating at gaming stations is prohibited. Only resealable drink bottles with caps are permitted on desks.'
+                : 'Laitteiden äärellä syöminen on kielletty. Vain suljettavat korkilliset juomapullot ovat sallittuja pöydillä.'}
             </li>
             <li>
-              <strong>🧹 {isEn ? 'Cleanliness & order:' : 'Siisteys & järjestys:'}</strong>{' '}
+              <strong>{isEn ? 'Cleanliness and order.' : 'Siisteys ja järjestys.'}</strong>{' '}
               {isEn
-                ? 'Dispose of your trash in the bins immediately after your session. Push your chair neatly under the desk and return headphones to their stand.'
-                : 'Vie omat roskat roskakoriin heti session jälkeen. Laita pelituoli siististi pöydän alle ja aseta kuulokkeet telineeseen.'}
+                ? 'Put your trash in the bins immediately after your session. Push your chair under the desk and return headphones to their stand.'
+                : 'Vie omat roskat roskakoriin heti vuoron jälkeen. Työnnä pelituoli pöydän alle ja aseta kuulokkeet telineeseen.'}
             </li>
             <li>
-              <strong>🎧 {isEn ? 'Audio & etiquette:' : 'Äänenvoimakkuus & käytöstavat:'}</strong>{' '}
+              <strong>{isEn ? 'Audio and etiquette.' : 'Äänenvoimakkuus ja käytöstavat.'}</strong>{' '}
               {isEn
-                ? 'Always use headphones at PC stations. Respect peers playing and studying in the space — avoid disruptive shouting.'
-                : 'Käytä aina kuulokkeita PC-pisteillä. Kunnioita tilassa opiskelevia ja pelaavia kanssatiimiläisiä — ei häiritsevää huutelua.'}
+                ? 'Always use headphones at PC stations. Respect other students playing and working in the room, and avoid shouting.'
+                : 'Käytä aina kuulokkeita PC-pisteillä. Huomioi muut pelaajat ja vältä häiritsevää huutelua.'}
             </li>
             <li>
-              <strong>⏰ {isEn ? 'Opening hours (08:00–18:00):' : 'Aukioloajat (klo 08:00–18:00):'}</strong>{' '}
+              <strong>{isEn ? 'Opening hours 08:00-18:00.' : 'Aukioloajat klo 08:00-18:00.'}</strong>{' '}
               {isEn
-                ? 'The room is open Mon–Fri 08:00–18:00. You must exit promptly by 18:00 when doors automatically lock.'
-                : 'Tila on avoinna ma–pe klo 08:00–18:00. Tilasta on poistuttava viipymättä klo 18:00 mennessä, jolloin ovet lukittuvat.'}
+                ? 'The room is open Mon-Fri 08:00-18:00. Leave the room by 18:00 when the doors lock.'
+                : 'Tila on avoinna ma-pe klo 08:00-18:00. Poistu tilasta viimeistään klo 18:00, jolloin ovet lukittuvat.'}
             </li>
             <li>
-              <strong>⏱️ {isEn ? 'Booking limits:' : 'Varausrajat:'}</strong>{' '}
+              <strong>{isEn ? 'Booking limits.' : 'Varausrajat.'}</strong>{' '}
               {isEn
-                ? 'An individual student quota is maximum 4 hours per day. Remember to cancel your booking in the system before it starts if you cannot attend!'
-                : 'Yksittäisen opiskelijan varauskiintiö on enintään 4 tuntia päivässä. Muista perua varauksesi järjestelmästä ennen sen alkamista, jos et pääsekään pelaamaan!'}
+                ? 'The student quota is up to 4 hours per day. Cancel your booking in the system before it starts if you cannot attend.'
+                : 'Yksittäisen opiskelijan varauskiintiö on enintään 4 tuntia päivässä. Peru varauksesi järjestelmästä ennen sen alkamista, jos et pääse paikalle.'}
             </li>
           </ul>
         </div>
 
-        {/* 2. PC & Steam-pelaaminen */}
+        {/* 2. PC ja Steam-pelaaminen */}
         <div className="rule-card">
           <div className="rule-card-header">
-            <span className="rule-icon">🖥️</span>
+            <span className="rule-icon" aria-hidden="true">
+              <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+            </span>
             <div>
               <h3>{t('rules.steamTitle')}</h3>
               <span className="rule-badge">{t('rules.steamBadge')}</span>
@@ -113,44 +126,46 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           </div>
           <ul className="rule-list">
             <li>
-              <strong>🎮 {isEn ? 'Pre-installed games:' : 'Asennetut pelit:'}</strong>{' '}
+              <strong>{isEn ? 'Pre-installed games.' : 'Asennetut pelit.'}</strong>{' '}
               {isEn
-                ? 'PCs are preloaded with CS2, Valorant, Dota 2, Rocket League, and more. You can propose new titles in the Games & Wishlist tab.'
-                : 'Koneilla on valmiiksi asennettuna mm. CS2, Valorant, Dota 2, Rocket League. Uusia pelejä voi ehdottaa Pelit & toivelista -välilehdellä.'}
+                ? 'PCs have CS2, Valorant, Dota 2, Rocket League, and other titles installed. You can propose new titles on the Games and wishlist tab.'
+                : 'Koneilla on valmiiksi asennettuna esimerkiksi CS2, Valorant, Dota 2 ja Rocket League. Uusia pelejä voi ehdottaa Pelit ja toivelista -välilehdellä.'}
             </li>
             <li>
-              <strong>🔑 {isEn ? 'Personal accounts:' : 'Omat tilit:'}</strong>{' '}
+              <strong>{isEn ? 'Personal accounts.' : 'Omat tilit.'}</strong>{' '}
               {isEn
-                ? 'Gaming is conducted using your own student accounts (Steam, Riot Games, Epic Games, Battle.net).'
-                : 'Pelaaminen tapahtuu aina opiskelijan omilla pelitunnuksilla (Steam, Riot Games, Epic Games, Battle.net).'}
+                ? 'Sign in with your own accounts on Steam, Riot Games, Epic Games, and Battle.net.'
+                : 'Pelaa omilla Steam-, Riot Games-, Epic Games- ja Battle.net-pelitunnuksillasi.'}
             </li>
             <li>
               <strong className="text-warning">
-                🔒 {isEn ? 'IMPORTANT — Always Sign Out:' : 'TÄRKEÄÄ — Kirjaudu aina ulos:'}
+                {isEn ? 'Always sign out.' : 'Kirjaudu aina ulos.'}
               </strong>{' '}
               {isEn
-                ? 'Always remember to sign out of Steam and other game launchers before leaving the room! Never save your passwords in browsers on shared stations.'
-                : 'Muista aina kirjautua ulos Steam- ja muilta pelitileiltäsi ennen kuin poistut tilasta! Älä koskaan tallenna salasanojasi koneiden selaimiin.'}
+                ? 'Sign out of Steam and other game launchers before leaving the room. Do not save passwords in browsers on shared stations.'
+                : 'Kirjaudu ulos Steam- ja muilta pelitileiltäsi ennen kuin poistut tilasta. Älä tallenna salasanojasi yhteiskäyttökoneiden selaimiin.'}
             </li>
             <li>
-              <strong>⚙️ {isEn ? 'No tampering with settings:' : 'Ei asetusten peukalointia:'}</strong>{' '}
+              <strong>{isEn ? 'System settings and cables.' : 'Järjestelmäasetukset ja kaapelit.'}</strong>{' '}
               {isEn
-                ? 'Do not install malicious software, alter Windows system settings, or unplug hardware cables.'
-                : 'Älä asenna haittaohjelmia, muuta Windowsin järjestelmäasetuksia tai irrota koneiden kaapeleita.'}
+                ? 'Do not install unauthorized software, change Windows system settings, or unplug hardware cables.'
+                : 'Älä asenna luvattomia ohjelmia, muuta Windowsin järjestelmäasetuksia tai irrota koneiden kaapeleita.'}
             </li>
             <li>
-              <strong>🖱️ {isEn ? 'Personal peripherals:' : 'Omat oheislaitteet:'}</strong>{' '}
+              <strong>{isEn ? 'Personal peripherals.' : 'Omat oheislaitteet.'}</strong>{' '}
               {isEn
-                ? 'You are welcome to use your own mouse, keyboard, or headset, provided you reconnect the room equipment back in place afterwards.'
-                : 'Omien hiirien, näppäimistöjen tai kuulokkeiden käyttö on sallittua, kunhan kytket laitteiston omat osat takaisin paikoilleen session jälkeen.'}
+                ? 'You may use your own mouse, keyboard, or headset if you reconnect the room equipment afterwards.'
+                : 'Voit käyttää omaa hiirtä, näppäimistöä tai kuulokkeita, kun kytket tilan omat laitteet takaisin paikoilleen vuoron jälkeen.'}
             </li>
           </ul>
         </div>
 
-        {/* 3. Konsolikaappi & SharedTV */}
+        {/* 3. Konsolikaappi ja yhteinen TV */}
         <div className="rule-card">
           <div className="rule-card-header">
-            <span className="rule-icon">🎮</span>
+            <span className="rule-icon" aria-hidden="true">
+              <Gamepad2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+            </span>
             <div>
               <h3>{t('rules.consoleTitle')}</h3>
               <span className="rule-badge">{t('rules.consoleBadge')}</span>
@@ -158,42 +173,44 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           </div>
           <ul className="rule-list">
             <li>
-              <strong>📺 {isEn ? 'Shared TV Display:' : 'SharedTV-näyttö:'}</strong>{' '}
+              <strong>{isEn ? 'Shared TV display.' : 'Yhteinen TV-näyttö.'}</strong>{' '}
               {isEn
-                ? 'PlayStation 5 and Nintendo Switch share the same large TV. Only one console can be in use at a time — the booking system automatically locks the other during active reservations.'
-                : 'PlayStation 5 ja Nintendo Switch jakavat saman suuren television. Vain toinen konsoli voi olla käytössä kerrallaan — järjestelmä lukitsee toisen automaattisesti varauksen ajaksi.'}
+                ? 'PlayStation 5 and Nintendo Switch share the same 4K TV. Only one console can be in use at a time, and the booking system locks the other console during active reservations.'
+                : 'PlayStation 5 ja Nintendo Switch jakavat saman 4K-television. Vain toinen konsoli voi olla käytössä kerrallaan, ja varausjärjestelmä lukitsee toisen konsolin varauksen ajaksi.'}
             </li>
             <li>
-              <strong>🗄️ {isEn ? 'Cabinet contents:' : 'Konsolikaapin sisältö:'}</strong>{' '}
+              <strong>{isEn ? 'Cabinet contents.' : 'Konsolikaapin sisältö.'}</strong>{' '}
               {isEn
-                ? 'The cabinet houses the consoles, PS5 DualSense controllers, Switch Pro Controllers, and Joy-Cons with charging docks.'
-                : 'Kaapista löytyvät konsolit, PS5 DualSense -ohjaimet, Switch Pro Controllerit sekä Joy-Conit lataustelakoineen.'}
+                ? 'The cabinet holds the consoles, PS5 DualSense controllers, Switch Pro Controllers, and Joy-Cons with charging docks.'
+                : 'Kaapissa ovat konsolit, PS5 DualSense -ohjaimet, Switch Pro -ohjaimet sekä Joy-Con-ohjaimet lataustelakoineen.'}
             </li>
             <li>
-              <strong>🔋 {isEn ? 'Charging controllers:' : 'Ohjainten lataus:'}</strong>{' '}
+              <strong>{isEn ? 'Charging controllers.' : 'Ohjainten lataus.'}</strong>{' '}
               {isEn
-                ? 'Return controllers to the charging stands immediately after use so the next gamer has full battery!'
-                : 'Palauta ohjaimet lataustelineisiin aina heti käytön jälkeen, jotta seuraavalla pelaajalla on akut täynnä!'}
+                ? 'Return controllers to the charging docks immediately after use so the batteries are charged for the next player.'
+                : 'Palauta ohjaimet lataustelineisiin heti käytön jälkeen, jotta akut latautuvat seuraavalle pelaajalle.'}
             </li>
             <li>
-              <strong>🔌 {isEn ? 'Powering down:' : 'Laitteiden sammutus:'}</strong>{' '}
+              <strong>{isEn ? 'Powering down.' : 'Laitteiden sammutus.'}</strong>{' '}
               {isEn
-                ? 'Turn off or put console in Rest Mode from the controller and turn off the TV with the remote. Return remote to its cradle.'
-                : 'Sammuta konsoli ohjaimesta ("Sammuta konsoli" tai "Lepotila") ja sulje TV kaukosäätimestä. Palauta kaukosäädin konsolitason telineeseen.'}
+                ? 'Turn off the console or set it to rest mode from the controller, and turn off the TV with the remote. Return the remote to its stand.'
+                : 'Sammuta konsoli tai aseta se lepotilaan ohjaimesta, ja sulje TV kaukosäätimestä. Palauta kaukosäädin konsolitason telineeseen.'}
             </li>
             <li>
-              <strong>🤝 {isEn ? 'Whole room booking (max 4h):' : 'Koko tilan varaus (max 4h):'}</strong>{' '}
+              <strong>{isEn ? 'Whole room booking, up to 4 hours.' : 'Koko tilan varaus, enintään 4 h.'}</strong>{' '}
               {isEn
-                ? 'A single student can reserve the whole room (e.g. for a console tournament). Booker details are displayed publicly so others can ask if they can join.'
-                : 'Yksittäinenkin opiskelija voi varata koko tilan (esim. konsoliturnaukseen). Varaajan yhteystiedot näkyvät julkisesti, jotta muut voivat tarvittaessa kysyä mahtuuko mukaan.'}
+                ? 'A student may reserve the whole room, for example for a console tournament. Booker contact details are shown on the status board so other students can ask to join.'
+                : 'Opiskelija voi varata koko tilan esimerkiksi konsoliturnaukseen. Varaajan yhteystiedot näkyvät tilannetaulussa, jotta muut voivat kysyä lupaa liittyä mukaan.'}
             </li>
           </ul>
         </div>
 
-        {/* 4. Discord & Yhteisö */}
+        {/* 4. Discord ja yhteisö */}
         <div className="rule-card discord-highlight-card">
           <div className="rule-card-header">
-            <span className="rule-icon">💬</span>
+            <span className="rule-icon" aria-hidden="true">
+              <MessageSquare className="w-5 h-5 shrink-0" aria-hidden="true" />
+            </span>
             <div>
               <h3>{t('rules.discordTitle')}</h3>
               <span className="rule-badge">{t('rules.discordBadge')}</span>
@@ -201,24 +218,24 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           </div>
           <p className="discord-card-desc">
             {isEn
-              ? 'Looking for teammates for CS2, organizing a Smash tournament, or suggesting new titles for the gaming room? Join our official Discord server!'
-              : 'Etsitkö tiimikavereita CS2-matsiin, haluatko sopia Smash-turnauksesta tai ehdottaa uutta peliä tilan valikoimaan? Liity viralliselle Discord-palvelimellemme!'}
+              ? 'Find teammates for CS2, arrange a Smash tournament, or discuss new games on the Xamk Gaming Discord server.'
+              : 'Etsi peliseuraa CS2-otteluun, sovi Smash-turnauksesta tai keskustele uusista peleistä Xamk Gaming Discord -palvelimella.'}
           </p>
           <ul className="rule-list">
             <li>
               {isEn
-                ? '📢 Announcements on upcoming LAN events and student tournaments.'
-                : '📢 Tiedotteet tulevista LAN-tapahtumista ja opiskelijaturnauksista.'}
+                ? 'Announcements on upcoming LAN events and student tournaments.'
+                : 'Tiedotteet tulevista LAN-tapahtumista ja opiskelijaturnauksista.'}
             </li>
             <li>
               {isEn
-                ? '👥 LFG player matchmaking across games (PC, PS5, Switch).'
-                : '👥 Peliseuranhaku eri peleille (PC, PS5, Switch).'}
+                ? 'Player matchmaking across PC, PS5, and Switch games.'
+                : 'Peliseuranhaku PC-, PS5- ja Switch-peleihin.'}
             </li>
             <li>
               {isEn
-                ? '💡 Direct communication channel with admins and teachers.'
-                : '💡 Suora keskustelukanava ylläpidon ja opettajien kanssa.'}
+                ? 'Direct contact channel with student administrators and staff.'
+                : 'Suora keskustelukanava ylläpidon ja henkilökunnan kanssa.'}
             </li>
           </ul>
           <div className="discord-action-area">
@@ -228,15 +245,14 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span>{isEn ? '🚀 Join Discord Now' : '🚀 Liity Discordiin nyt'}</span>
-                <span className="confirm-arrow" aria-hidden="true">→</span>
+                <span>{isEn ? 'Join Discord' : 'Liity Discordiin'}</span>
               </a>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Visuaalinen katsaus tilasta (Kuvapaikat & visualisointi) */}
+      {/* Visuaalinen katsaus tilasta */}
       <div className="visual-overview-section">
         <div className="section-header">
           <div>
@@ -248,9 +264,11 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
           <Button
             type="button"
             variant="secondary"
+            className="inline-flex items-center gap-1.5"
             onClick={onOpenFloorPlan}
           >
-            {t('rules.openFloorPlan')}
+            <Map className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>{t('rules.openFloorPlan')}</span>
           </Button>
         </div>
 
@@ -260,39 +278,43 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
             <div className="photo-placeholder pc-zone-photo">
               <span className="photo-badge">{isEn ? 'PC ZONE' : 'PC-ALUE'}</span>
               <div className="photo-illustration">
-                <span className="big-icon">🖥️</span>
-                <span className="photo-caption-title">PC 1 – PC 6</span>
+                <span className="big-icon" aria-hidden="true">
+                  <Monitor className="w-8 h-8 shrink-0" aria-hidden="true" />
+                </span>
+                <span className="photo-caption-title">PC 1-PC 6</span>
                 <span className="photo-caption-sub">
-                  {isEn ? '6x 240Hz gaming PCs, mechanical keyboards' : '6 kpl 240Hz pelikoneita, mekaaniset näppäimistöt'}
+                  {isEn ? '6x 240Hz gaming PCs, mechanical keyboards' : '6 kpl 240 Hz pelikoneita, mekaaniset näppäimistöt'}
                 </span>
               </div>
             </div>
             <div className="photo-card-info">
-              <h4>{isEn ? '🖥️ PC Stations (PCs 1–6)' : '🖥️ PC-pisteet (Koneet 1–6)'}</h4>
+              <h4>{isEn ? 'PC stations, PC 1-PC 6' : 'PC-pisteet, PC 1-PC 6'}</h4>
               <p>
                 {isEn
-                  ? 'A row of high-performance gaming computers with ergonomic chairs. Pre-installed with top competitive titles.'
-                  : 'Rivistö tehokkaita pelitietokoneita ergonomisilla pelituoleilla. Asennettuina tärkeimmät kilpapelit.'}
+                  ? 'Six gaming computers with 240 Hz monitors and adjustable chairs.'
+                  : 'Kuusi pelitietokonetta 240 Hz näytöillä ja säädettävillä pelituoleilla.'}
               </p>
             </div>
           </div>
 
-          {/* Kortti 2: Konsolialue & SharedTV */}
+          {/* Kortti 2: Konsolialue ja yhteinen TV */}
           <div className="photo-card">
             <div className="photo-placeholder tv-zone-photo">
               <span className="photo-badge">SHARED TV</span>
               <div className="photo-illustration">
-                <span className="big-icon">📺</span>
-                <span className="photo-caption-title">65" 4K 120Hz {isEn ? 'Display' : 'Näyttö'}</span>
-                <span className="photo-caption-sub">PlayStation 5 & Nintendo Switch</span>
+                <span className="big-icon" aria-hidden="true">
+                  <Tv className="w-8 h-8 shrink-0" aria-hidden="true" />
+                </span>
+                <span className="photo-caption-title">65" 4K 120 Hz {isEn ? 'Display' : 'Näyttö'}</span>
+                <span className="photo-caption-sub">PlayStation 5 ja Nintendo Switch</span>
               </div>
             </div>
             <div className="photo-card-info">
-              <h4>{isEn ? '📺 Console Lounge & Shared TV' : '📺 Konsolinurkkaus & SharedTV'}</h4>
+              <h4>{isEn ? 'Console lounge and shared TV' : 'Konsolinurkkaus ja yhteinen TV'}</h4>
               <p>
                 {isEn
-                  ? 'Comfortable sofa lounge and a 65-inch 4K OLED gaming television with low latency and HDR.'
-                  : 'Mukava sohva-alue ja 65 tuuman 4K OLED -pelitelevisio matalalla viiveellä ja HDR-tuella.'}
+                  ? 'Sofa group and a 65-inch 4K OLED television connected to both consoles.'
+                  : 'Sohvaryhmä ja 65 tuuman 4K OLED -televisio, johon molemmat konsolit on kytketty.'}
               </p>
             </div>
           </div>
@@ -302,21 +324,23 @@ export const RulesAndGuide: React.FC<RulesAndGuideProps> = ({ onOpenFloorPlan })
             <div className="photo-placeholder cabinet-zone-photo">
               <span className="photo-badge">{isEn ? 'CONSOLE CABINET' : 'KONSOLIKAAPPI'}</span>
               <div className="photo-illustration">
-                <span className="big-icon">🗄️</span>
+                <span className="big-icon" aria-hidden="true">
+                  <Gamepad2 className="w-8 h-8 shrink-0" aria-hidden="true" />
+                </span>
                 <span className="photo-caption-title">
-                  {isEn ? 'Docks & Controllers' : 'Lataustelineet & Ohjaimet'}
+                  {isEn ? 'Docks and controllers' : 'Lataustelineet ja ohjaimet'}
                 </span>
                 <span className="photo-caption-sub">
-                  {isEn ? 'PS5 DualSense & Switch Pro Controllers' : 'PS5 DualSense & Switch Pro -ohjaimet'}
+                  {isEn ? 'PS5 DualSense and Switch Pro Controllers' : 'PS5 DualSense- ja Switch Pro -ohjaimet'}
                 </span>
               </div>
             </div>
             <div className="photo-card-info">
-              <h4>{isEn ? '🗄️ Console Cabinet & Gear' : '🗄️ Konsolikaappi & Tarvikkeet'}</h4>
+              <h4>{isEn ? 'Console cabinet and gear' : 'Konsolikaappi ja tarvikkeet'}</h4>
               <p>
                 {isEn
-                  ? 'Lockable cabinet holding controllers, docks, and physical games. Always return controllers to charge!'
-                  : 'Lukittava konsolikaappi sisältää ohjaimet, lataustelakat ja pelikotelot. Palauta aina ohjaimet lataukseen!'}
+                  ? 'Cabinet holding controllers, charging docks, and game cases. Return controllers to the docks after use.'
+                  : 'Konsolikaapissa säilytetään ohjaimet, lataustelakat ja pelikotelot. Palauta ohjaimet lataukseen käytön jälkeen.'}
               </p>
             </div>
           </div>

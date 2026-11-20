@@ -1,9 +1,10 @@
 /**
  * @file FloorPlanModal.tsx
  * @description Pelitilan pohjakuvan ja laitesijoittelun esittävä modaali-ikkuna.
- * Havainnollistaa 6 PC-pelipisteen sekä konsolikaapin (PS5, Switch ja yhteinen 4K TV) sijainnin.
+ * Havainnollistaa 6 PC-pelipisteen sekä konsolikaapin (PS5, Switch ja yhteinen 4K-TV) sijainnin.
  */
 import React from 'react';
+import { Map, Monitor, Gamepad2, Tv } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import {
   Dialog,
@@ -39,7 +40,7 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
         <DialogHeader>
           <div className="xamk-modal-header-row">
             <div className="xamk-modal-icon-badge" aria-hidden="true">
-              🗺️
+              <Map className="w-5 h-5 shrink-0" aria-hidden="true" />
             </div>
             <div className="xamk-modal-title-group">
               <DialogTitle>{t('floorplan.title')}</DialogTitle>
@@ -56,7 +57,7 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
               <div className="sketch-header">
                 <span className="sketch-title">{t('floorplan.sketchHeader')}</span>
                 <Badge variant="status">
-                  {isEn ? '6 PCs + 2 Consoles' : '6 PC + 2 Konsolia'}
+                  {isEn ? '6 PCs and 2 consoles' : '6 PC ja 2 konsolia'}
                 </Badge>
               </div>
 
@@ -65,35 +66,41 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
                 <div className="sketch-zone pc-group">
                   <div className="zone-tag">{t('floorplan.pcZone')}</div>
                   <div className="pc-grid-sketch">
-                    <div className="sketch-station">🖥️ PC 1</div>
-                    <div className="sketch-station">🖥️ PC 2</div>
-                    <div className="sketch-station">🖥️ PC 3</div>
-                    <div className="sketch-station">🖥️ PC 4</div>
-                    <div className="sketch-station">🖥️ PC 5</div>
-                    <div className="sketch-station">🖥️ PC 6</div>
+                    {['PC 1', 'PC 2', 'PC 3', 'PC 4', 'PC 5', 'PC 6'].map((pcName) => (
+                      <div key={pcName} className="sketch-station inline-flex items-center justify-center gap-1.5">
+                        <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>{pcName}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Konsolit & Shared TV */}
+                {/* Konsolit ja yhteinen TV */}
                 <div className="sketch-zone console-group">
                   <div className="zone-tag">{t('floorplan.consoleZone')}</div>
-                  <div className="tv-box">
+                  <div className="tv-box inline-flex items-center justify-center gap-1.5">
+                    <Tv className="w-4 h-4 shrink-0" aria-hidden="true" />
                     <span>{t('floorplan.sharedTvZone')}</span>
                   </div>
                   <div className="console-grid-sketch">
-                    <div className="sketch-station console-st">🎮 PS5</div>
-                    <div className="sketch-station console-st">🕹️ Switch</div>
+                    <div className="sketch-station console-st inline-flex items-center justify-center gap-1.5">
+                      <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>PlayStation 5</span>
+                    </div>
+                    <div className="sketch-station console-st inline-flex items-center justify-center gap-1.5">
+                      <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Nintendo Switch</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="sketch-empty-notice">
                 <p>
-                  📷{' '}
                   <em>
                     {isEn
-                      ? 'Interactive floor plan schematic — 6 gaming PCs and shared 4K console zone'
-                      : 'Pelitilan pohjakaavio — 6 tehokasta pelitietokonetta sekä konsolikaapin yhteinen 4K TV'}
+                      ? 'Floor plan schematic, 6 gaming PCs and shared 4K console zone'
+                      : 'Pelitilan pohjakaavio, 6 pelitietokonetta sekä konsolikaapin yhteinen 4K-TV'}
                   </em>
                 </p>
               </div>

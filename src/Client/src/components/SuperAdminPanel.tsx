@@ -1,11 +1,20 @@
 /**
  * @file SuperAdminPanel.tsx
- * @description Pääkäyttäjän (SuperAdmin) tapahtumajyräysnäkymä (Sääntö #8).
+ * @description Pääkäyttäjän (SuperAdmin) tapahtumajyräysnäkymä (Sääntö #10).
  * Mahdollistaa virallisen oppilaitostapahtuman luomisen, joka lukitsee koko pelitilan
  * valitulle aikavälille ja peruuttaa automaattisesti päällekkäiset opiskelijavaraukset.
  */
 import React, { useState, useId } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Zap,
+  Settings,
+  Trophy,
+  AlertTriangle,
+  ClipboardList,
+  Calendar,
+  Clock,
+} from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -58,8 +67,8 @@ export const SuperAdminPanel: React.FC = () => {
       setErrorMessage(null);
       setStatusMessage(
         isEn
-          ? `✅ Official event created (ID: ${createdEvent.id.slice(0, 8)}...). All overlapping bookings were overridden.`
-          : `✅ Tapahtuma luotu onnistuneesti (ID: ${createdEvent.id.slice(0, 8)}...). Kaikki päällekkäiset varaukset jyrätty.`
+          ? `Official event created, ID ${createdEvent.id.slice(0, 8)}. All overlapping bookings were overridden.`
+          : `Tapahtuma luotu, tunniste ${createdEvent.id.slice(0, 8)}. Kaikki päällekkäiset varaukset peruutettiin.`
       );
       // Päivitetään kaikki varauslistat ja saatavuustiedot välimuistista
       queryClient.invalidateQueries({ queryKey: ['available-stations'] });
@@ -83,7 +92,7 @@ export const SuperAdminPanel: React.FC = () => {
       <div className="alert alert-error">
         {isEn
           ? 'Only SuperAdmin accounts have access to this panel.'
-          : 'Vain pääkäyttäjällä (SuperAdmin) on pääsy tähän paneeliin.'}
+          : 'Vain pääkäyttäjällä, SuperAdmin, on pääsy tähän paneeliin.'}
       </div>
     );
   }
@@ -140,15 +149,16 @@ export const SuperAdminPanel: React.FC = () => {
       {/* Ylätunniste ja pikavaihtaja tavallisen Admin-paneelin ja SuperAdmin-näkymän välillä */}
       <div className="xamk-admin-header">
         <div className="xamk-admin-header-titles">
-          <div className="xamk-admin-kicker">XAMK GAME ROOM • SUPERADMIN AUTHORITY</div>
-          <h2 className="xamk-section-heading" style={{ textAlign: 'left' }}>
-            ⚡ {isEn ? 'SuperAdmin — Official Event Override' : 'SuperAdmin — Tapahtumajyräys'}
+          <div className="xamk-admin-kicker">XAMK GAME ROOM, SUPERADMIN AUTHORITY</div>
+          <h2 className="xamk-section-heading inline-flex items-center gap-2" style={{ textAlign: 'left' }}>
+            <Zap className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <span>{isEn ? 'SuperAdmin, official event override' : 'SuperAdmin, tapahtumajyräys'}</span>
           </h2>
           <div className="xamk-section-underline" style={{ margin: '10px 0 12px' }} />
           <p className="xamk-admin-subtitle">
             {isEn
-              ? 'Rule #8: SuperAdmin has authority to schedule official university events and override overlapping student reservations for that time slot.'
-              : 'Sääntö #8: SuperAdminilla on oikeus järjestää oppilaitoksen virallinen tapahtuma ja jyrätä tarvittaessa yksittäisten opiskelijoiden varaukset kyseiseltä ajankohdalta.'}
+              ? 'Rule #10. SuperAdmin has authority to schedule official university events and override overlapping student reservations for that time slot.'
+              : 'Sääntö #10. SuperAdminilla on oikeus järjestää oppilaitoksen virallinen tapahtuma ja jyrätä yksittäisten opiskelijoiden varaukset kyseiseltä ajankohdalta.'}
           </p>
         </div>
 
@@ -159,12 +169,14 @@ export const SuperAdminPanel: React.FC = () => {
             onClick={() => setActiveTab('admin')}
           >
             <div className="xamk-station-card-left">
-              <span className="xamk-station-card-icon" aria-hidden="true">⚙️</span>
+              <span className="xamk-station-card-icon" aria-hidden="true">
+                <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </span>
               <span className="xamk-station-card-name">
-                {isEn ? 'Admin Control Panel' : 'Ylläpitopaneeli'}
+                {isEn ? 'Admin control panel' : 'Ylläpitopaneeli'}
               </span>
             </div>
-            <Badge variant="status">← ADMIN</Badge>
+            <Badge variant="status">ADMIN</Badge>
           </Button>
           <Button
             type="button"
@@ -173,9 +185,11 @@ export const SuperAdminPanel: React.FC = () => {
             onClick={() => setActiveTab('superadmin')}
           >
             <div className="xamk-station-card-left">
-              <span className="xamk-station-card-icon" aria-hidden="true">⚡</span>
+              <span className="xamk-station-card-icon" aria-hidden="true">
+                <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </span>
               <span className="xamk-station-card-name">
-                {isEn ? 'SuperAdmin Event Override' : 'SuperAdmin — Tapahtumajyräys'}
+                {isEn ? 'SuperAdmin, event override' : 'SuperAdmin, tapahtumajyräys'}
               </span>
             </div>
             <Badge variant="status">ACTIVE</Badge>
@@ -191,8 +205,9 @@ export const SuperAdminPanel: React.FC = () => {
         {/* Vasen sarake: Tapahtuma-ajan ja jyräysperusteen syöttölomake */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              🏆 {isEn ? 'Create Official Event & Override Slot' : 'Aseta tapahtuma-aika ja jyräysperuste'}
+            <CardTitle className="inline-flex items-center gap-2">
+              <Trophy className="w-5 h-5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Create official event and override slot' : 'Aseta tapahtuma-aika ja jyräysperuste'}</span>
             </CardTitle>
             <div className="xamk-modal-underline" />
             <CardDescription>
@@ -205,7 +220,7 @@ export const SuperAdminPanel: React.FC = () => {
           <form onSubmit={handleOpenConfirm} className="xamk-modal-form">
             <div className="xamk-field-group">
               <Label htmlFor="admin-date">
-                {isEn ? 'Event Date *' : 'Tapahtuman päivämäärä *'}
+                {isEn ? 'Event date *' : 'Tapahtuman päivämäärä *'}
               </Label>
               <div className="xamk-input-box xamk-date-box">
                 <input
@@ -222,7 +237,7 @@ export const SuperAdminPanel: React.FC = () => {
             <div className="xamk-form-row-2col">
               <div className="xamk-field-group">
                 <Label htmlFor="admin-start">
-                  {isEn ? 'Start Time (08:00–17:00) *' : 'Alkamisaika (klo 08–17) *'}
+                  {isEn ? 'Start time 08:00-17:00 *' : 'Alkamisaika klo 08:00-17:00 *'}
                 </Label>
                 <NativeSelect
                   id="admin-start"
@@ -241,7 +256,7 @@ export const SuperAdminPanel: React.FC = () => {
 
               <div className="xamk-field-group">
                 <Label htmlFor="admin-end">
-                  {isEn ? 'End Time (09:00–18:00) *' : 'Päättymisaika (klo 09–18) *'}
+                  {isEn ? 'End time 09:00-18:00 *' : 'Päättymisaika klo 09:00-18:00 *'}
                 </Label>
                 <NativeSelect
                   id="admin-end"
@@ -261,12 +276,16 @@ export const SuperAdminPanel: React.FC = () => {
 
             <div className="xamk-field-group">
               <Label htmlFor="override-reason">
-                {isEn ? 'Official Event Title & Override Reason *' : 'Jyräyksen ja tapahtuman perustelu *'}
+                {isEn ? 'Official event title and override reason *' : 'Jyräyksen ja tapahtuman perustelu *'}
               </Label>
               <Input
                 id="override-reason"
                 type="text"
-                placeholder="esim. Koulun virallinen peliturnaus / Vierailijapäivä"
+                placeholder={
+                  isEn
+                    ? 'For example university tournament or visitor day'
+                    : 'Esimerkiksi koulun peliturnaus tai vierailijapäivä'
+                }
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 required
@@ -284,16 +303,16 @@ export const SuperAdminPanel: React.FC = () => {
                 variant="pill"
                 disabled={overrideMutation.isPending}
               >
+                <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>
                   {overrideMutation.isPending
                     ? isEn
                       ? 'Executing override...'
                       : 'Käsitellään jyräystä...'
                     : isEn
-                    ? '⚠️ Override Bookings & Create Event'
-                    : '⚠️ Jyrää varaukset ja luo tapahtuma'}
+                    ? 'Override bookings and create event'
+                    : 'Jyrää varaukset ja luo tapahtuma'}
                 </span>
-                <span className="confirm-arrow" aria-hidden="true">→</span>
               </Button>
             </div>
           </form>
@@ -303,21 +322,24 @@ export const SuperAdminPanel: React.FC = () => {
         {/* Oikea sarake: Yhteenveto valitusta aikaikkunasta ja jyräyksen vaikutuksista */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              📋 {isEn ? 'Override Operation Summary' : 'Jyräysoperaation esikatselu ja vaikutukset'}
+            <CardTitle className="inline-flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'Override operation summary' : 'Jyräysoperaation esikatselu ja vaikutukset'}</span>
             </CardTitle>
             <div className="xamk-modal-underline" />
             <CardDescription>
               {isEn
-                ? 'Verify the selected window and understand how Rule #8 affects active reservations.'
-                : 'Tarkista valittu aikaikkuna ja mitä tapahtumajyräys tekee päällekkäisille varauksille.'}
+                ? 'Verify the selected window and check how Rule #10 affects active reservations.'
+                : 'Tarkista valittu aikaikkuna ja mitä säännön #10 mukainen tapahtumajyräys tekee päällekkäisille varauksille.'}
             </CardDescription>
           </CardHeader>
 
           <div className="xamk-stations-2col-grid" style={{ marginBottom: '18px' }}>
             <div className="xamk-station-row-card xamk-station-card-selected" style={{ cursor: 'default' }}>
               <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon">📅</span>
+                <span className="xamk-station-card-icon" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
                 <div>
                   <div className="xamk-station-card-name">
                     {new Date(`${date}T12:00:00`).toLocaleDateString('fi-FI', {
@@ -327,7 +349,7 @@ export const SuperAdminPanel: React.FC = () => {
                     })}
                   </div>
                   <div className="xamk-table-subtext">
-                    {isEn ? 'Target Date' : 'Kohdepäivämäärä'}
+                    {isEn ? 'Target date' : 'Kohdepäivämäärä'}
                   </div>
                 </div>
               </div>
@@ -336,13 +358,15 @@ export const SuperAdminPanel: React.FC = () => {
 
             <div className="xamk-station-row-card xamk-station-card-selected" style={{ cursor: 'default' }}>
               <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon">⏰</span>
+                <span className="xamk-station-card-icon" aria-hidden="true">
+                  <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
                 <div>
                   <div className="xamk-station-card-name">
-                    {startHour} – {endHour}
+                    {startHour}-{endHour}
                   </div>
                   <div className="xamk-table-subtext">
-                    {isEn ? 'Locked Window' : 'Lukittava aikaväli'}
+                    {isEn ? 'Locked window' : 'Lukittava aikaväli'}
                   </div>
                 </div>
               </div>
@@ -351,8 +375,9 @@ export const SuperAdminPanel: React.FC = () => {
           </div>
 
           <div className="xamk-landing-rules-card">
-            <h4 className="xamk-landing-rules-heading">
-              ⚡ {isEn ? 'What happens when you confirm:' : 'Mitä jyräyksen vahvistaminen tekee:'}
+            <h4 className="xamk-landing-rules-heading inline-flex items-center gap-1.5">
+              <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>{isEn ? 'What happens when you confirm' : 'Mitä jyräyksen vahvistaminen tekee'}</span>
             </h4>
             <ul className="xamk-landing-rules-list">
               <li>
@@ -362,12 +387,12 @@ export const SuperAdminPanel: React.FC = () => {
               </li>
               <li>
                 {isEn
-                  ? 'The entire Xamk Game Room (6 PCs + PS5 + Switch) is locked for the official event.'
-                  : 'Koko Xamk Game Room (6 PC-konetta, PS5 ja Switch) lukitaan virallisen tapahtuman käyttöön.'}
+                  ? 'The entire Xamk Game Room, 6 PCs, PS5, and Switch, is locked for the official event.'
+                  : 'Koko Xamk Game Room, 6 PC-konetta, PS5 ja Switch, lukitaan virallisen tapahtuman käyttöön.'}
               </li>
               <li>
                 {isEn
-                  ? 'If a Discord Webhook is configured in Settings, an event notification is sent automatically.'
+                  ? 'If a Discord Webhook is configured in settings, an event notification is sent automatically.'
                   : 'Jos Discord Webhook on määritetty asetuksissa, tapahtumasta lähtee ilmoitus Discordiin.'}
               </li>
             </ul>
@@ -382,17 +407,17 @@ export const SuperAdminPanel: React.FC = () => {
           <DialogHeader>
             <div className="xamk-modal-header-row">
               <div className="xamk-modal-icon-badge" aria-hidden="true">
-                ⚠️
+                <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
               </div>
               <div className="xamk-modal-title-group">
                 <DialogTitle>
-                  {isEn ? 'Confirm SuperAdmin Event Override' : 'Vahvista tapahtumajyräys'}
+                  {isEn ? 'Confirm SuperAdmin event override' : 'Vahvista tapahtumajyräys'}
                 </DialogTitle>
                 <div className="xamk-modal-underline" />
                 <DialogDescription>
                   {isEn
-                    ? 'This action will automatically cancel all overlapping reservations made by other users during the selected time window.'
-                    : 'VAROITUS: Tämä toiminto peruuttaa automaattisesti kaikki samalle aikavälille osuvat muiden käyttäjien varaukset.'}
+                    ? 'This action automatically cancels all overlapping reservations made by other users during the selected time window.'
+                    : 'Tämä toiminto peruuttaa automaattisesti kaikki samalle aikavälille osuvat muiden käyttäjien varaukset.'}
                 </DialogDescription>
               </div>
             </div>
@@ -401,10 +426,10 @@ export const SuperAdminPanel: React.FC = () => {
           <div className="xamk-landing-rules-card" style={{ marginTop: '4px' }}>
             <div className="xamk-table-primary-cell" style={{ gap: '6px' }}>
               <div>
-                <strong>{isEn ? 'Date & Time:' : 'Ajankohta:'}</strong> {date} klo {startHour} – {endHour}
+                <strong>{isEn ? 'Date and time:' : 'Ajankohta:'}</strong> {date} klo {startHour}-{endHour}
               </div>
               <div>
-                <strong>{isEn ? 'Reason / Event:' : 'Perustelu / Tapahtuma:'}</strong> {reason}
+                <strong>{isEn ? 'Reason and event:' : 'Perustelu ja tapahtuma:'}</strong> {reason}
               </div>
             </div>
           </div>
@@ -430,10 +455,9 @@ export const SuperAdminPanel: React.FC = () => {
                     ? 'Processing...'
                     : 'Suoritetaan...'
                   : isEn
-                  ? 'Confirm Override'
+                  ? 'Confirm override'
                   : 'Vahvista jyräys'}
               </span>
-              <span className="confirm-arrow" aria-hidden="true">→</span>
             </Button>
           </DialogFooter>
         </DialogContent>

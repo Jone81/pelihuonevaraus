@@ -2,12 +2,27 @@
  * @file DailyScheduleViewer.tsx
  * @description Monipuolinen päiväkohtaisen aikataulun tarkastelukomponentti.
  * Tarjoaa kolme esitystapaa:
- * 1) Visuaalinen aikajana (`timeline`) klo 08:00–18:00
+ * 1) Visuaalinen aikajana (`timeline`) klo 08:00-18:00
  * 2) Pelipistekohtaiset varauskortit (`cards`)
  * 3) Taulukkoyhteenveto kaikista päivän varauksista (`summary`)
  */
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Calendar,
+  BarChart3,
+  ClipboardList,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  Monitor,
+  Gamepad2,
+  Tv,
+  Lock,
+  CheckCircle2,
+  MessageSquare,
+} from 'lucide-react';
 import { api } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 import type { GamingStation, Reservation } from '../types';
@@ -163,7 +178,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
   );
 
   /**
-   * Lasketaan kullekin laitteelle aikajanaintervallit (varatut ja vapaat) klo 08:00–18:00 välille.
+   * Lasketaan kullekin laitteelle aikajanaintervallit (varatut ja vapaat) klo 08:00-18:00 välille.
    */
   const computeStationIntervals = (station: GamingStation): TimeInterval[] => {
     if (!dayReservations) return [];
@@ -186,7 +201,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
         )
       : [];
 
-    // Kerätään kaikki estot ja leikataan aukioloaikaan (08:00 - 18:00)
+    // Kerätään kaikki estot ja leikataan aukioloaikaan (08:00-18:00)
     const blocks: TimeInterval[] = [];
 
     roomRes.forEach((r) => {
@@ -202,7 +217,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           endStr: minToTimeStr(end),
           type: 'room-locked',
           reservation: r,
-          title: `${t('schedule.roomLocked')}: ${r.bookerName || 'Varattu'} (${minToTimeStr(start)}–${minToTimeStr(end)})`,
+          title: `${t('schedule.roomLocked')}: ${r.bookerName || 'Varattu'} (${minToTimeStr(start)}-${minToTimeStr(end)})`,
         });
       }
     });
@@ -220,7 +235,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           endStr: minToTimeStr(end),
           type: 'busy',
           reservation: r,
-          title: `${t('schedule.busy')}: ${r.bookerName || 'Käyttäjä'} (${minToTimeStr(start)}–${minToTimeStr(end)})`,
+          title: `${t('schedule.busy')}: ${r.bookerName || 'Käyttäjä'} (${minToTimeStr(start)}-${minToTimeStr(end)})`,
         });
       }
     });
@@ -238,7 +253,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           endStr: minToTimeStr(end),
           type: 'tv-locked',
           reservation: r,
-          title: `${t('schedule.tvLocked')}: 📺 Konsolikaapin TV varattu (${minToTimeStr(start)}–${minToTimeStr(end)})`,
+          title: `${t('schedule.tvLocked')}: Konsolikaapin TV varattu (${minToTimeStr(start)}-${minToTimeStr(end)})`,
         });
       }
     });
@@ -258,7 +273,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           startStr: minToTimeStr(currentMin),
           endStr: minToTimeStr(b.startMin),
           type: 'free',
-          title: `${t('schedule.free')} (${minToTimeStr(currentMin)}–${minToTimeStr(b.startMin)})`,
+          title: `${t('schedule.free')} (${minToTimeStr(currentMin)}-${minToTimeStr(b.startMin)})`,
         });
       }
       result.push(b);
@@ -272,7 +287,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
         startStr: minToTimeStr(currentMin),
         endStr: minToTimeStr(CLOSE_MIN),
         type: 'free',
-        title: `${t('schedule.free')} (${minToTimeStr(currentMin)}–${minToTimeStr(CLOSE_MIN)})`,
+        title: `${t('schedule.free')} (${minToTimeStr(currentMin)}-${minToTimeStr(CLOSE_MIN)})`,
       });
     }
 
@@ -285,7 +300,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
   const handleSlotClick = (stationId: string, interval: TimeInterval) => {
     if (interval.type !== 'free' || !onSelectSlot) return;
 
-    // Lasketaan järkevä oletuskesto (max 4h yksittäiselle laitteelle)
+    // Lasketaan järkevä oletuskesto enintään 4 h yksittäiselle laitteelle
     const slotDurationHours = (interval.endMin - interval.startMin) / 60;
     const chosenDurationHours = Math.min(2, Math.min(4, slotDurationHours));
     const targetEndMin = Math.min(interval.endMin, interval.startMin + chosenDurationHours * 60);
@@ -301,7 +316,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
       <div className="daily-schedule-header">
         <div className="schedule-header-text">
           <div className="schedule-title-row">
-            <span className="schedule-icon">📅</span>
+            <span className="schedule-icon" aria-hidden="true">
+              <Calendar className="w-5 h-5 shrink-0" aria-hidden="true" />
+            </span>
             <h3>{t('schedule.title')}</h3>
             <span className="bookings-count-pill">
               {totalBookingsCount > 0
@@ -316,38 +333,41 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
         <div className="schedule-view-toggle">
           <button
             type="button"
-            className={`btn btn-sm ${viewMode === 'timeline' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'timeline' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('timeline')}
             title="Näytä graafinen aikataulumatriisi"
           >
+            <BarChart3 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span className="btn-full-text">{t('schedule.timelineView')}</span>
-            <span className="btn-short-text">📊 Aikataulu</span>
+            <span className="btn-short-text">{isEn ? 'Timeline' : 'Aikataulu'}</span>
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('cards')}
             title="Näytä pelipisteiden varauskortit"
           >
+            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span className="btn-full-text">{t('schedule.listView')}</span>
-            <span className="btn-short-text">📋 Pisteet</span>
+            <span className="btn-short-text">{isEn ? 'Stations' : 'Pisteet'}</span>
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${viewMode === 'summary' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'summary' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('summary')}
             title="Kaikki varaukset listana"
           >
+            <ClipboardList className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span className="btn-full-text">{t('schedule.summaryView')}</span>
-            <span className="btn-short-text">📑 Lista</span>
+            <span className="btn-short-text">{isEn ? 'List' : 'Lista'}</span>
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-secondary refresh-icon-btn"
+            className="btn btn-sm btn-secondary refresh-icon-btn inline-flex items-center justify-center"
             onClick={() => refetch()}
             title={t('status.refresh')}
           >
-            🔄
+            <RefreshCw className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -358,12 +378,12 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           <div className="date-nav-buttons">
             <button
               type="button"
-              className="btn btn-secondary btn-touch date-nav-btn"
+              className="btn btn-secondary btn-touch date-nav-btn inline-flex items-center gap-1"
               onClick={handlePrevDay}
               aria-label={t('schedule.prevDay')}
             >
+              <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span className="btn-full-text">{t('schedule.prevDay')}</span>
-              <span className="btn-short-text">◀</span>
             </button>
 
             <div className="schedule-date-picker-wrap">
@@ -371,7 +391,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                 {t('schedule.dateLabel')}
               </label>
               <div className="date-input-with-icon">
-                <span className="calendar-indicator-badge" aria-hidden="true">📅</span>
+                <span className="calendar-indicator-badge" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
                 <input
                   id="schedule-date-input"
                   type="date"
@@ -384,12 +406,12 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
             <button
               type="button"
-              className="btn btn-secondary btn-touch date-nav-btn"
+              className="btn btn-secondary btn-touch date-nav-btn inline-flex items-center gap-1"
               onClick={handleNextDay}
               aria-label={t('schedule.nextDay')}
             >
               <span className="btn-full-text">{t('schedule.nextDay')}</span>
-              <span className="btn-short-text">▶</span>
+              <ChevronRight className="w-4 h-4 shrink-0" aria-hidden="true" />
             </button>
           </div>
 
@@ -416,9 +438,11 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
       {/* Koko tilan varaukset / Tapahtumat varoitusbanneri */}
       {roomReservations.length > 0 && (
         <div className="schedule-room-alert" role="alert">
-          <div className="alert-icon">🏢</div>
+          <div className="alert-icon" aria-hidden="true">
+            <Building2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+          </div>
           <div className="alert-content">
-            <strong>{t('schedule.roomAlert')}:</strong>
+            <strong>{t('schedule.roomAlert')}.</strong>
             <ul className="room-res-list">
               {roomReservations.map((r) => {
                 const s = parseTimeToMinutes(r.startUtc).timeStr;
@@ -428,8 +452,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                     <span className="res-badge res-room-badge">
                       {r.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}
                     </span>{' '}
-                    <strong>klo {s} – {e}</strong> • {t('booking.booker')}{' '}
-                    <strong>{r.bookerName || 'Opiskelija/Admin'}</strong>{' '}
+                    <strong>klo {s}-{e}</strong>, {t('booking.booker')}{' '}
+                    <strong>{r.bookerName || 'Opiskelija tai Admin'}</strong>{' '}
                     {r.bookerEmail && (
                       <a href={`mailto:${r.bookerEmail}`} className="booker-email-link">
                         ({r.bookerEmail})
@@ -453,7 +477,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           {/* Vinkkiteksti klikkaamisesta, jos onSelectSlot on käytössä */}
           {onSelectSlot && (
             <div className="schedule-hint-bar">
-              <span>💡 {t('schedule.clickSlotHint')}</span>
+              <span>{t('schedule.clickSlotHint')}</span>
             </div>
           )}
 
@@ -477,7 +501,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                   </span>
                 )}
                 <span className="legend-item sm:hidden text-[#d49a15] font-semibold text-[11px] ml-auto">
-                  {isEn ? '👉 Swipe timeline 👈' : '👉 Pyyhkäise aikajanaa 👈'}
+                  {isEn ? 'Swipe timeline' : 'Pyyhkäise aikajanaa'}
                 </span>
               </div>
 
@@ -509,18 +533,23 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                       <div key={station.id} className="timeline-row">
                         {/* Laiteinfo vasemmalla */}
                         <div className="timeline-station-cell">
-                          <span className="station-mini-icon">
-                            {station.type === 'PC' ? '🖥️' : station.type === 'PlayStation5' ? '🎮' : '🕹️'}
+                          <span className="station-mini-icon" aria-hidden="true">
+                            {station.type === 'PC' ? (
+                              <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                            ) : (
+                              <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                            )}
                           </span>
                           <span className="station-cell-name">{station.name}</span>
                           {station.usesSharedTv && (
-                            <span className="mini-tv-tag" title="Käyttää yhteistä televisiota">
-                              📺 TV
+                            <span className="mini-tv-tag inline-flex items-center gap-1" title="Käyttää yhteistä televisiota">
+                              <Tv className="w-3 h-3 shrink-0" aria-hidden="true" />
+                              <span>TV</span>
                             </span>
                           )}
                         </div>
 
-                        {/* 08:00 - 18:00 aikajana */}
+                        {/* 08:00-18:00 aikajana */}
                         <div className="timeline-track">
                           {/* Taustan tuntiviivat */}
                           {HOURS.slice(0, -1).map((_, idx) => (
@@ -543,11 +572,11 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                   type="button"
                                   className={`timeline-block block-free ${onSelectSlot ? 'clickable-slot' : ''}`}
                                   style={{ left: `${left}%`, width: `${width}%` }}
-                                  title={`${station.name}: ${interval.title}${onSelectSlot ? ' - ' + t('schedule.clickSlotHint') : ''}`}
+                                  title={`${station.name}: ${interval.title}${onSelectSlot ? ', ' + t('schedule.clickSlotHint') : ''}`}
                                   onClick={() => handleSlotClick(station.id, interval)}
                                 >
                                   <span className="block-label">
-                                    {interval.startStr}–{interval.endStr}
+                                    {interval.startStr}-{interval.endStr}
                                   </span>
                                 </button>
                               );
@@ -561,8 +590,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                   style={{ left: `${left}%`, width: `${width}%` }}
                                   title={interval.title}
                                 >
-                                  <span className="block-label">
-                                    📺 {interval.startStr}–{interval.endStr}
+                                  <span className="block-label inline-flex items-center gap-1">
+                                    <Tv className="w-3 h-3 shrink-0" aria-hidden="true" />
+                                    <span>{interval.startStr}-{interval.endStr}</span>
                                   </span>
                                 </div>
                               );
@@ -576,8 +606,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                   style={{ left: `${left}%`, width: `${width}%` }}
                                   title={interval.title}
                                 >
-                                  <span className="block-label">
-                                    🏢 {interval.startStr}–{interval.endStr}
+                                  <span className="block-label inline-flex items-center gap-1">
+                                    <Building2 className="w-3 h-3 shrink-0" aria-hidden="true" />
+                                    <span>{interval.startStr}-{interval.endStr}</span>
                                   </span>
                                 </div>
                               );
@@ -591,9 +622,12 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                 style={{ left: `${left}%`, width: `${width}%` }}
                                 title={interval.title}
                               >
-                                <span className="block-label">
-                                  🔒 {interval.startStr}–{interval.endStr}
-                                  {interval.reservation?.bookerName ? ` (${interval.reservation.bookerName})` : ''}
+                                <span className="block-label inline-flex items-center gap-1">
+                                  <Lock className="w-3 h-3 shrink-0" aria-hidden="true" />
+                                  <span>
+                                    {interval.startStr}-{interval.endStr}
+                                    {interval.reservation?.bookerName ? ` (${interval.reservation.bookerName})` : ''}
+                                  </span>
                                 </span>
                               </div>
                             );
@@ -619,8 +653,12 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                   <div key={station.id} className="schedule-station-card">
                     <div className="schedule-station-header">
                       <div className="station-title-box">
-                        <span className="station-icon">
-                          {station.type === 'PC' ? '🖥️' : station.type === 'PlayStation5' ? '🎮' : '🕹️'}
+                        <span className="station-icon" aria-hidden="true">
+                          {station.type === 'PC' ? (
+                            <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+                          ) : (
+                            <Gamepad2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                          )}
                         </span>
                         <div>
                           <h4 className="station-card-title">{station.name}</h4>
@@ -635,7 +673,9 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                     <div className="station-schedule-body">
                       {busyIntervals.length === 0 ? (
                         <div className="station-all-free">
-                          <span className="free-check-icon">🟢</span>
+                          <span className="free-check-icon" aria-hidden="true">
+                            <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          </span>
                           <span>{t('schedule.freeAllDay')}</span>
                           {onSelectSlot && (
                             <button
@@ -643,7 +683,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                               className="btn btn-sm btn-secondary quick-pick-btn"
                               onClick={() => onSelectSlot(station.id, '10:00', '12:00')}
                             >
-                              {t('schedule.quickSelectSlot')} (10–12)
+                              {t('schedule.quickSelectSlot')} (10:00-12:00)
                             </button>
                           )}
                         </div>
@@ -662,13 +702,13 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                               }`}
                             >
                               <span className="pill-time">
-                                {b.startStr} – {b.endStr}
+                                {b.startStr}-{b.endStr}
                               </span>
                               <span className="pill-desc">
                                 {b.type === 'tv-locked'
-                                  ? '📺 ' + t('schedule.tvLocked')
+                                  ? t('schedule.tvLocked')
                                   : b.type === 'room-locked'
-                                  ? '🏢 ' + t('schedule.roomLocked')
+                                  ? t('schedule.roomLocked')
                                   : b.reservation?.bookerName || t('schedule.busy')}
                               </span>
                             </div>
@@ -676,7 +716,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
                           {/* Näytetään myös vapaat ajat */}
                           <div className="free-slots-summary">
-                            <span className="free-subhead">🟢 {t('schedule.free')}:</span>
+                            <span className="free-subhead">{t('schedule.free')}:</span>
                             <div className="free-chips-row">
                               {freeIntervals.map((f, fIdx) => (
                                 <button
@@ -686,7 +726,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                   onClick={() => handleSlotClick(station.id, f)}
                                   title={onSelectSlot ? t('schedule.clickSlotHint') : undefined}
                                 >
-                                  {f.startStr}–{f.endStr}
+                                  {f.startStr}-{f.endStr}
                                 </button>
                               ))}
                             </div>
@@ -725,14 +765,14 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                       const station = stations?.find((s) => s.id === r.gamingStationId);
                       const targetName =
                         r.reservationType === 'Room' || r.reservationType === 'Event'
-                          ? '🏢 Koko tila'
+                          ? 'Koko tila'
                           : station?.name || 'Pelipiste';
 
                       return (
                         <tr key={r.id}>
                           <td>
                             <strong className="table-time-cell">
-                              klo {start} – {end}
+                              klo {start}-{end}
                             </strong>
                           </td>
                           <td>
@@ -768,10 +808,11 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                           <td>
                             {r.bookerEmail && (
                               <a
-                                href={`mailto:${r.bookerEmail}?subject=Pelihuonevaraus klo ${start}–${end}`}
-                                className="btn btn-sm btn-secondary"
+                                href={`mailto:${r.bookerEmail}?subject=Pelihuonevaraus klo ${start}-${end}`}
+                                className="btn btn-sm btn-secondary inline-flex items-center gap-1.5"
                               >
-                                ✉️ {t('schedule.contactBooker')}
+                                <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                                <span>{t('schedule.contactBooker')}</span>
                               </a>
                             )}
                           </td>

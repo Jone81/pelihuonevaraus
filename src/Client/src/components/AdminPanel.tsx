@@ -2,15 +2,44 @@
  * @file AdminPanel.tsx
  * @description Ylläpitäjän (Admin ja SuperAdmin) monivälilehtinen hallintapaneeli.
  * Sisältää kuusi alavälilehteä (`AdminSubTab`):
- * 1) Pelit & Toivelista (`games`)
- * 2) Uutiset & Tiedotteet (`news`)
- * 3) Käyttäjät & Roolit (`users`)
- * 4) Asetukset & Discord Webhook (`settings`)
- * 5) Tilastot & Käyttöaste (`statistics`)
+ * 1) Pelit ja toivelista (`games`)
+ * 2) Uutiset ja tiedotteet (`news`)
+ * 3) Käyttäjät ja roolit (`users`)
+ * 4) Asetukset ja Discord (`settings`)
+ * 5) Tilastot ja käyttöaste (`statistics`)
  * 6) Vikailmoitukset (`issues`)
  */
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Gamepad2,
+  Newspaper,
+  Users,
+  Settings,
+  BarChart3,
+  AlertTriangle,
+  Zap,
+  Star,
+  Pin,
+  Shield,
+  CheckCircle2,
+  Monitor,
+  Link,
+  Eye,
+  EyeOff,
+  Trash2,
+  Lock,
+  Clock,
+  Building2,
+  Tv,
+  RotateCcw,
+  Wrench,
+  MessageSquare,
+  ClipboardList,
+  Calendar,
+  Trophy,
+  User,
+} from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -48,7 +77,7 @@ export const AdminPanel: React.FC = () => {
   const queryClient = useQueryClient();
   const { adminSubTab: activeSubTab, setAdminSubTab: setActiveSubTab, setActiveTab } = useRouter();
 
-  // Pelien lisäys & suodatus
+  // Pelien lisäys ja suodatus
   const [newGameName, setNewGameName] = useState('');
   const [newGamePlatform, setNewGamePlatform] = useState('PC');
   const [newGameDesc, setNewGameDesc] = useState('');
@@ -79,7 +108,7 @@ export const AdminPanel: React.FC = () => {
   const [isMaintenanceModeDraft, setIsMaintenanceModeDraft] = useState<boolean | null>(null);
   const [maintenanceMessageDraft, setMaintenanceMessageDraft] = useState<string | null>(null);
 
-  // Vikailmoitusten suodatus & kuittausmuistiinpanot
+  // Vikailmoitusten suodatus ja kuittausmuistiinpanot
   const [issueFilter, setIssueFilter] = useState<'ALL' | 'OPEN' | 'RESOLVED'>('ALL');
   const [resolveNotes, setResolveNotes] = useState<Record<string, string>>({});
 
@@ -166,8 +195,8 @@ export const AdminPanel: React.FC = () => {
     onSuccess: (game) => {
       setStatusMessage(
         isEn
-          ? `Game "${game.name}" added to the official catalog!`
-          : `Peli "${game.name}" lisätty viralliseen valikoimaan!`
+          ? `Game "${game.name}" added to the catalog.`
+          : `Peli "${game.name}" lisätty valikoimaan.`
       );
       setErrorMessage(null);
       setNewGameName('');
@@ -191,10 +220,10 @@ export const AdminPanel: React.FC = () => {
     onSuccess: (game) => {
       setStatusMessage(
         isEn
-          ? `Updated "${game.name}" status (${game.isWishlist ? 'Wishlist' : 'Installed'}).`
-          : `Pelin "${game.name}" tila päivitetty (${
-              game.isWishlist ? 'Toivelistalla' : 'Virallisessa valikoimassa'
-            }).`
+          ? `Updated "${game.name}" status to ${game.isWishlist ? 'wishlist' : 'installed'}.`
+          : `Pelin "${game.name}" tila päivitetty: ${
+              game.isWishlist ? 'toivelistalla' : 'asennettuna valikoimassa'
+            }.`
       );
       setErrorMessage(null);
       queryClient.invalidateQueries({ queryKey: ['games'] });
@@ -217,8 +246,8 @@ export const AdminPanel: React.FC = () => {
     onSuccess: () => {
       setStatusMessage(
         isEn
-          ? 'Announcement published successfully!'
-          : 'Uusi tiedote julkaistu onnistuneesti!'
+          ? 'Announcement published.'
+          : 'Uusi tiedote julkaistu.'
       );
       setErrorMessage(null);
       setNewsTitle('');
@@ -243,7 +272,7 @@ export const AdminPanel: React.FC = () => {
     mutationFn: (newsId: string) => api.deleteNews(newsId, user?.id ?? ''),
     onSuccess: () => {
       setStatusMessage(
-        isEn ? 'Announcement deleted.' : 'Tiedote poistettu onnistuneesti.'
+        isEn ? 'Announcement deleted.' : 'Tiedote poistettu.'
       );
       setErrorMessage(null);
       queryClient.invalidateQueries({ queryKey: ['news'] });
@@ -267,7 +296,7 @@ export const AdminPanel: React.FC = () => {
       setStatusMessage(
         isEn
           ? `User "${updatedUser.displayName}" role updated to ${updatedUser.role}.`
-          : `Käyttäjän "${updatedUser.displayName}" rooli päivitetty: ${updatedUser.role}`
+          : `Käyttäjän "${updatedUser.displayName}" rooli päivitetty: ${updatedUser.role}.`
       );
       setErrorMessage(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -296,7 +325,7 @@ export const AdminPanel: React.FC = () => {
         const untilFormatted = isPerm
           ? isEn
             ? 'permanently'
-            : 'pysyvästi (toistaiseksi)'
+            : 'pysyvästi'
           : untilDate?.toLocaleString('fi-FI', {
               day: '2-digit',
               month: '2-digit',
@@ -306,14 +335,14 @@ export const AdminPanel: React.FC = () => {
             }) ?? '';
         setStatusMessage(
           isEn
-            ? `User "${updatedUser.displayName}" banned (${untilFormatted}).`
-            : `Käyttäjälle "${updatedUser.displayName}" asetettiin käyttöesto (${untilFormatted}).`
+            ? `User "${updatedUser.displayName}" banned, ${untilFormatted}.`
+            : `Käyttäjälle "${updatedUser.displayName}" asetettiin käyttöesto, ${untilFormatted}.`
         );
       } else {
         setStatusMessage(
           isEn
             ? `Ban removed from user "${updatedUser.displayName}".`
-            : `Käyttäjän "${updatedUser.displayName}" käyttöesto (banni) poistettiin.`
+            : `Käyttäjän "${updatedUser.displayName}" käyttöesto poistettiin.`
         );
       }
       setErrorMessage(null);
@@ -325,7 +354,7 @@ export const AdminPanel: React.FC = () => {
           ? err.message
           : isEn
           ? 'Failed to update user ban status.'
-          : 'Käyttöeston (bannin) päivitys epäonnistui.'
+          : 'Käyttöeston päivitys epäonnistui.'
       );
     },
   });
@@ -335,8 +364,8 @@ export const AdminPanel: React.FC = () => {
     mutationFn: (req: UpdateSiteSettingsRequest) => api.updateSettings(req, user?.id ?? ''),
     onSuccess: () => {
       const msg = isEn
-        ? 'System settings, booking quotas and room policies saved!'
-        : 'Järjestelmäasetukset, varauskiintiöt ja tilasäännöt tallennettu onnistuneesti!';
+        ? 'System settings, booking quotas, and room policies saved.'
+        : 'Järjestelmäasetukset, varauskiintiöt ja tilasäännöt tallennettu.';
       setStatusMessage(msg);
       setSettingsSuccess(msg);
       setSettingsError(null);
@@ -363,8 +392,8 @@ export const AdminPanel: React.FC = () => {
       api.updateStationStatus(stationId, { isActive }, user?.id ?? ''),
     onSuccess: (updatedStation) => {
       const msg = isEn
-        ? `Station "${updatedStation.name}" is now ${updatedStation.isActive ? 'ACTIVE' : 'IN MAINTENANCE'}.`
-        : `Pelipiste "${updatedStation.name}" on nyt ${updatedStation.isActive ? 'KÄYTÖSSÄ' : 'HUOLTOTILASSA (pois varauksista)'}.`;
+        ? `Station "${updatedStation.name}" is now ${updatedStation.isActive ? 'active' : 'in maintenance'}.`
+        : `Pelipiste "${updatedStation.name}" on nyt ${updatedStation.isActive ? 'käytössä' : 'huoltotilassa'}.`;
       setStatusMessage(msg);
       setSettingsSuccess(msg);
       setErrorMessage(null);
@@ -389,11 +418,11 @@ export const AdminPanel: React.FC = () => {
     mutationFn: (reservationId: string) =>
       api.cancelReservation(reservationId, {
         userId: user?.id ?? '',
-        reason: isEn ? 'Cancelled by Administrator' : 'Ylläpitäjän peruuttama varaus',
+        reason: isEn ? 'Cancelled by administrator' : 'Ylläpitäjän peruuttama varaus',
       }),
     onSuccess: () => {
       setStatusMessage(
-        isEn ? 'Reservation cancelled by Admin.' : 'Varaus peruutettu ylläpitäjän toimesta.'
+        isEn ? 'Reservation cancelled by administrator.' : 'Varaus peruutettu ylläpitäjän toimesta.'
       );
       setErrorMessage(null);
       queryClient.invalidateQueries({ queryKey: ['admin-reservations'] });
@@ -489,8 +518,8 @@ export const AdminPanel: React.FC = () => {
     return (
       <div className="alert alert-error">
         {isEn
-          ? 'Only administrators (Admin / SuperAdmin) have access to this control panel.'
-          : 'Vain ylläpitäjillä (Admin / SuperAdmin) on pääsy tähän paneeliin.'}
+          ? 'Only administrators have access to this control panel.'
+          : 'Vain ylläpitäjillä on pääsy tähän paneeliin.'}
       </div>
     );
   }
@@ -594,7 +623,7 @@ export const AdminPanel: React.FC = () => {
     const trimmed = discordWebhookUrl.trim();
     if (!trimmed) {
       setTestWebhookStatus(
-        isEn ? 'Please enter a webhook URL first.' : 'Syötä ensin Discord Webhook URL.'
+        isEn ? 'Enter a webhook URL first.' : 'Syötä ensin Discord Webhook URL.'
       );
       return;
     }
@@ -606,68 +635,68 @@ export const AdminPanel: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: '🎮 **Xamk Game Room Testi-ilmoitus:** Discord Webhook -yhteys toimii onnistuneesti!',
+          content: 'Xamk Game Room testi-ilmoitus. Discord Webhook -yhteys toimii.',
         }),
       });
       if (res.ok || res.status === 204) {
         setTestWebhookStatus(
           isEn
-            ? '✅ Test notification sent to Discord!'
-            : '✅ Testi-ilmoitus lähetetty Discordiin onnistuneesti!'
+            ? 'Test notification sent to Discord.'
+            : 'Testi-ilmoitus lähetetty Discordiin.'
         );
       } else {
         setTestWebhookStatus(
           isEn
-            ? `⚠️ Discord returned status ${res.status}`
-            : `⚠️ Discord palautti tilakoodin ${res.status}`
+            ? `Discord returned status ${res.status}.`
+            : `Discord palautti tilakoodin ${res.status}.`
         );
       }
     } catch {
       setTestWebhookStatus(
         isEn
-          ? '⚠️ Connection to Discord failed (check URL or CORS).'
-          : '⚠️ Yhteydenotto Discordiin epäonnistui (tarkista URL).'
+          ? 'Connection to Discord failed. Check the URL.'
+          : 'Yhteydenotto Discordiin epäonnistui. Tarkista URL.'
       );
     }
   };
 
   // Ylläpitopaneelin alavälilehtien konfiguraatio
-  const subTabs: { id: AdminSubTab; icon: string; labelFi: string; labelEn: string; badge?: number }[] = [
+  const subTabs: { id: AdminSubTab; icon: React.ReactNode; labelFi: string; labelEn: string; badge?: number }[] = [
     {
       id: 'games',
-      icon: '🎮',
-      labelFi: `Pelit & Toivelista (${allGames?.length ?? 0})`,
-      labelEn: `Games & Wishlist (${allGames?.length ?? 0})`,
+      icon: <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      labelFi: `Pelit ja toivelista (${allGames?.length ?? 0})`,
+      labelEn: `Games and wishlist (${allGames?.length ?? 0})`,
     },
     {
       id: 'news',
-      icon: '📰',
-      labelFi: `Uutiset (${allNews?.length ?? 0})`,
-      labelEn: `News (${allNews?.length ?? 0})`,
+      icon: <Newspaper className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      labelFi: `Uutiset ja tiedotteet (${allNews?.length ?? 0})`,
+      labelEn: `News and announcements (${allNews?.length ?? 0})`,
     },
     {
       id: 'users',
-      icon: '👥',
-      labelFi: `Käyttäjät (${allUsers?.length ?? 0})`,
-      labelEn: `Users (${allUsers?.length ?? 0})`,
+      icon: <Users className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      labelFi: `Käyttäjät ja roolit (${allUsers?.length ?? 0})`,
+      labelEn: `Users and roles (${allUsers?.length ?? 0})`,
     },
     {
       id: 'settings',
-      icon: '⚙️',
-      labelFi: 'Asetukset & Discord',
-      labelEn: 'Settings & Discord',
+      icon: <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      labelFi: 'Asetukset ja Discord',
+      labelEn: 'Settings and Discord',
     },
     {
       id: 'statistics',
-      icon: '📊',
-      labelFi: 'Tilastot & Käyttöaste',
-      labelEn: 'Statistics & Usage',
+      icon: <BarChart3 className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      labelFi: 'Tilastot ja käyttöaste',
+      labelEn: 'Statistics and usage',
     },
     {
       id: 'issues',
-      icon: '⚠️',
+      icon: <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />,
       labelFi: 'Vikailmoitukset',
-      labelEn: 'Issue Reports',
+      labelEn: 'Issue reports',
       badge: openIssuesCount,
     },
   ];
@@ -677,14 +706,14 @@ export const AdminPanel: React.FC = () => {
       {/* Top Header Row */}
       <div className="xamk-admin-header">
         <div className="xamk-admin-header-titles">
-          <div className="xamk-admin-kicker">XAMK GAME ROOM • ADMIN CONTROL PANEL</div>
+          <div className="xamk-admin-kicker">XAMK GAME ROOM, ADMIN CONTROL PANEL</div>
           <h2 className="xamk-section-heading" style={{ textAlign: 'left' }}>
-            {isEn ? 'Administrator Control Panel' : 'Ylläpitäjän hallintapaneeli'}
+            {isEn ? 'Administrator control panel' : 'Ylläpitäjän hallintapaneeli'}
           </h2>
           <div className="xamk-section-underline" style={{ margin: '10px 0 12px' }} />
           <p className="xamk-admin-subtitle">
             {isEn
-              ? 'Manage the installed game catalog, student wishlist, announcements, user roles, Discord webhooks, usage statistics, and hardware bug reports.'
+              ? 'Manage the installed game catalog, student wishlist, announcements, user roles, Discord webhooks, usage statistics, and hardware issue reports.'
               : 'Hallinnoi pelivalikoimaa, opiskelijoiden toivelistaa, uutistiedotteita, käyttöoikeuksia, Discord-ilmoituksia sekä laitteiden vikailmoituksia.'}
           </p>
         </div>
@@ -698,9 +727,11 @@ export const AdminPanel: React.FC = () => {
               onClick={() => setActiveTab('admin')}
             >
               <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">⚙️</span>
+                <span className="xamk-station-card-icon" aria-hidden="true">
+                  <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
                 <span className="xamk-station-card-name">
-                  {isEn ? 'Admin Control Panel' : 'Ylläpitopaneeli'}
+                  {isEn ? 'Admin control panel' : 'Ylläpitopaneeli'}
                 </span>
               </div>
               <Badge variant="status">ACTIVE</Badge>
@@ -711,12 +742,14 @@ export const AdminPanel: React.FC = () => {
               onClick={() => setActiveTab('superadmin')}
             >
               <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">⚡</span>
+                <span className="xamk-station-card-icon" aria-hidden="true">
+                  <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
                 <span className="xamk-station-card-name">
-                  {isEn ? 'SuperAdmin Event Override' : 'SuperAdmin — Tapahtumajyräys'}
+                  {isEn ? 'SuperAdmin, event override' : 'SuperAdmin, tapahtumajyräys'}
                 </span>
               </div>
-              <Badge variant="status">OVERRIDE →</Badge>
+              <Badge variant="status">OVERRIDE</Badge>
             </Button>
           </div>
         )}
@@ -731,13 +764,16 @@ export const AdminPanel: React.FC = () => {
         >
           <div className="xamk-admin-kpi-top">
             <span className="xamk-admin-kpi-label">
-              {isEn ? 'Installed Games' : 'Asennetut pelit'}
+              {isEn ? 'Installed games' : 'Asennetut pelit'}
             </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">🎮</span>
+            <span className="xamk-admin-kpi-icon" aria-hidden="true">
+              <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="xamk-admin-kpi-value">{installedGamesCount}</div>
-          <div className="xamk-admin-kpi-meta">
-            ⭐ {wishlistGamesCount} {isEn ? 'on student wishlist' : 'opiskelijoiden toivelistalla'}
+          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>{wishlistGamesCount} {isEn ? 'on student wishlist' : 'opiskelijoiden toivelistalla'}</span>
           </div>
         </button>
 
@@ -750,12 +786,17 @@ export const AdminPanel: React.FC = () => {
             <span className="xamk-admin-kpi-label">
               {isEn ? 'Announcements' : 'Julkaistut tiedotteet'}
             </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">📰</span>
+            <span className="xamk-admin-kpi-icon" aria-hidden="true">
+              <Newspaper className="w-4 h-4 shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="xamk-admin-kpi-value">{allNews?.length ?? 0}</div>
-          <div className="xamk-admin-kpi-meta">
-            📌 {(allNews ?? []).filter((n) => n.isPinned).length}{' '}
-            {isEn ? 'pinned to banner' : 'kiinnitettynä yläreunaan'}
+          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
+            <Pin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              {(allNews ?? []).filter((n) => n.isPinned).length}{' '}
+              {isEn ? 'pinned to banner' : 'kiinnitettynä yläreunaan'}
+            </span>
           </div>
         </button>
 
@@ -766,14 +807,19 @@ export const AdminPanel: React.FC = () => {
         >
           <div className="xamk-admin-kpi-top">
             <span className="xamk-admin-kpi-label">
-              {isEn ? 'Registered Users' : 'Rekisteröidyt käyttäjät'}
+              {isEn ? 'Registered users' : 'Rekisteröidyt käyttäjät'}
             </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">👥</span>
+            <span className="xamk-admin-kpi-icon" aria-hidden="true">
+              <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="xamk-admin-kpi-value">{allUsers?.length ?? 0}</div>
-          <div className="xamk-admin-kpi-meta">
-            🛡️ {(allUsers ?? []).filter((u) => u.role.toLowerCase().includes('admin')).length}{' '}
-            {isEn ? 'administrators' : 'ylläpitäjää'}
+          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
+            <Shield className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              {(allUsers ?? []).filter((u) => u.role.toLowerCase().includes('admin')).length}{' '}
+              {isEn ? 'administrators' : 'ylläpitäjää'}
+            </span>
           </div>
         </button>
 
@@ -784,28 +830,33 @@ export const AdminPanel: React.FC = () => {
         >
           <div className="xamk-admin-kpi-top">
             <span className="xamk-admin-kpi-label">
-              {isEn ? 'Open Bug Reports' : 'Avoimet vikailmoitukset'}
+              {isEn ? 'Open issue reports' : 'Avoimet vikailmoitukset'}
             </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">⚠️</span>
+            <span className="xamk-admin-kpi-icon" aria-hidden="true">
+              <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+            </span>
           </div>
           <div className="xamk-admin-kpi-value">{openIssuesCount}</div>
-          <div className="xamk-admin-kpi-meta">
-            ✅ {(allIssues ?? []).filter((i) => i.isResolved).length}{' '}
-            {isEn ? 'resolved total' : 'ratkaistua ilmoitusta'}
+          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              {(allIssues ?? []).filter((i) => i.isResolved).length}{' '}
+              {isEn ? 'resolved total' : 'ratkaistua ilmoitusta'}
+            </span>
           </div>
         </button>
       </div>
 
       {statusMessage && (
-        <div className="alert alert-success" role="alert">
-          <span>✅</span>
+        <div className="alert alert-success flex items-center gap-2" role="alert">
+          <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>{statusMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="alert alert-error" role="alert">
-          <span>⚠️</span>
+        <div className="alert alert-error flex items-center gap-2" role="alert">
+          <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -827,7 +878,7 @@ export const AdminPanel: React.FC = () => {
               setActiveSubTab(tab.id);
             }}
           >
-            <span aria-hidden="true">{tab.icon}</span>
+            {tab.icon}
             <span>{isEn ? tab.labelEn : tab.labelFi}</span>
             {tab.badge !== undefined && tab.badge > 0 && (
               <span className="xamk-admin-tab-badge">{tab.badge}</span>
@@ -843,25 +894,29 @@ export const AdminPanel: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                {isEn ? 'Add New Game to Catalog' : 'Lisää uusi peli suoraan valikoimaan'}
+                {isEn ? 'Add new game to catalog' : 'Lisää uusi peli suoraan valikoimaan'}
               </CardTitle>
               <div className="xamk-modal-underline" />
               <CardDescription>
                 {isEn
-                  ? 'Games added here are immediately marked as installed in the official Xamk Game Room catalog.'
-                  : 'Tästä lisätyt pelit merkitään suoraan asennetuiksi Xamk Game Roomin viralliseen pelivalikoimaan.'}
+                  ? 'Games added here are immediately marked as installed in the Xamk Game Room catalog.'
+                  : 'Tästä lisätyt pelit merkitään suoraan asennetuiksi Xamk Game Roomin pelivalikoimaan.'}
               </CardDescription>
             </CardHeader>
 
             <form onSubmit={handleAddGame} className="xamk-modal-form">
               <div className="xamk-field-group">
                 <Label htmlFor="game-name">
-                  {isEn ? 'Game Title *' : 'Pelin nimi *'}
+                  {isEn ? 'Game title *' : 'Pelin nimi *'}
                 </Label>
                 <Input
                   id="game-name"
                   type="text"
-                  placeholder="esim. Helldivers 2 / Counter-Strike 2"
+                  placeholder={
+                    isEn
+                      ? 'For example Helldivers 2 or Counter-Strike 2'
+                      : 'Esimerkiksi Helldivers 2 tai Counter-Strike 2'
+                  }
                   value={newGameName}
                   onChange={(e) => setNewGameName(e.target.value)}
                   required
@@ -870,22 +925,22 @@ export const AdminPanel: React.FC = () => {
 
               <div className="xamk-field-group">
                 <Label htmlFor="game-platform">
-                  {isEn ? 'Hardware Platform *' : 'Alusta *'}
+                  {isEn ? 'Hardware platform *' : 'Alusta *'}
                 </Label>
                 <NativeSelect
                   id="game-platform"
                   value={newGamePlatform}
                   onChange={(e) => setNewGamePlatform(e.target.value)}
                 >
-                  <option value="PC">🖥️ PC</option>
-                  <option value="PlayStation5">🎮 PlayStation 5</option>
-                  <option value="NintendoSwitch">🕹️ Nintendo Switch</option>
+                  <option value="PC">PC</option>
+                  <option value="PlayStation5">PlayStation 5</option>
+                  <option value="NintendoSwitch">Nintendo Switch</option>
                 </NativeSelect>
               </div>
 
               <div className="xamk-field-group">
                 <Label htmlFor="game-desc">
-                  {isEn ? 'Short Description' : 'Lyhyt kuvaus'}
+                  {isEn ? 'Short description' : 'Lyhyt kuvaus'}
                 </Label>
                 <Textarea
                   id="game-desc"
@@ -910,10 +965,9 @@ export const AdminPanel: React.FC = () => {
                         ? 'Saving...'
                         : 'Tallennetaan...'
                       : isEn
-                      ? 'Add Game to Catalog'
+                      ? 'Add game to catalog'
                       : 'Lisää peli valikoimaan'}
                   </span>
-                  <span className="confirm-arrow" aria-hidden="true">→</span>
                 </Button>
               </div>
             </form>
@@ -924,7 +978,7 @@ export const AdminPanel: React.FC = () => {
             <div className="xamk-admin-card-header-flex">
               <div>
                 <CardTitle>
-                  {isEn ? 'Catalog & Wishlist Approval' : 'Kaikki pelit ja toivelistan hyväksyminen'}
+                  {isEn ? 'Catalog and wishlist approval' : 'Kaikki pelit ja toivelistan hyväksyminen'}
                 </CardTitle>
                 <div className="xamk-modal-underline mt-1.5" />
               </div>
@@ -951,7 +1005,7 @@ export const AdminPanel: React.FC = () => {
               <Input
                 type="text"
                 placeholder={
-                  isEn ? '🔍 Search by game title or platform...' : '🔍 Hae pelin nimellä tai alustalla...'
+                  isEn ? 'Search by game title or platform...' : 'Hae pelin nimellä tai alustalla...'
                 }
                 value={gameSearch}
                 onChange={(e) => setGameSearch(e.target.value)}
@@ -980,19 +1034,30 @@ export const AdminPanel: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="xamk-platform-chip">
-                        {game.platform === 'PC'
-                          ? '🖥️ PC'
-                          : game.platform === 'PlayStation5'
-                          ? '🎮 PS5'
-                          : '🕹️ Switch'}
+                      <span className="xamk-platform-chip inline-flex items-center gap-1.5">
+                        {game.platform === 'PC' ? (
+                          <>
+                            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span>PC</span>
+                          </>
+                        ) : game.platform === 'PlayStation5' ? (
+                          <>
+                            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span>PS5</span>
+                          </>
+                        ) : (
+                          <>
+                            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span>Switch</span>
+                          </>
+                        )}
                       </span>
                     </TableCell>
                     <TableCell>
                       {game.isWishlist ? (
-                        <span className="votes-count-badge">🔥 {game.votesCount || 0}</span>
+                        <span className="votes-count-badge">{game.votesCount || 0}</span>
                       ) : (
-                        <span className="xamk-table-muted">—</span>
+                        <span className="xamk-table-muted">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -1011,19 +1076,22 @@ export const AdminPanel: React.FC = () => {
                         type="button"
                         className={
                           game.isWishlist
-                            ? 'xamk-table-action-btn action-gold btn-touch'
+                            ? 'xamk-table-action-btn action-gold btn-touch inline-flex items-center gap-1.5'
                             : 'xamk-table-action-btn btn-touch'
                         }
                         onClick={() => toggleWishlistMutation.mutate(game.id)}
                         disabled={toggleWishlistMutation.isPending}
                       >
-                        {game.isWishlist
-                          ? isEn
-                            ? '✅ Approve to Catalog'
-                            : '✅ Hyväksy valikoimaan'
-                          : isEn
-                          ? 'Move to Wishlist'
-                          : 'Siirrä toivelistalle'}
+                        {game.isWishlist ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span>{isEn ? 'Approve to catalog' : 'Hyväksy valikoimaan'}</span>
+                          </>
+                        ) : isEn ? (
+                          'Move to wishlist'
+                        ) : (
+                          'Siirrä toivelistalle'
+                        )}
                       </button>
                     </TableCell>
                   </TableRow>
@@ -1041,7 +1109,7 @@ export const AdminPanel: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                {isEn ? 'Publish New Announcement' : 'Julkaise uusi tiedote'}
+                {isEn ? 'Publish new announcement' : 'Julkaise uusi tiedote'}
               </CardTitle>
               <div className="xamk-modal-underline" />
               <CardDescription>
@@ -1059,7 +1127,11 @@ export const AdminPanel: React.FC = () => {
                 <Input
                   id="news-title"
                   type="text"
-                  placeholder="esim. 🏆 Perjantain CS2-turnaus alkaa klo 14!"
+                  placeholder={
+                    isEn
+                      ? 'For example Friday CS2 tournament starts at 14:00'
+                      : 'Esimerkiksi Perjantain CS2-turnaus alkaa klo 14:00'
+                  }
                   value={newsTitle}
                   onChange={(e) => setNewsTitle(e.target.value)}
                   required
@@ -1078,29 +1150,37 @@ export const AdminPanel: React.FC = () => {
                 <button
                   type="button"
                   className="xamk-toolbar-chip btn-touch"
-                  onClick={() => setNewsContent((c) => c + '\n• Kohta 1\n• Kohta 2')}
+                  onClick={() => setNewsContent((c) => c + '\n- Kohta 1\n- Kohta 2')}
                 >
-                  • {isEn ? 'List' : 'Lista'}
+                  - {isEn ? 'List' : 'Lista'}
                 </button>
                 <button
                   type="button"
-                  className="xamk-toolbar-chip btn-touch"
+                  className="xamk-toolbar-chip btn-touch inline-flex items-center gap-1"
                   onClick={() => setNewsContent((c) => c + ' [Linkki](https://www.xamk.fi)')}
                 >
-                  🔗 {isEn ? 'Link' : 'Linkki'}
+                  <Link className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'Link' : 'Linkki'}</span>
                 </button>
                 <button
                   type="button"
-                  className={`xamk-toolbar-chip btn-touch ${previewNews ? 'chip-active' : ''}`}
+                  className={`xamk-toolbar-chip btn-touch inline-flex items-center gap-1 ${previewNews ? 'chip-active' : ''}`}
                   onClick={() => setPreviewNews(!previewNews)}
                 >
-                  👁️ {previewNews ? (isEn ? 'Hide Preview' : 'Piilota esikatselu') : isEn ? 'Preview' : 'Esikatsele'}
+                  {previewNews ? (
+                    <EyeOff className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  )}
+                  <span>
+                    {previewNews ? (isEn ? 'Hide preview' : 'Piilota esikatselu') : isEn ? 'Preview' : 'Esikatsele'}
+                  </span>
                 </button>
               </div>
 
               <div className="xamk-field-group">
                 <Label htmlFor="news-content">
-                  {isEn ? 'Announcement Content *' : 'Tiedotteen sisältö *'}
+                  {isEn ? 'Announcement content *' : 'Tiedotteen sisältö *'}
                 </Label>
                 <Textarea
                   id="news-content"
@@ -1108,7 +1188,7 @@ export const AdminPanel: React.FC = () => {
                   placeholder={
                     isEn
                       ? 'Write the announcement details...'
-                      : 'Kirjoita tiedotteen sisältö. Voit käyttää emoji-ikoneita ja kappalejakoja...'
+                      : 'Kirjoita tiedotteen sisältö...'
                   }
                   value={newsContent}
                   onChange={(e) => setNewsContent(e.target.value)}
@@ -1120,14 +1200,14 @@ export const AdminPanel: React.FC = () => {
                 <div className="xamk-landing-news-card card-pinned">
                   <div className="xamk-landing-news-meta">
                     <Badge variant="status">
-                      {newsIsPinned ? '📌 Tärkeä tiedote' : '📢 Esikatselu'}
+                      {newsIsPinned ? (isEn ? 'Pinned notice' : 'Kiinnitetty tiedote') : isEn ? 'Preview' : 'Esikatselu'}
                     </Badge>
                     <time className="xamk-landing-news-date">
                       {new Date().toLocaleDateString('fi-FI')}
                     </time>
                   </div>
                   <h4 className="xamk-landing-news-title">
-                    {newsTitle || (isEn ? 'Headline Preview' : 'Tiedotteen otsikko')}
+                    {newsTitle || (isEn ? 'Headline preview' : 'Tiedotteen otsikko')}
                   </h4>
                   <p className="xamk-landing-news-body" style={{ whiteSpace: 'pre-wrap' }}>
                     {newsContent || (isEn ? 'Content preview...' : 'Tiedotteen sisältöteksti...')}
@@ -1142,8 +1222,9 @@ export const AdminPanel: React.FC = () => {
                   onChange={(e) => setNewsIsPinned(e.target.checked)}
                 />
                 <div className="xamk-checkbox-text">
-                  <strong>
-                    📌 {isEn ? 'Pin to Hero Banner & Top of Feed' : 'Kiinnitä tiedote yläbanneriin ja uutislistan kärkeen'}
+                  <strong className="inline-flex items-center gap-1.5">
+                    <Pin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Pin to hero banner and top of feed' : 'Kiinnitä tiedote yläbanneriin ja uutislistan kärkeen'}</span>
                   </strong>
                   <span>
                     {isEn
@@ -1165,10 +1246,9 @@ export const AdminPanel: React.FC = () => {
                         ? 'Publishing...'
                         : 'Julkaistaan...'
                       : isEn
-                      ? 'Publish Announcement'
+                      ? 'Publish announcement'
                       : 'Julkaise tiedote'}
                   </span>
-                  <span className="confirm-arrow" aria-hidden="true">→</span>
                 </Button>
               </div>
             </form>
@@ -1178,7 +1258,7 @@ export const AdminPanel: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                {isEn ? 'Published Announcements' : 'Julkaistut tiedotteet'}
+                {isEn ? 'Published announcements' : 'Julkaistut tiedotteet'}
               </CardTitle>
               <div className="xamk-modal-underline" />
               <CardDescription>
@@ -1198,11 +1278,11 @@ export const AdminPanel: React.FC = () => {
                     <Badge variant="status">
                       {news.isPinned
                         ? isEn
-                          ? '📌 Pinned'
-                          : '📌 Kiinnitetty'
+                          ? 'Pinned'
+                          : 'Kiinnitetty'
                         : isEn
-                        ? '📢 Notice'
-                        : '📢 Tiedote'}
+                        ? 'Notice'
+                        : 'Tiedote'}
                     </Badge>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <time className="xamk-landing-news-date">
@@ -1215,7 +1295,8 @@ export const AdminPanel: React.FC = () => {
                         onClick={() => deleteNewsMutation.mutate(news.id)}
                         disabled={deleteNewsMutation.isPending}
                       >
-                        🗑️ {isEn ? 'Delete' : 'Poista'}
+                        <Trash2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>{isEn ? 'Delete' : 'Poista'}</span>
                       </Button>
                     </div>
                   </div>
@@ -1228,28 +1309,28 @@ export const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {/* 3. KÄYTTÄJIEN, OIKEUKSIEN JA KÄYTTÖESTOJEN (BANNAUKSEN) HALLINTA */}
+      {/* 3. KÄYTTÄJIEN, OIKEUKSIEN JA KÄYTTÖESTOJEN HALLINTA */}
       {activeSubTab === 'users' && (
         <Card>
           <div className="xamk-admin-card-header-flex">
             <div>
               <CardTitle>
                 {isEn
-                  ? 'System Users, Access Roles & Ban Controls'
-                  : 'Järjestelmäkäyttäjät, Käyttöoikeudet & Bannaus'}
+                  ? 'System users, access roles, and ban controls'
+                  : 'Järjestelmäkäyttäjät, käyttöoikeudet ja käyttöestot'}
               </CardTitle>
               <div className="xamk-modal-underline mt-1.5 mb-2" />
               <CardDescription>
                 {isEn
                   ? 'Manage registered students and staff. Change roles between User and Admin, or apply temporary and permanent bans with custom duration.'
-                  : 'Hallinnoi rekisteröityjä opiskelijoita ja henkilökuntaa. Voit muuttaa käyttäjän roolia tai asettaa määräaikaisen/pysyvän käyttöeston (bannin) valitulla kestolla.'}
+                  : 'Hallinnoi rekisteröityjä opiskelijoita ja henkilökuntaa. Voit muuttaa käyttäjän roolia tai asettaa määräaikaisen tai pysyvän käyttöeston valitulla kestolla.'}
               </CardDescription>
             </div>
 
             <div className="xamk-field-group w-full sm:w-auto sm:min-w-[280px]">
               <Input
                 type="text"
-                placeholder={isEn ? '🔍 Search users by name or email...' : '🔍 Hae nimen tai sähköpostin perusteella...'}
+                placeholder={isEn ? 'Search users by name or email...' : 'Hae nimen tai sähköpostin perusteella...'}
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
               />
@@ -1259,12 +1340,12 @@ export const AdminPanel: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{isEn ? 'User & Status' : 'Käyttäjä & Tila'}</TableHead>
+                <TableHead>{isEn ? 'User and status' : 'Käyttäjä ja tila'}</TableHead>
                 <TableHead>{isEn ? 'Email' : 'Sähköposti'}</TableHead>
-                <TableHead>{isEn ? 'Current Role' : 'Nykyinen rooli'}</TableHead>
-                <TableHead>{isEn ? 'Change Role' : 'Muuta käyttöoikeutta'}</TableHead>
+                <TableHead>{isEn ? 'Current role' : 'Nykyinen rooli'}</TableHead>
+                <TableHead>{isEn ? 'Change role' : 'Muuta käyttöoikeutta'}</TableHead>
                 <TableHead>
-                  {isEn ? 'Ban / Suspension & Duration' : 'Bannaus / Käyttöesto & Pituus'}
+                  {isEn ? 'Ban and duration' : 'Käyttöesto ja kesto'}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -1292,11 +1373,11 @@ export const AdminPanel: React.FC = () => {
                         <div>
                           {u.isBanned ? (
                             <Badge variant="wishlist">
-                              🚫 {isEn ? 'BANNED' : 'BANNATTU / ESTETTY'}
+                              {isEn ? 'BANNED' : 'ESTETTY'}
                             </Badge>
                           ) : (
                             <Badge variant="installed">
-                              🟢 {isEn ? 'Active' : 'Aktiivinen'}
+                              {isEn ? 'Active' : 'Aktiivinen'}
                             </Badge>
                           )}
                         </div>
@@ -1318,12 +1399,14 @@ export const AdminPanel: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {u.role === 'SuperAdmin' ? (
-                        <span className="xamk-table-muted">
-                          ⚡ {isEn ? 'Primary SuperAdmin (locked)' : 'Pääkäyttäjä (pysyvä oikeus)'}
+                        <span className="xamk-table-muted inline-flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          <span>{isEn ? 'Primary SuperAdmin, locked' : 'Pääkäyttäjä, pysyvä oikeus'}</span>
                         </span>
                       ) : !isSuperAdmin ? (
-                        <span className="xamk-table-muted">
-                          🔒 {isEn ? 'SuperAdmin required' : 'Vaatii SuperAdmin-oikeuden'}
+                        <span className="xamk-table-muted inline-flex items-center gap-1">
+                          <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          <span>{isEn ? 'SuperAdmin required' : 'Vaatii SuperAdmin-oikeuden'}</span>
                         </span>
                       ) : (
                         <NativeSelect
@@ -1334,15 +1417,16 @@ export const AdminPanel: React.FC = () => {
                           }
                           disabled={updateUserRoleMutation.isPending}
                         >
-                          <option value="User">User ({isEn ? 'Student / Staff' : 'Käyttäjä'})</option>
+                          <option value="User">User ({isEn ? 'Student or staff' : 'Käyttäjä'})</option>
                           <option value="Admin">Admin ({isEn ? 'Administrator' : 'Ylläpitäjä'})</option>
                         </NativeSelect>
                       )}
                     </TableCell>
                     <TableCell>
                       {u.role === 'SuperAdmin' ? (
-                        <span className="xamk-table-muted">
-                          🛡️ {isEn ? 'Cannot be banned' : 'Pääkäyttäjää ei voi bannata'}
+                        <span className="xamk-table-muted inline-flex items-center gap-1">
+                          <Shield className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          <span>{isEn ? 'Cannot be banned' : 'Pääkäyttäjää ei voi estää'}</span>
                         </span>
                       ) : (
                         <div
@@ -1367,11 +1451,10 @@ export const AdminPanel: React.FC = () => {
                               }}
                             >
                               <div style={{ fontWeight: 700, color: '#fca5a5' }}>
-                                ⏳{' '}
                                 {isPermanentBan
                                   ? isEn
                                     ? 'Permanent ban active'
-                                    : 'Voimassa: Pysyvä esto (toistaiseksi)'
+                                    : 'Voimassa: pysyvä esto'
                                   : isEn
                                   ? `Banned until: ${bannedUntilDate?.toLocaleString('fi-FI', {
                                       day: '2-digit',
@@ -1402,7 +1485,7 @@ export const AdminPanel: React.FC = () => {
                               aria-label={
                                 isEn
                                   ? `Select ban duration for ${u.displayName}`
-                                  : `Valitse bannauksen pituus käyttäjälle ${u.displayName}`
+                                  : `Valitse käyttöeston pituus käyttäjälle ${u.displayName}`
                               }
                               wrapperClassName="flex-1 min-w-[165px] min-h-[36px]"
                               value={selectedDuration}
@@ -1414,17 +1497,17 @@ export const AdminPanel: React.FC = () => {
                               }
                               disabled={updateUserBanMutation.isPending}
                             >
-                              <option value="1">{isEn ? '1 hour (1h)' : '1 tunti (1 h)'}</option>
-                              <option value="3">{isEn ? '3 hours (3h)' : '3 tuntia (3 h)'}</option>
-                              <option value="12">{isEn ? '12 hours (12h)' : '12 tuntia (12 h)'}</option>
-                              <option value="24">{isEn ? '24 hours (1 day)' : '1 vuorokausi (24 h)'}</option>
-                              <option value="72">{isEn ? '3 days (72h)' : '3 päivää (72 h)'}</option>
-                              <option value="168">{isEn ? '1 week (7 days)' : '1 viikko (7 vrk)'}</option>
-                              <option value="336">{isEn ? '2 weeks (14 days)' : '2 viikkoa (14 vrk)'}</option>
-                              <option value="720">{isEn ? '1 month (30 days)' : '1 kuukausi (30 vrk)'}</option>
-                              <option value="2160">{isEn ? '3 months (90 days)' : '3 kuukautta (90 vrk)'}</option>
+                              <option value="1">{isEn ? '1 hour' : '1 tunti'}</option>
+                              <option value="3">{isEn ? '3 hours' : '3 tuntia'}</option>
+                              <option value="12">{isEn ? '12 hours' : '12 tuntia'}</option>
+                              <option value="24">{isEn ? '24 hours, 1 day' : '1 vuorokausi, 24 h'}</option>
+                              <option value="72">{isEn ? '3 days, 72 hours' : '3 päivää, 72 h'}</option>
+                              <option value="168">{isEn ? '1 week, 7 days' : '1 viikko, 7 vrk'}</option>
+                              <option value="336">{isEn ? '2 weeks, 14 days' : '2 viikkoa, 14 vrk'}</option>
+                              <option value="720">{isEn ? '1 month, 30 days' : '1 kuukausi, 30 vrk'}</option>
+                              <option value="2160">{isEn ? '3 months, 90 days' : '3 kuukautta, 90 vrk'}</option>
                               <option value="permanent">
-                                {isEn ? 'Permanent ban' : 'Pysyvä esto (Toistaiseksi)'}
+                                {isEn ? 'Permanent ban' : 'Pysyvä esto'}
                               </option>
                             </NativeSelect>
 
@@ -1446,14 +1529,13 @@ export const AdminPanel: React.FC = () => {
                                 });
                               }}
                             >
-                              🚫{' '}
                               {u.isBanned
                                 ? isEn
-                                  ? 'Update Ban'
-                                  : 'Päivitä banni'
+                                  ? 'Update ban'
+                                  : 'Päivitä esto'
                                 : isEn
-                                ? 'Ban User'
-                                : 'Bannaa'}
+                                ? 'Ban user'
+                                : 'Aseta esto'}
                             </Button>
 
                             {u.isBanned && (
@@ -1473,7 +1555,7 @@ export const AdminPanel: React.FC = () => {
                                   })
                                 }
                               >
-                                🔓 {isEn ? 'Unban' : 'Poista banni'}
+                                {isEn ? 'Unban' : 'Poista esto'}
                               </Button>
                             )}
                           </div>
@@ -1484,8 +1566,8 @@ export const AdminPanel: React.FC = () => {
                             className="h-8 text-xs"
                             placeholder={
                               isEn
-                                ? 'Reason for ban (optional, e.g. rule violation)...'
-                                : 'Bannauksen syy (valinnainen, esim. sääntörikkomus)...'
+                                ? 'Reason for ban, optional, for example rule violation...'
+                                : 'Käyttöeston syy, valinnainen, esimerkiksi sääntörikkomus...'
                             }
                             value={reasonText}
                             onChange={(e) =>
@@ -1506,7 +1588,7 @@ export const AdminPanel: React.FC = () => {
         </Card>
       )}
 
-      {/* 4. SIVUSTOASETUKSET, VARAUSKIINTIÖT & JÄRJESTELMÄNHALLINTA */}
+      {/* 4. SIVUSTOASETUKSET, VARAUSKIINTIÖT JA JÄRJESTELMÄNHALLINTA */}
       {activeSubTab === 'settings' && (
         <div className="xamk-admin-subcontent" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {settingsSuccess && (
@@ -1522,16 +1604,17 @@ export const AdminPanel: React.FC = () => {
           )}
 
           <div className="xamk-admin-2col">
-            {/* VARAUSKIINTIÖT & TILASÄÄNNÖT (INTERAKTIIVINEN HALLINTA) */}
+            {/* VARAUSKIINTIÖT JA TILASÄÄNNÖT */}
             <Card>
               <CardHeader>
-                <CardTitle>
-                  📐 {isEn ? 'Active Booking Quotas & Room Policy' : 'Voimassa olevat varauskiintiöt & tilasäännöt'}
+                <CardTitle className="inline-flex items-center gap-2">
+                  <Settings className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'Active booking quotas and room policy' : 'Voimassa olevat varauskiintiöt ja tilasäännöt'}</span>
                 </CardTitle>
                 <div className="xamk-modal-underline" />
                 <CardDescription>
                   {isEn
-                    ? 'Configure opening hours, advance limits, booking quotas and console TV locking enforced by the backend.'
+                    ? 'Configure opening hours, advance limits, booking quotas, and console TV locking enforced by the backend.'
                     : 'Muokkaa varausjärjestelmän palvelimen valvomia aukiolo-, kiintiö- ja laitesääntöjä.'}
                 </CardDescription>
               </CardHeader>
@@ -1545,19 +1628,21 @@ export const AdminPanel: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">🕒</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'Opening Hours' : 'Aukioloajat'}
+                            {isEn ? 'Opening hours' : 'Aukioloajat'}
                           </div>
                           <div className="xamk-table-subtext">
-                            {`${String(openTimeHour).padStart(2, '0')}:00 – ${String(closeTimeHour).padStart(2, '0')}:00 (${
-                              onlyWeekdays ? (isEn ? 'Mon–Fri' : 'Ma–Pe') : isEn ? 'Mon–Sun' : 'Ma–Su'
-                            })`}
+                            {`${String(openTimeHour).padStart(2, '0')}:00-${String(closeTimeHour).padStart(2, '0')}:00, ${
+                              onlyWeekdays ? (isEn ? 'Mon-Fri' : 'ma-pe') : isEn ? 'Mon-Sun' : 'ma-su'
+                            }`}
                           </div>
                         </div>
                       </div>
-                      <Badge variant="status">{onlyWeekdays ? 'MA–PE' : 'MA–SU'}</Badge>
+                      <Badge variant="status">{onlyWeekdays ? 'MA-PE' : 'MA-SU'}</Badge>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -1606,7 +1691,7 @@ export const AdminPanel: React.FC = () => {
 
                     <div>
                       <Label htmlFor="weekdays-select" className="text-xs">
-                        {isEn ? 'Open Days' : 'Aukiolopäivät'}
+                        {isEn ? 'Open days' : 'Aukiolopäivät'}
                       </Label>
                       <NativeSelect
                         id="weekdays-select"
@@ -1618,10 +1703,10 @@ export const AdminPanel: React.FC = () => {
                         }}
                       >
                         <option value="weekdays">
-                          {isEn ? 'Weekdays only (Mon–Fri)' : 'Vain arkipäivät (Ma–Pe)'}
+                          {isEn ? 'Weekdays only, Mon-Fri' : 'Vain arkipäivät, ma-pe'}
                         </option>
                         <option value="all">
-                          {isEn ? 'Every day (Mon–Sun)' : 'Kaikki viikonpäivät (Ma–Su)'}
+                          {isEn ? 'Every day, Mon-Sun' : 'Kaikki viikonpäivät, ma-su'}
                         </option>
                       </NativeSelect>
                     </div>
@@ -1634,10 +1719,12 @@ export const AdminPanel: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">📅</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'Advance Window' : 'Ennakkovarausraja'}
+                            {isEn ? 'Advance window' : 'Ennakkovarausraja'}
                           </div>
                           <div className="xamk-table-subtext">
                             {isEn
@@ -1646,12 +1733,12 @@ export const AdminPanel: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge variant="status">{`MAX ${maxAdvanceBookingMonths} KK`}</Badge>
+                      <Badge variant="status">{`${maxAdvanceBookingMonths} KK`}</Badge>
                     </div>
 
                     <div>
                       <Label htmlFor="advance-months-select" className="text-xs">
-                        {isEn ? 'Max Advance Window' : 'Sallittu ennakkovarausaika'}
+                        {isEn ? 'Allowed advance window' : 'Sallittu ennakkovarausaika'}
                       </Label>
                       <NativeSelect
                         id="advance-months-select"
@@ -1671,29 +1758,31 @@ export const AdminPanel: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 3. Yksittäisvaraus & Päiväkiintiö */}
+                  {/* 3. Yksittäisvaraus ja päiväkiintiö */}
                   <div
                     className="xamk-station-row-card"
                     style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">🎮</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'Single Station Quota' : 'Yksittäisvaraus'}
+                            {isEn ? 'Single station quota' : 'Yksittäisvaraus'}
                           </div>
                           <div className="xamk-table-subtext">
-                            {maxIndividualHours} {isEn ? 'hours / day' : 'tuntia / päivä'}
+                            {maxIndividualHours} {isEn ? 'hours per day' : 'tuntia päivässä'}
                           </div>
                         </div>
                       </div>
-                      <Badge variant="status">{`MAX ${maxIndividualHours}H`}</Badge>
+                      <Badge variant="status">{`${maxIndividualHours} H`}</Badge>
                     </div>
 
                     <div>
                       <Label htmlFor="individual-hours-select" className="text-xs">
-                        {isEn ? 'Max Daily Quota per Student' : 'Opiskelijan päiväkiintiö & maksimikesto'}
+                        {isEn ? 'Daily quota per student' : 'Opiskelijan päiväkiintiö ja enimmäiskesto'}
                       </Label>
                       <NativeSelect
                         id="individual-hours-select"
@@ -1706,7 +1795,7 @@ export const AdminPanel: React.FC = () => {
                       >
                         {[1, 2, 3, 4, 5, 6, 8, 10].map((h) => (
                           <option key={h} value={h}>
-                            {isEn ? `Max ${h} hours / day` : `Enintään ${h} tuntia / päivä`}
+                            {isEn ? `Up to ${h} hours per day` : `Enintään ${h} tuntia päivässä`}
                           </option>
                         ))}
                       </NativeSelect>
@@ -1720,10 +1809,12 @@ export const AdminPanel: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">🏢</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'Student Room Booking' : 'Opiskelijan tilavaraus'}
+                            {isEn ? 'Student room booking' : 'Opiskelijan tilavaraus'}
                           </div>
                           <div className="xamk-table-subtext">
                             {isEn
@@ -1732,12 +1823,12 @@ export const AdminPanel: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge variant="status">{`MAX ${maxStudentRoomHours}H`}</Badge>
+                      <Badge variant="status">{`${maxStudentRoomHours} H`}</Badge>
                     </div>
 
                     <div>
                       <Label htmlFor="room-hours-select" className="text-xs">
-                        {isEn ? 'Max Room Booking Duration' : 'Tilavarauksen enimmäiskesto (Opiskelija)'}
+                        {isEn ? 'Room booking duration limit' : 'Tilavarauksen enimmäiskesto opiskelijalle'}
                       </Label>
                       <NativeSelect
                         id="room-hours-select"
@@ -1764,10 +1855,12 @@ export const AdminPanel: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">⏱️</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'Minimum Duration' : 'Vähimmäisvaraus'}
+                            {isEn ? 'Minimum duration' : 'Vähimmäisvaraus'}
                           </div>
                           <div className="xamk-table-subtext">
                             {isEn
@@ -1776,12 +1869,12 @@ export const AdminPanel: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge variant="status">{`MIN ${minReservationMinutes}M`}</Badge>
+                      <Badge variant="status">{`${minReservationMinutes} MIN`}</Badge>
                     </div>
 
                     <div>
                       <Label htmlFor="min-duration-select" className="text-xs">
-                        {isEn ? 'Shortest Allowed Slot' : 'Lyhin sallittu varausjakso'}
+                        {isEn ? 'Shortest allowed slot' : 'Lyhin sallittu varausjakso'}
                       </Label>
                       <NativeSelect
                         id="min-duration-select"
@@ -1793,8 +1886,8 @@ export const AdminPanel: React.FC = () => {
                         }}
                       >
                         <option value="30">{isEn ? '30 minutes' : '30 minuuttia'}</option>
-                        <option value="60">{isEn ? '60 minutes (1 hour)' : '60 minuuttia (1 tunti)'}</option>
-                        <option value="120">{isEn ? '120 minutes (2 hours)' : '120 minuuttia (2 tuntia)'}</option>
+                        <option value="60">{isEn ? '60 minutes, 1 hour' : '60 minuuttia, 1 tunti'}</option>
+                        <option value="120">{isEn ? '120 minutes, 2 hours' : '120 minuuttia, 2 tuntia'}</option>
                       </NativeSelect>
                     </div>
                   </div>
@@ -1806,16 +1899,18 @@ export const AdminPanel: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                       <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">📺</span>
+                        <span className="xamk-station-card-icon" aria-hidden="true">
+                          <Tv className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        </span>
                         <div>
                           <div className="xamk-station-card-name">
-                            {isEn ? 'SharedTV Console Lock' : 'Konsolien yhteinen TV'}
+                            {isEn ? 'SharedTV console lock' : 'Konsolien yhteinen TV'}
                           </div>
                           <div className="xamk-table-subtext">
                             {enforceSharedTvLock
                               ? isEn
-                                ? 'PS5 & Switch lock each other'
-                                : 'PS5 & Switch lukitsevat toisensa'
+                                ? 'PS5 and Switch lock each other'
+                                : 'PS5 ja Switch lukitsevat toisensa'
                               : isEn
                               ? 'Simultaneous console booking allowed'
                               : 'Rinnakkaisvaraus sallittu'}
@@ -1829,7 +1924,7 @@ export const AdminPanel: React.FC = () => {
 
                     <div>
                       <Label htmlFor="shared-tv-select" className="text-xs">
-                        {isEn ? 'SharedTV Policy (Rule #6)' : 'Yhteisen television sääntö (Sääntö #6)'}
+                        {isEn ? 'SharedTV policy, Rule #8' : 'Yhteisen television sääntö, Sääntö #8'}
                       </Label>
                       <NativeSelect
                         id="shared-tv-select"
@@ -1842,13 +1937,13 @@ export const AdminPanel: React.FC = () => {
                       >
                         <option value="enabled">
                           {isEn
-                            ? 'Enforced (PS5 and Switch share 1 TV)'
-                            : 'Voimassa (PS5 ja Switch jakavat saman TV:n)'}
+                            ? 'Enforced, PS5 and Switch share 1 TV'
+                            : 'Voimassa, PS5 ja Switch jakavat saman TV:n'}
                         </option>
                         <option value="disabled">
                           {isEn
-                            ? 'Disabled (Allow both consoles simultaneously)'
-                            : 'Pois käytöstä (Salli molemmat konsolit yhtä aikaa)'}
+                            ? 'Disabled, allow both consoles simultaneously'
+                            : 'Pois käytöstä, salli molemmat konsolit yhtä aikaa'}
                         </option>
                       </NativeSelect>
                     </div>
@@ -1867,10 +1962,9 @@ export const AdminPanel: React.FC = () => {
                           ? 'Saving...'
                           : 'Tallennetaan...'
                         : isEn
-                        ? 'Save Quotas & Room Policy'
-                        : 'Tallenna kiintiöt & tilasäännöt'}
+                        ? 'Save quotas and room policy'
+                        : 'Tallenna kiintiöt ja tilasäännöt'}
                     </span>
-                    <span className="confirm-arrow" aria-hidden="true">→</span>
                   </Button>
 
                   <Button
@@ -1879,7 +1973,8 @@ export const AdminPanel: React.FC = () => {
                     onClick={handleResetDefaultQuotas}
                     disabled={updateSettingsMutation.isPending}
                   >
-                    <span>↺ {isEn ? 'Restore Defaults' : 'Palauta oletusarvot'}</span>
+                    <RotateCcw className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Restore defaults' : 'Palauta oletusarvot'}</span>
                   </Button>
                 </div>
               </form>
@@ -1889,13 +1984,14 @@ export const AdminPanel: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <Card>
                 <CardHeader>
-                  <CardTitle>
-                    🛠️ {isEn ? 'Room Operational Status & Maintenance' : 'Pelitilan tila & Poikkeussulku'}
+                  <CardTitle className="inline-flex items-center gap-2">
+                    <Wrench className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Room operational status and maintenance' : 'Pelitilan tila ja poikkeussulku'}</span>
                   </CardTitle>
                   <div className="xamk-modal-underline" />
                   <CardDescription>
                     {isEn
-                      ? 'Temporarily lock the Game Room for maintenance, cleaning or equipment upgrades.'
+                      ? 'Temporarily lock the Game Room for maintenance, cleaning, or equipment upgrades.'
                       : 'Sulje pelihuone tilapäisesti opiskelijavarauksilta esimerkiksi huollon, siivouksen tai päivitysten ajaksi.'}
                   </CardDescription>
                 </CardHeader>
@@ -1903,7 +1999,7 @@ export const AdminPanel: React.FC = () => {
                 <form onSubmit={handleSaveSettings} noValidate className="xamk-modal-form">
                   <div className="xamk-field-group">
                     <Label htmlFor="maintenance-mode-select">
-                      {isEn ? 'Room Operational Mode' : 'Pelihuoneen toimintatila'}
+                      {isEn ? 'Room operational mode' : 'Pelihuoneen toimintatila'}
                     </Label>
                     <NativeSelect
                       id="maintenance-mode-select"
@@ -1914,25 +2010,25 @@ export const AdminPanel: React.FC = () => {
                       }}
                     >
                       <option value="normal">
-                        🟢 {isEn ? 'Open Normally (Student bookings enabled)' : 'Avoinna normaalisti (Opiskelijavaraukset käytössä)'}
+                        {isEn ? 'Open normally, student bookings enabled' : 'Avoinna normaalisti, opiskelijavaraukset käytössä'}
                       </option>
                       <option value="maintenance">
-                        🟠 {isEn ? 'Maintenance Mode (Block new student bookings)' : 'Huoltotila / Suljettu (Estää uudet opiskelijavaraukset)'}
+                        {isEn ? 'Maintenance mode, block new student bookings' : 'Huoltotila, estää uudet opiskelijavaraukset'}
                       </option>
                     </NativeSelect>
                   </div>
 
                   <div className="xamk-field-group">
                     <Label htmlFor="maintenance-msg-input">
-                      {isEn ? 'Maintenance Notice to Students' : 'Huoltotiedote käyttäjille'}
+                      {isEn ? 'Maintenance notice to students' : 'Huoltotiedote käyttäjille'}
                     </Label>
                     <Input
                       id="maintenance-msg-input"
                       type="text"
                       placeholder={
                         isEn
-                          ? 'e.g., Closed for PC updates until 14:00'
-                          : 'esim. Pelihuone on huollossa laitepäivitysten vuoksi klo 14:00 asti.'
+                          ? 'For example Closed for PC updates until 14:00'
+                          : 'Esimerkiksi Pelihuone on huollossa laitepäivitysten vuoksi klo 14:00 asti.'
                       }
                       value={maintenanceMessage}
                       onChange={(e) => {
@@ -1949,9 +2045,8 @@ export const AdminPanel: React.FC = () => {
                       disabled={updateSettingsMutation.isPending}
                     >
                       <span>
-                        {isEn ? 'Update Operational Mode' : 'Tallenna tilan toimintatila'}
+                        {isEn ? 'Update operational mode' : 'Tallenna tilan toimintatila'}
                       </span>
-                      <span className="confirm-arrow" aria-hidden="true">→</span>
                     </Button>
                   </div>
                 </form>
@@ -1959,8 +2054,9 @@ export const AdminPanel: React.FC = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>
-                    💬 {isEn ? 'Discord Webhook Integration' : 'Discord Webhook & Automaatti-ilmoitukset'}
+                  <CardTitle className="inline-flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <span>{isEn ? 'Discord Webhook integration' : 'Discord Webhook ja automaatti-ilmoitukset'}</span>
                   </CardTitle>
                   <div className="xamk-modal-underline" />
                   <CardDescription>
@@ -1993,8 +2089,8 @@ export const AdminPanel: React.FC = () => {
                     />
                     <span className="xamk-field-hint">
                       {isEn
-                        ? 'Create a webhook in your Discord channel settings (Integrations → Webhooks) and paste the URL above.'
-                        : 'Luo webhook Discord-palvelimesi kanavan asetuksista (Integrations → Webhooks) ja liitä URL-osoite tähän.'}
+                        ? 'Create a webhook in your Discord channel settings under Integrations and Webhooks, and paste the URL above.'
+                        : 'Luo webhook Discord-palvelimesi kanavan asetuksista kohdasta Integrations ja Webhooks, ja liitä URL-osoite tähän.'}
                     </span>
                   </div>
 
@@ -2013,7 +2109,6 @@ export const AdminPanel: React.FC = () => {
                           ? 'Save Webhook'
                           : 'Tallenna Webhook'}
                       </span>
-                      <span className="confirm-arrow" aria-hidden="true">→</span>
                     </Button>
 
                     {discordWebhookUrl.trim() && (
@@ -2024,7 +2119,8 @@ export const AdminPanel: React.FC = () => {
                         disabled={updateSettingsMutation.isPending}
                         title="Lähetä testi-ilmoitus kanavalle"
                       >
-                        <span>💬 {isEn ? 'Test Webhook' : 'Testaa yhteys'}</span>
+                        <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>{isEn ? 'Test Webhook' : 'Testaa yhteys'}</span>
                       </Button>
                     )}
                   </div>
@@ -2036,14 +2132,15 @@ export const AdminPanel: React.FC = () => {
           {/* PELIPISTEIDEN LAITEKOHTAINEN HUOLTO- JA KÄYTTÖTILAHALLINTA */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                🖥️ {isEn ? 'Gaming Stations Hardware & Maintenance Control' : 'Pelipisteiden laitehallinta & huoltotila (8 laitetta)'}
+              <CardTitle className="inline-flex items-center gap-2">
+                <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <span>{isEn ? 'Gaming stations hardware and maintenance control' : 'Pelipisteiden laitehallinta ja huoltotila, 8 laitetta'}</span>
               </CardTitle>
               <div className="xamk-modal-underline" />
               <CardDescription>
                 {isEn
                   ? 'Enable or disable individual gaming stations. Disabled stations are immediately hidden from student bookings during maintenance or repairs.'
-                  : 'Hallitse yksittäisten pelipisteiden (PC 1–6, PS5, Switch) käyttötilaa. Huoltotilaan asetettu laite lukitaan välittömästi uusilta varauksilta.'}
+                  : 'Hallitse yksittäisten pelipisteiden, PC 1-PC 6, PS5 ja Switch, käyttötilaa. Huoltotilaan asetettu laite lukitaan välittömästi uusilta varauksilta.'}
               </CardDescription>
             </CardHeader>
 
@@ -2056,13 +2153,17 @@ export const AdminPanel: React.FC = () => {
                 >
                   <div className="xamk-station-card-left">
                     <span className="xamk-station-card-icon" aria-hidden="true">
-                      {st.type === 'PC' ? '🖥️' : '🎮'}
+                      {st.type === 'PC' ? (
+                        <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      ) : (
+                        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      )}
                     </span>
                     <div>
                       <div className="xamk-station-card-name">{st.name}</div>
                       <div className="xamk-table-subtext">
                         {st.type}
-                        {st.usesSharedTv ? ' • SharedTV' : ''}
+                        {st.usesSharedTv ? ', SharedTV' : ''}
                       </div>
                     </div>
                   </div>
@@ -2071,11 +2172,11 @@ export const AdminPanel: React.FC = () => {
                     <Badge variant={st.isActive ? 'installed' : 'wishlist'}>
                       {st.isActive
                         ? isEn
-                          ? '🟢 ACTIVE'
-                          : '🟢 KÄYTÖSSÄ'
+                          ? 'ACTIVE'
+                          : 'KÄYTÖSSÄ'
                         : isEn
-                        ? '🔧 MAINTENANCE'
-                        : '🔧 HUOLLOSSA'}
+                        ? 'MAINTENANCE'
+                        : 'HUOLLOSSA'}
                     </Badge>
                     <Button
                       type="button"
@@ -2091,10 +2192,10 @@ export const AdminPanel: React.FC = () => {
                     >
                       {st.isActive
                         ? isEn
-                          ? 'Set Maintenance'
+                          ? 'Set maintenance'
                           : 'Aseta huoltoon'
                         : isEn
-                        ? 'Restore Active'
+                        ? 'Restore active'
                         : 'Palauta käyttöön'}
                     </Button>
                   </div>
@@ -2106,8 +2207,9 @@ export const AdminPanel: React.FC = () => {
           {/* VOIMASSA OLEVIEN VARAUSTEN HALLINTA JA PERUUTUS (ADMIN) */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                📋 {isEn ? 'Active Reservations Management (Next 14 Days)' : 'Voimassa olevien varausten hallinta (Seuraavat 14 vrk)'}
+              <CardTitle className="inline-flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <span>{isEn ? 'Active reservations management, next 14 days' : 'Voimassa olevien varausten hallinta, seuraavat 14 vrk'}</span>
               </CardTitle>
               <div className="xamk-modal-underline" />
               <CardDescription>
@@ -2127,9 +2229,9 @@ export const AdminPanel: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isEn ? 'Time Window' : 'Ajankohta'}</TableHead>
-                    <TableHead>{isEn ? 'Target / Type' : 'Kohde / Tyyppi'}</TableHead>
-                    <TableHead>{isEn ? 'Booked By' : 'Varaaja'}</TableHead>
+                    <TableHead>{isEn ? 'Time window' : 'Ajankohta'}</TableHead>
+                    <TableHead>{isEn ? 'Target and type' : 'Kohde ja tyyppi'}</TableHead>
+                    <TableHead>{isEn ? 'Booked by' : 'Varaaja'}</TableHead>
                     <TableHead>{isEn ? 'Action' : 'Toiminto'}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -2143,8 +2245,8 @@ export const AdminPanel: React.FC = () => {
                           : 'Koko pelitila'
                         : r.reservationType === 'Event'
                         ? isEn
-                          ? 'Official Event'
-                          : 'Tapahtuma / Turnaus'
+                          ? 'Official event'
+                          : 'Tapahtuma tai turnaus'
                         : r.reservationType);
                     const startD = new Date(r.startUtc);
                     const endD = new Date(r.endUtc);
@@ -2153,7 +2255,7 @@ export const AdminPanel: React.FC = () => {
                         <TableCell>
                           <strong>{startD.toLocaleDateString('fi-FI')}</strong>{' '}
                           <span className="xamk-table-subtext">
-                            {startD.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })} –{' '}
+                            {startD.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}-
                             {endD.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </TableCell>
@@ -2172,7 +2274,8 @@ export const AdminPanel: React.FC = () => {
                             disabled={adminCancelReservationMutation.isPending}
                             onClick={() => adminCancelReservationMutation.mutate(r.id)}
                           >
-                            🗑️ {isEn ? 'Cancel' : 'Peru varaus'}
+                            <Trash2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span>{isEn ? 'Cancel' : 'Peru varaus'}</span>
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -2185,42 +2288,48 @@ export const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {/* 5. STATISTIIKKA & KÄYTTÖASTE */}
+      {/* 5. TILASTOT JA KÄYTTÖASTE */}
       {activeSubTab === 'statistics' && (
         <div className="xamk-admin-subcontent">
           <div className="xamk-admin-kpi-grid" style={{ marginBottom: '20px' }}>
             <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
               <div className="xamk-admin-kpi-top">
                 <span className="xamk-admin-kpi-label">
-                  {isEn ? 'Total Reservations' : 'Kokonaisvaraukset'}
+                  {isEn ? 'Total reservations' : 'Kokonaisvaraukset'}
                 </span>
-                <span className="xamk-admin-kpi-icon">📅</span>
+                <span className="xamk-admin-kpi-icon" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
               </div>
               <div className="xamk-admin-kpi-value">{statistics?.totalReservations ?? 0}</div>
               <div className="xamk-admin-kpi-meta">
-                {isEn ? 'All-time recorded bookings' : 'Kaikki järjestelmän varaukset'}
+                {isEn ? 'All recorded bookings' : 'Kaikki järjestelmän varaukset'}
               </div>
             </div>
 
             <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
               <div className="xamk-admin-kpi-top">
                 <span className="xamk-admin-kpi-label">
-                  {isEn ? 'Active Reservations' : 'Aktiiviset varaukset'}
+                  {isEn ? 'Active reservations' : 'Aktiiviset varaukset'}
                 </span>
-                <span className="xamk-admin-kpi-icon">🟢</span>
+                <span className="xamk-admin-kpi-icon" aria-hidden="true">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
               </div>
               <div className="xamk-admin-kpi-value">{statistics?.activeReservations ?? 0}</div>
               <div className="xamk-admin-kpi-meta">
-                {isEn ? 'Upcoming & ongoing sessions' : 'Voimassa olevat varaukset'}
+                {isEn ? 'Upcoming and ongoing sessions' : 'Voimassa olevat varaukset'}
               </div>
             </div>
 
             <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
               <div className="xamk-admin-kpi-top">
                 <span className="xamk-admin-kpi-label">
-                  {isEn ? 'Total Users' : 'Käyttäjämäärä'}
+                  {isEn ? 'Total users' : 'Käyttäjämäärä'}
                 </span>
-                <span className="xamk-admin-kpi-icon">👥</span>
+                <span className="xamk-admin-kpi-icon" aria-hidden="true">
+                  <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
               </div>
               <div className="xamk-admin-kpi-value">{statistics?.totalUsers ?? 0}</div>
               <div className="xamk-admin-kpi-meta">
@@ -2231,13 +2340,15 @@ export const AdminPanel: React.FC = () => {
             <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
               <div className="xamk-admin-kpi-top">
                 <span className="xamk-admin-kpi-label">
-                  {isEn ? 'Catalog Games' : 'Asennetut pelit'}
+                  {isEn ? 'Catalog games' : 'Asennetut pelit'}
                 </span>
-                <span className="xamk-admin-kpi-icon">🎮</span>
+                <span className="xamk-admin-kpi-icon" aria-hidden="true">
+                  <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                </span>
               </div>
               <div className="xamk-admin-kpi-value">{statistics?.totalGames ?? 0}</div>
               <div className="xamk-admin-kpi-meta">
-                {isEn ? 'Available across PC, PS5 & Switch' : 'PC-, PS5- ja Switch-pelit'}
+                {isEn ? 'Available across PC, PS5, and Switch' : 'PC-, PS5- ja Switch-pelit'}
               </div>
             </div>
           </div>
@@ -2245,8 +2356,9 @@ export const AdminPanel: React.FC = () => {
           <div className="xamk-admin-2col">
             <Card>
               <CardHeader>
-                <CardTitle>
-                  📊 {isEn ? 'Station Utilization & Hours' : 'Pelipisteiden käyttöaste & varausmäärät'}
+                <CardTitle className="inline-flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'Station utilization and hours' : 'Pelipisteiden käyttöaste ja varausmäärät'}</span>
                 </CardTitle>
                 <div className="xamk-modal-underline" />
               </CardHeader>
@@ -2254,12 +2366,17 @@ export const AdminPanel: React.FC = () => {
                 {statistics?.stationUsage?.map((st) => (
                   <div key={st.stationId} className="station-stat-row">
                     <div className="station-stat-meta">
-                      <span className="st-name">
-                        {st.stationType === 'PC' ? '🖥️' : '🎮'} {st.stationName}
+                      <span className="st-name inline-flex items-center gap-1.5">
+                        {st.stationType === 'PC' ? (
+                          <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        ) : (
+                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        )}
+                        <span>{st.stationName}</span>
                       </span>
                       <span className="st-numbers">
-                        {st.reservationCount} {isEn ? 'bookings' : 'varausta'} • {st.totalHours}{' '}
-                        {isEn ? 'hrs' : 'tuntia'}
+                        {st.reservationCount} {isEn ? 'bookings' : 'varausta'}, {st.totalHours}{' '}
+                        {isEn ? 'hours' : 'tuntia'}
                       </span>
                     </div>
                     <div className="progress-bar-track">
@@ -2280,8 +2397,9 @@ export const AdminPanel: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>
-                  📑 {isEn ? 'Reservations by Type' : 'Varausten jakautuminen tyypeittäin'}
+                <CardTitle className="inline-flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <span>{isEn ? 'Reservations by type' : 'Varausten jakautuminen tyypeittäin'}</span>
                 </CardTitle>
                 <div className="xamk-modal-underline" />
               </CardHeader>
@@ -2289,21 +2407,23 @@ export const AdminPanel: React.FC = () => {
                 {statistics?.typeBreakdown?.map((tb) => (
                   <div key={tb.reservationType} className="xamk-station-row-card" style={{ cursor: 'default' }}>
                     <div className="xamk-station-card-left">
-                      <span className="xamk-station-card-icon">
-                        {tb.reservationType === 'Individual'
-                          ? '🎮'
-                          : tb.reservationType === 'Room'
-                          ? '🏢'
-                          : '🏆'}
+                      <span className="xamk-station-card-icon" aria-hidden="true">
+                        {tb.reservationType === 'Individual' ? (
+                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        ) : tb.reservationType === 'Room' ? (
+                          <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        ) : (
+                          <Trophy className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        )}
                       </span>
                       <span className="xamk-station-card-name">
                         {tb.reservationType === 'Individual'
                           ? isEn
-                            ? 'Single Station'
+                            ? 'Single station'
                             : 'Yksittäisvaraukset'
                           : tb.reservationType === 'Room'
                           ? isEn
-                            ? 'Whole Room'
+                            ? 'Whole room'
                             : 'Tilavaraukset'
                           : isEn
                           ? 'Events'
@@ -2324,8 +2444,9 @@ export const AdminPanel: React.FC = () => {
         <Card>
           <div className="xamk-admin-card-header-flex">
             <div>
-              <CardTitle>
-                ⚠️ {isEn ? 'Hardware & Software Issue Reports' : 'Saapuneet vika- ja virheilmoitukset'}
+              <CardTitle className="inline-flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <span>{isEn ? 'Hardware and software issue reports' : 'Saapuneet vika- ja virheilmoitukset'}</span>
               </CardTitle>
               <div className="xamk-modal-underline mt-1.5 mb-2" />
               <CardDescription>
@@ -2344,10 +2465,10 @@ export const AdminPanel: React.FC = () => {
                   {isEn ? 'All' : 'Kaikki'} ({allIssues?.length ?? 0})
                 </TabsTrigger>
                 <TabsTrigger value="OPEN">
-                  🟡 {isEn ? 'Open' : 'Avoimet'} ({openIssuesCount})
+                  {isEn ? 'Open' : 'Avoimet'} ({openIssuesCount})
                 </TabsTrigger>
                 <TabsTrigger value="RESOLVED">
-                  🟢 {isEn ? 'Resolved' : 'Ratkaistut'} ({(allIssues?.length ?? 0) - openIssuesCount})
+                  {isEn ? 'Resolved' : 'Ratkaistut'} ({(allIssues?.length ?? 0) - openIssuesCount})
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -2370,15 +2491,18 @@ export const AdminPanel: React.FC = () => {
                 >
                   <div className="issue-card-header">
                     <div className="issue-meta">
-                      <span className="target-tag">🖥️ {issue.target}</span>
+                      <span className="target-tag inline-flex items-center gap-1.5">
+                        <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>{issue.target}</span>
+                      </span>
                       <Badge variant={issue.isResolved ? 'installed' : 'wishlist'}>
                         {issue.isResolved
                           ? isEn
-                            ? '🟢 RESOLVED'
-                            : '🟢 RATKAISTU'
+                            ? 'RESOLVED'
+                            : 'RATKAISTU'
                           : isEn
-                          ? '🟡 OPEN'
-                          : '🟡 AVOIN'}
+                          ? 'OPEN'
+                          : 'AVOIN'}
                       </Badge>
                       <time className="issue-date">
                         {new Date(issue.createdAt).toLocaleDateString('fi-FI', {
@@ -2392,8 +2516,11 @@ export const AdminPanel: React.FC = () => {
                     </div>
 
                     {issue.reporterEmail && (
-                      <div className="issue-reporter">
-                        👤 {issue.reporterName || (isEn ? 'Student' : 'Opiskelija')} ({issue.reporterEmail})
+                      <div className="issue-reporter inline-flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span>
+                          {issue.reporterName || (isEn ? 'Student' : 'Opiskelija')} ({issue.reporterEmail})
+                        </span>
                       </div>
                     )}
                   </div>
@@ -2426,8 +2553,8 @@ export const AdminPanel: React.FC = () => {
                           type="text"
                           placeholder={
                             isEn
-                              ? 'Add resolution note (e.g., replaced cable / updated driver)...'
-                              : 'Kirjaa toimenpide (esim. näytön kaapeli vaihdettu)...'
+                              ? 'Add resolution note, for example replaced cable or updated driver...'
+                              : 'Kirjaa toimenpide, esimerkiksi näytön kaapeli vaihdettu...'
                           }
                           value={resolveNotes[issue.id] || ''}
                           onChange={(e) =>
@@ -2446,8 +2573,9 @@ export const AdminPanel: React.FC = () => {
                         }
                         disabled={resolveIssueMutation.isPending}
                       >
+                        <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
                         <span>
-                          ✅ {isEn ? 'Mark Resolved' : 'Merkitse ratkaistuksi'}
+                          {isEn ? 'Mark resolved' : 'Merkitse ratkaistuksi'}
                         </span>
                       </Button>
                     </div>
