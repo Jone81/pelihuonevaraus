@@ -129,17 +129,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="xamk-modal-md">
+      <DialogContent className="max-w-[560px]">
         <DialogHeader>
-          <div className="xamk-modal-header-row">
-            <div className="xamk-logo-emblem" aria-hidden="true">
-              <span className="xamk-logo-emblem-main">XAMK</span>
-              <span className="xamk-logo-emblem-sub">GAME ROOM</span>
+          <div className="flex items-start gap-3.5">
+            <div
+              className="flex flex-col items-center justify-center rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] px-2.5 py-1.5 shrink-0"
+              aria-hidden="true"
+            >
+              <span className="font-extrabold text-sm leading-none tracking-tight uppercase">
+                XAMK
+              </span>
+              <span className="font-mono font-bold text-[10px] leading-tight tracking-wider uppercase">
+                GAME ROOM
+              </span>
             </div>
-            <div className="xamk-modal-title-group">
-              <DialogTitle>{t('login.title')}</DialogTitle>
-              <div className="xamk-modal-underline" />
-              <DialogDescription>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <DialogTitle className="font-extrabold uppercase tracking-tight text-[#F4F4F5]">
+                {t('login.title')}
+              </DialogTitle>
+              <div className="h-1 w-12 bg-[#FACC15]" />
+              <DialogDescription className="text-sm text-[#A1A1AA]">
                 {t('login.desc')} {t('login.sessionNotice')}
               </DialogDescription>
             </div>
@@ -164,29 +173,47 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </TabsList>
         </Tabs>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div className="rounded-none bg-[#121417] border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] p-3 text-sm font-mono font-bold text-[#EF4444]">
+            {error}
+          </div>
+        )}
 
         {step === 1 ? (
-          <form onSubmit={handleSendCode} className="xamk-modal-form">
-            <div className="xamk-field-group">
-              <Label htmlFor="email">{t('login.emailLabel')} *</Label>
+          <form onSubmit={handleSendCode} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="email"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('login.emailLabel')} *
+              </Label>
               <Input
                 id="email"
                 type="email"
+                className="rounded-none bg-white text-[#09090B]"
                 placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
               />
-              <span className="xamk-field-hint">{t('login.allowedHint')}</span>
+              <span className="block text-xs font-mono text-[#A1A1AA]">
+                {t('login.allowedHint')}
+              </span>
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="displayName">{t('login.nameLabel')}</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="displayName"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('login.nameLabel')}
+              </Label>
               <Input
                 id="displayName"
                 type="text"
+                className="rounded-none bg-white text-[#09090B]"
                 placeholder={t('login.namePlaceholder')}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -208,23 +235,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             </DialogFooter>
           </form>
         ) : (
-          <form onSubmit={handleVerifyCode} className="xamk-modal-form">
-            <div className="alert alert-info">
-              {t('login.codeSentAlert')} <strong>{email}</strong>.
+          <form onSubmit={handleVerifyCode} className="space-y-4">
+            <div className="rounded-none bg-[#121417] border-2 border-[#3B82F6] shadow-[4px_4px_0px_#000000] p-3 text-sm text-[#F4F4F5]">
+              {t('login.codeSentAlert')} <strong className="font-mono text-[#FACC15]">{email}</strong>.
               {devCodeHint && (
-                <div style={{ marginTop: '6px' }}>
-                  <em>{t('login.devCodeHint')}</em> <strong>{devCodeHint}</strong>{' '}
-                  ({isEn ? 'or use test code' : 'tai käytä testikoodia'} <code>123456</code>).
+                <div className="mt-1.5">
+                  <em>{t('login.devCodeHint')}</em>{' '}
+                  <strong className="font-mono text-[#FACC15]">{devCodeHint}</strong> (
+                  {isEn ? 'or use test code' : 'tai käytä testikoodia'}{' '}
+                  <code className="rounded-none bg-[#1C1F24] border border-[#3F444E] px-1.5 py-0.5 font-mono font-bold text-[#FACC15]">
+                    123456
+                  </code>
+                  ).
                 </div>
               )}
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="otp-code">{t('login.enterCodeLabel')} *</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="otp-code"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('login.enterCodeLabel')} *
+              </Label>
               <Input
                 id="otp-code"
                 type="text"
-                className="xamk-code-input"
+                className="rounded-none bg-white text-[#09090B] font-mono font-bold text-center text-xl tracking-[0.4em]"
                 placeholder="123456"
                 maxLength={6}
                 value={code}
@@ -251,20 +288,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         )}
 
         {/* Pikatunnukset */}
-        <div className="xamk-landing-quick-section" style={{ marginTop: '6px' }}>
-          <span className="xamk-landing-quick-label">{t('login.tryQuick')}</span>
-          <div className="xamk-landing-quick-grid">
+        <div className="mt-2 pt-4 border-t-2 border-[#3F444E] space-y-2.5">
+          <span className="block text-xs font-mono font-bold uppercase tracking-wider text-[#A1A1AA]">
+            {t('login.tryQuick')}
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button
               type="button"
               variant="station"
               onClick={() => handleQuickLogin('opiskelija@edu.xamk.fi', 'Matti Meikäläinen')}
               disabled={loading}
             >
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none bg-[#121417] border border-[#3F444E] text-[#FACC15]"
+                  aria-hidden="true"
+                >
+                  <User className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <span className="xamk-station-card-name">
+                <span className="font-mono font-bold text-sm">
                   {isEn ? 'Student' : 'Opiskelija'}
                 </span>
               </div>
@@ -276,11 +318,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               onClick={() => handleQuickLogin('admin@xamk.fi', 'Pääkäyttäjä')}
               disabled={loading}
             >
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none bg-[#121417] border border-[#3F444E] text-[#FACC15]"
+                  aria-hidden="true"
+                >
+                  <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <span className="xamk-station-card-name">SuperAdmin</span>
+                <span className="font-mono font-bold text-sm">SuperAdmin</span>
               </div>
               <Badge variant="status">ADMIN</Badge>
             </Button>

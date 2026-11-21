@@ -23,8 +23,7 @@ const FinlandFlag: React.FC = () => (
     width="16"
     height="11"
     aria-hidden="true"
-    className="flag-icon"
-    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0 }}
+    className="inline-block shrink-0 rounded-none border border-black"
   >
     <rect width="18" height="11" fill="#ffffff" />
     <rect width="18" height="3" y="4" fill="#003580" />
@@ -41,8 +40,7 @@ const UKFlag: React.FC = () => (
     width="16"
     height="11"
     aria-hidden="true"
-    className="flag-icon"
-    style={{ borderRadius: '2px', display: 'inline-block', flexShrink: 0 }}
+    className="inline-block shrink-0 rounded-none border border-black"
   >
     <clipPath id="uk-flag-clip">
       <path d="M0,0 v30 h60 v-30 z" />
@@ -70,19 +68,19 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
 
   return (
     <div
-      className={`lang-switcher-compact ${className}`}
+      className={`inline-flex items-center ${className}`}
       role="group"
       aria-label="Kielivalitsin / Language selector"
     >
       <button
         type="button"
-        className="lang-pill-btn btn-touch"
+        className="rounded-none inline-flex items-center gap-2 px-3 py-2 min-h-[40px] bg-[#1C1F24] text-[#F4F4F5] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono font-bold text-xs uppercase tracking-wider cursor-pointer hover:bg-[#FACC15] hover:text-[#09090B] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_#000000] transition-colors"
         onClick={toggleLanguage}
         title={lang === 'fi' ? 'Switch to English' : 'Vaihda kieleksi Suomi'}
       >
         {lang === 'fi' ? <FinlandFlag /> : <UKFlag />}
-        <span className="lang-text hidden sm:inline">{lang === 'fi' ? 'Suomi' : 'English'}</span>
-        <span className="lang-text-short sm:hidden font-bold text-[11px]">{lang === 'fi' ? 'FI' : 'EN'}</span>
+        <span className="hidden sm:inline font-mono font-bold">{lang === 'fi' ? 'Suomi' : 'English'}</span>
+        <span className="sm:hidden font-mono font-bold text-[11px]">{lang === 'fi' ? 'FI' : 'EN'}</span>
       </button>
     </div>
   );

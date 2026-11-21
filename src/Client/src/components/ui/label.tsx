@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 
 /** Nimikkeen oletustyylit ja passiivisen tilan korostus */
 const labelVariants = cva(
-  'xamk-field-label peer-disabled:cursor-not-allowed peer-disabled:opacity-70 select-none'
+  'font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5] peer-disabled:cursor-not-allowed peer-disabled:opacity-70 select-none'
 )
 
 /**

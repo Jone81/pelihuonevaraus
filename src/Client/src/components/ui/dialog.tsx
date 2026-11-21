@@ -27,7 +27,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn('xamk-dialog-overlay', className)}
+    className={cn('fixed inset-0 z-[200] bg-black/80', className)}
     {...props}
   />
 ))
@@ -44,13 +44,19 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={cn('xamk-dialog-content', className)}
+      className={cn(
+        'fixed left-1/2 top-1/2 z-[210] -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-[540px] max-h-[calc(100vh-40px)] overflow-y-auto rounded-none bg-[#1C1F24] text-[#F4F4F5] border-[3px] border-black shadow-[6px_6px_0px_#FACC15] p-6 sm:p-7 flex flex-col gap-4 focus:outline-none',
+        className
+      )}
       {...props}
     >
       {children}
       {/* Oikean yläkulman sulkupainike ruudunlukijatekstillä */}
-      <DialogPrimitive.Close className="xamk-dialog-close" aria-label="Sulje">
-        <X className="h-4 w-4" />
+      <DialogPrimitive.Close
+        className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-none bg-[#121417] border-2 border-black text-[#F4F4F5] cursor-pointer transition-colors hover:bg-[#FACC15] hover:text-[#09090B] focus:outline-none"
+        aria-label="Sulje"
+      >
+        <X className="h-4 w-4" strokeWidth={2.5} />
         <span className="sr-only">Sulje</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -66,7 +72,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('xamk-dialog-header', className)}
+    className={cn('flex flex-col gap-1.5 pr-10', className)}
     {...props}
   />
 )
@@ -80,7 +86,10 @@ const DialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('xamk-dialog-footer', className)}
+    className={cn(
+      'flex items-center justify-end gap-2.5 pt-3.5 mt-1 border-t-2 border-[#3F444E] flex-wrap',
+      className
+    )}
     {...props}
   />
 )
@@ -95,7 +104,10 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('xamk-dialog-title', className)}
+    className={cn(
+      'font-extrabold uppercase tracking-tight text-xl text-[#F4F4F5] leading-tight',
+      className
+    )}
     {...props}
   />
 ))
@@ -110,7 +122,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('xamk-dialog-description', className)}
+    className={cn('text-sm text-[#9CA3AF] leading-relaxed', className)}
     {...props}
   />
 ))

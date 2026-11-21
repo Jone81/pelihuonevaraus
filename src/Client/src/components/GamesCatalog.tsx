@@ -131,18 +131,18 @@ export const GamesCatalog: React.FC = () => {
   const wishlistCount = allGames?.filter((g) => g.isWishlist).length || 0;
 
   return (
-    <div className="games-catalog-container">
-      <div className="section-header flex justify-between items-center flex-wrap gap-4">
+    <div className="space-y-6 text-[#F4F4F5]">
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[#3F444E] pb-4">
         <div>
-          <h2>{t('games.title')}</h2>
-          <p className="section-description">{t('games.subtitle')}</p>
+          <h2 className="text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('games.title')}</h2>
+          <p className="text-sm text-[#A1A1AA] mt-1">{t('games.subtitle')}</p>
         </div>
         <Button
           type="button"
           variant="pill"
           onClick={() => setIsWishModalOpen(true)}
         >
-          <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           <span>{t('wishlist.propose')}</span>
         </Button>
       </div>
@@ -158,19 +158,19 @@ export const GamesCatalog: React.FC = () => {
         <TabsList aria-label="Pelialustat">
           <TabsTrigger value="ALL">{t('games.filterAll')}</TabsTrigger>
           <TabsTrigger value="PC" className="inline-flex items-center gap-1.5">
-            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <Monitor className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>PC</span>
           </TabsTrigger>
           <TabsTrigger value="PlayStation5" className="inline-flex items-center gap-1.5">
-            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>PlayStation 5</span>
           </TabsTrigger>
           <TabsTrigger value="NintendoSwitch" className="inline-flex items-center gap-1.5">
-            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>Nintendo Switch</span>
           </TabsTrigger>
           <TabsTrigger value="WISHLIST" className="inline-flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <Star className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{t('wishlist.tabWishlist')}</span>
             {wishlistCount > 0 && (
               <Badge variant="wishlist" className="ml-1">
@@ -182,17 +182,17 @@ export const GamesCatalog: React.FC = () => {
       </Tabs>
 
       {selectedFilter === 'WISHLIST' && (
-        <Card className="my-4 flex-row items-center justify-between flex-wrap gap-4">
-          <div className="wishlist-intro-text">
-            <CardTitle>{t('wishlist.introTitle')}</CardTitle>
-            <CardDescription>{t('wishlist.introDesc')}</CardDescription>
+        <Card className="my-4 p-5 rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[4px_4px_0px_#FACC15] flex flex-row items-center justify-between flex-wrap gap-4">
+          <div className="space-y-1">
+            <CardTitle className="font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('wishlist.introTitle')}</CardTitle>
+            <CardDescription className="text-[#A1A1AA]">{t('wishlist.introDesc')}</CardDescription>
           </div>
           <Button
             type="button"
             variant="pill"
             onClick={() => setIsWishModalOpen(true)}
           >
-            <Plus className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{t('wishlist.proposeNew')}</span>
           </Button>
         </Card>
@@ -200,12 +200,12 @@ export const GamesCatalog: React.FC = () => {
 
       {/* Peliruudukko */}
       {isLoading ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
+        <div className="flex flex-col items-center justify-center gap-3 py-12 text-[#A1A1AA] font-mono font-bold">
+          <div className="w-8 h-8 border-2 border-[#FACC15] border-t-transparent animate-spin rounded-none"></div>
           <span>{t('games.loading')}</span>
         </div>
       ) : filteredGames.length === 0 ? (
-        <div className="empty-state">
+        <div className="rounded-none bg-[#1C1F24] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-8 text-center text-sm font-mono text-[#A1A1AA]">
           <p>
             {selectedFilter === 'WISHLIST'
               ? t('games.emptyWishlist')
@@ -213,25 +213,32 @@ export const GamesCatalog: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="games-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredGames.map((game) => (
-            <Card key={game.id} className={`game-card ${game.isWishlist ? 'game-card-wish' : ''}`}>
+            <Card
+              key={game.id}
+              className={`rounded-none bg-[#1C1F24] text-[#F4F4F5] p-5 flex flex-col justify-between gap-4 ${
+                game.isWishlist
+                  ? 'border-2 border-[#FACC15] shadow-[4px_4px_0px_#FACC15]'
+                  : 'border border-[#3F444E] shadow-[4px_4px_0px_#000000]'
+              }`}
+            >
               <CardHeader className="p-0">
-                <div className="game-card-header flex items-center justify-between">
-                  <span className="xamk-platform-chip inline-flex items-center gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold uppercase rounded-none bg-[#121417] text-[#F4F4F5] border border-[#3F444E]">
                     {game.platform === 'PC' ? (
                       <>
-                        <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <Monitor className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>PC</span>
                       </>
                     ) : game.platform === 'PlayStation5' ? (
                       <>
-                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>PS5</span>
                       </>
                     ) : (
                       <>
-                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>Switch</span>
                       </>
                     )}
@@ -244,15 +251,15 @@ export const GamesCatalog: React.FC = () => {
                     <Badge variant="installed">{t('games.installed')}</Badge>
                   )}
                 </div>
-                <CardTitle className="mt-2">{game.name}</CardTitle>
+                <CardTitle className="mt-3 text-lg font-extrabold uppercase tracking-tight text-[#F4F4F5]">{game.name}</CardTitle>
                 {game.description && (
-                  <CardDescription>{game.description}</CardDescription>
+                  <CardDescription className="text-sm text-[#A1A1AA]">{game.description}</CardDescription>
                 )}
               </CardHeader>
 
               {game.isWishlist && (
-                <CardFooter className="p-0 pt-3 border-t border-[#2b2d34]">
-                  <span className="text-xs text-[#9da3ae]">
+                <CardFooter className="p-0 pt-3 border-t border-[#3F444E] flex items-center justify-between gap-2">
+                  <span className="text-xs font-mono text-[#A1A1AA]">
                     {t('wishlist.communityWish')}
                   </span>
                   <Button
@@ -262,7 +269,7 @@ export const GamesCatalog: React.FC = () => {
                     onClick={() => handleVote(game.id)}
                     disabled={votedGameIds.has(game.id) || voteMutation.isPending}
                   >
-                    <ThumbsUp className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <ThumbsUp className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                     <span>{votedGameIds.has(game.id) ? t('wishlist.voted') : t('wishlist.vote')}</span>
                   </Button>
                 </CardFooter>
@@ -274,42 +281,44 @@ export const GamesCatalog: React.FC = () => {
 
       {/* Peli-ehdotusmodaali */}
       <Dialog open={isWishModalOpen} onOpenChange={(open) => !open && setIsWishModalOpen(false)}>
-        <DialogContent className="xamk-modal-md">
+        <DialogContent className="max-w-lg rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15]">
           <DialogHeader>
-            <div className="xamk-modal-header-row">
-              <div className="xamk-modal-icon-badge" aria-hidden="true">
-                <Star className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <div className="flex items-start gap-3">
+              <div className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black" aria-hidden="true">
+                <Star className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               </div>
-              <div className="xamk-modal-title-group">
-                <DialogTitle>{t('wishlist.modalTitle')}</DialogTitle>
-                <div className="xamk-modal-underline" />
-                <DialogDescription>{t('wishlist.modalDesc')}</DialogDescription>
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-extrabold uppercase tracking-tight text-[#09090B]">{t('wishlist.modalTitle')}</DialogTitle>
+                <div className="h-1 w-12 bg-[#FACC15]" />
+                <DialogDescription className="text-sm text-[#3F444E]">{t('wishlist.modalDesc')}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
-          {wishSuccess && <div className="alert alert-success">{wishSuccess}</div>}
-          {wishError && <div className="alert alert-error">{wishError}</div>}
+          {wishSuccess && <div className="rounded-none border-2 border-black bg-[#22C55E] text-[#09090B] px-4 py-3 text-sm font-mono font-bold">{wishSuccess}</div>}
+          {wishError && <div className="rounded-none border-2 border-black bg-[#EF4444] text-white px-4 py-3 text-sm font-mono font-bold">{wishError}</div>}
 
-          <form onSubmit={handleWishSubmit} className="xamk-modal-form">
-            <div className="xamk-field-group">
-              <Label htmlFor="wish-name">{t('wishlist.gameName')} *</Label>
+          <form onSubmit={handleWishSubmit} className="space-y-4 mt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-name" className="text-[#09090B] font-mono font-bold uppercase text-xs">{t('wishlist.gameName')} *</Label>
               <Input
                 id="wish-name"
                 type="text"
                 placeholder={t('wishlist.gameNamePlaceholder')}
                 value={wishName}
                 onChange={(e) => setWishName(e.target.value)}
+                className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                 required
               />
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="wish-platform">{t('wishlist.platform')} *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-platform" className="text-[#09090B] font-mono font-bold uppercase text-xs">{t('wishlist.platform')} *</Label>
               <NativeSelect
                 id="wish-platform"
                 value={wishPlatform}
                 onChange={(e) => setWishPlatform(e.target.value)}
+                className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
               >
                 <option value="PC">PC</option>
                 <option value="PlayStation5">PlayStation 5</option>
@@ -317,14 +326,15 @@ export const GamesCatalog: React.FC = () => {
               </NativeSelect>
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="wish-desc">{t('wishlist.reasonDesc')}</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="wish-desc" className="text-[#09090B] font-mono font-bold uppercase text-xs">{t('wishlist.reasonDesc')}</Label>
               <Textarea
                 id="wish-desc"
                 rows={3}
                 placeholder={t('wishlist.reasonPlaceholder')}
                 value={wishDesc}
                 onChange={(e) => setWishDesc(e.target.value)}
+                className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
               />
             </div>
 

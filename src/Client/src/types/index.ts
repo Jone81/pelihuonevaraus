@@ -126,6 +126,14 @@ export interface CancelReservationRequest {
 }
 
 /**
+ * Pyyntömalli käynnissä olevan varauksen lopettamiseksi kesken.
+ */
+export interface EndReservationRequest {
+  /** Lopetusta pyytävän käyttäjän tunniste */
+  userId: string;
+}
+
+/**
  * SuperAdmin-pyyntö päällekkäisten varausten jyräämiseksi ja uuden varauksen luomiseksi.
  */
 export interface OverrideReservationRequest {

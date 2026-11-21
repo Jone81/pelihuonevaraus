@@ -12,21 +12,21 @@ import { cn } from '@/lib/utils'
  * Badge-komponentin tyylivariantit Xamk-ulkoasujärjestelmässä.
  */
 const badgeVariants = cva(
-  'xamk-station-status-pill transition-colors focus:outline-none',
+  'inline-flex items-center justify-center rounded-none border-2 border-black px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-wider shrink-0 transition-colors focus:outline-none',
   {
     variants: {
       variant: {
-        default: '',
-        status: '',
-        occupied: 'status-pill-occupied',
-        installed: 'status-pill-installed',
-        wishlist: 'status-pill-wishlist',
-        secondary: 'bg-[#25272d] border-[#3d4049] text-[#dcdfe6]',
-        destructive: 'status-pill-occupied',
-        outline: 'bg-transparent border-[#454852] text-[#e2e5ec]',
-        success: 'status-pill-installed',
-        warning: 'status-pill-wishlist',
-        xamk: '',
+        default: 'bg-[#FACC15] text-[#09090B]',
+        status: 'bg-[#FACC15] text-[#09090B]',
+        occupied: 'bg-[#EF4444] text-white',
+        installed: 'bg-[#22C55E] text-[#09090B]',
+        wishlist: 'bg-[#FACC15] text-[#09090B]',
+        secondary: 'bg-[#1C1F24] border-[#3F444E] text-[#F4F4F5]',
+        destructive: 'bg-[#EF4444] text-white',
+        outline: 'bg-transparent border-[#3F444E] text-[#F4F4F5]',
+        success: 'bg-[#22C55E] text-[#09090B]',
+        warning: 'bg-[#FACC15] text-[#09090B]',
+        xamk: 'bg-[#FACC15] text-[#09090B]',
       },
     },
     defaultVariants: {

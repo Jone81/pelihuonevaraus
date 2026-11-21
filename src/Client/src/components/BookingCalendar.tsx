@@ -13,7 +13,6 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { CreateReservationRequest, GamingStation, ReservationType } from '../types';
 
@@ -56,21 +55,21 @@ const MATRIX_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:
 const StationIcon: React.FC<{ type: string; name: string }> = ({ type, name }) => {
   if (type === 'NintendoSwitch' || name.includes('Switch')) {
     return (
-      <span className="station-svg-icon icon-switch" aria-hidden="true">
-        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+      <span className="inline-flex items-center justify-center text-[#EF4444] shrink-0" aria-hidden="true">
+        <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
       </span>
     );
   }
   if (type === 'PlayStation5' || name.includes('PlayStation')) {
     return (
-      <span className="station-svg-icon icon-ps5" aria-hidden="true">
-        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+      <span className="inline-flex items-center justify-center text-[#3B82F6] shrink-0" aria-hidden="true">
+        <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
       </span>
     );
   }
   return (
-    <span className="station-svg-icon icon-pc" aria-hidden="true">
-      <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+    <span className="inline-flex items-center justify-center text-[#FACC15] shrink-0" aria-hidden="true">
+      <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
     </span>
   );
 };
@@ -144,7 +143,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   });
 
   // Haetaan valitulla aikavälillä vapaana olevat pelipisteet
-  const { data: availableStations } = useQuery({
+  useQuery({
     queryKey: ['available-stations', startUtc, endUtc],
     queryFn: () => api.getAvailableStations(startUtc, endUtc),
     enabled: endDateTime > startDateTime,
@@ -183,12 +182,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   }, [orderedStations, selectedStationId]);
 
   const effectiveStationId = selectedStationId || activeStation?.id || '';
-
-  // Kokoelma vapaiden pelipisteiden tunnisteista nopeaa hakua varten
-  const availableIdSet = useMemo(() => {
-    if (!availableStations) return null;
-    return new Set(availableStations.map((s) => s.id));
-  }, [availableStations]);
 
   /**
    * Tarkistaa onko tietty pelipiste varattuna (tai lukittuna tilavarauksen / SharedTV:n vuoksi)
@@ -526,30 +519,30 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   }, [endHour]);
 
   return (
-    <div className="xamk-booking-grid-layout">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* LEFT COLUMN: Tee uusi varaus */}
-      <section className="xamk-booking-left-col" aria-labelledby="heading-new-booking">
-        <div className="xamk-section-heading">
-          <h2 id="heading-new-booking">{t('booking.title')}</h2>
-          <div className="xamk-heading-underline" />
+      <section className="lg:col-span-5 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-5 sm:p-6 space-y-5" aria-labelledby="heading-new-booking">
+        <div className="space-y-2">
+          <h2 id="heading-new-booking" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#09090B]">{t('booking.title')}</h2>
+          <div className="h-1 w-16 bg-[#FACC15] border border-black" />
         </div>
 
         {conflictMessage && (
-          <div className="alert alert-error" role="alert">
+          <div className="p-3.5 rounded-none bg-[#EF4444] text-white border-2 border-black font-mono font-bold text-xs sm:text-sm shadow-[3px_3px_0px_#000000]" role="alert">
             {conflictMessage}
           </div>
         )}
 
         {generalError && (
-          <div className="alert alert-error" role="alert">
+          <div className="p-3.5 rounded-none bg-[#EF4444] text-white border-2 border-black font-mono font-bold text-xs sm:text-sm shadow-[3px_3px_0px_#000000]" role="alert">
             {generalError}
           </div>
         )}
 
-        <form onSubmit={handleBooking} className="xamk-booking-form-clean">
+        <form onSubmit={handleBooking} className="space-y-4">
           {/* Varaustyyppi (shadcn/ui Tabs 3-segment control) */}
-          <div className="xamk-field-group">
-            <Label>{t('booking.typeLabel')}</Label>
+          <div className="space-y-1.5">
+            <Label className="text-[#09090B] font-mono font-bold text-xs uppercase tracking-wider">{t('booking.typeLabel')}</Label>
             <Tabs
               value={String(reservationType)}
               onValueChange={(val) => {
@@ -580,30 +573,31 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             </Tabs>
           </div>
 
-          {/* Row: Päivämäärä & Alkamisaika */}
-          <div className="xamk-two-col-fields">
-            <div className="xamk-field-group">
-              <Label htmlFor="date">{t('booking.date')}</Label>
-              <div className="xamk-gold-input-box">
-                <input
-                  id="date"
-                  type="date"
-                  className="xamk-clean-input btn-touch"
-                  min={dateBounds.today}
-                  max={dateBounds.maxDateStr}
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
+          {/* Päivämäärä */}
+          <div className="space-y-1.5">
+            <Label htmlFor="date" className="text-[#09090B] font-mono font-bold text-xs uppercase tracking-wider">{t('booking.date')}</Label>
+            <div className="w-full">
+              <input
+                id="date"
+                type="date"
+                className="w-full min-h-[44px] px-3 py-2 rounded-none bg-white text-[#09090B] font-mono font-bold text-sm border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
+                min={dateBounds.today}
+                max={dateBounds.maxDateStr}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
             </div>
+          </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="startHour">{t('booking.startTime')}</Label>
-              <div className="xamk-gold-input-box">
+          {/* Row: Alkamisaika & Päättymisaika */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="startHour" className="text-[#09090B] font-mono font-bold text-xs uppercase tracking-wider">{t('booking.startTime')}</Label>
+              <div className="w-full">
                 <select
                   id="startHour"
-                  className="xamk-clean-select btn-touch"
+                  className="w-full min-h-[44px] px-3 py-2 rounded-none bg-white text-[#09090B] font-mono font-bold text-sm border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                   value={startHour}
                   onChange={(e) => setStartHour(e.target.value)}
                 >
@@ -626,16 +620,13 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 </select>
               </div>
             </div>
-          </div>
 
-          {/* Päättymisaika & Pelipisteen valinta (Connected 2-tier gold-underlined box) */}
-          <div className="xamk-field-group">
-            <Label htmlFor="endHour">{t('booking.endTime')}</Label>
-            <div className="xamk-double-gold-box">
-              <div className="xamk-double-box-top">
+            <div className="space-y-1.5">
+              <Label htmlFor="endHour" className="text-[#09090B] font-mono font-bold text-xs uppercase tracking-wider">{t('booking.endTime')}</Label>
+              <div className="w-full">
                 <select
                   id="endHour"
-                  className="xamk-clean-select btn-touch"
+                  className="w-full min-h-[44px] px-3 py-2 rounded-none bg-white text-[#09090B] font-mono font-bold text-sm border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                   value={endHour}
                   onChange={(e) => setEndHour(e.target.value)}
                 >
@@ -657,38 +648,40 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   ))}
                 </select>
               </div>
-
-              <div className="xamk-double-box-bottom">
-                {reservationType === 1 ? (
-                  <select
-                    aria-label={t('booking.selectStation')}
-                    className="xamk-clean-select xamk-sub-select btn-touch"
-                    value={effectiveStationId}
-                    onChange={(e) => setSelectedStationId(e.target.value)}
-                  >
-                    {orderedStations.map((st) => (
-                      <option key={st.id} value={st.id}>
-                        {st.name} ({startHour}-{endHour})
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <div className="xamk-room-summary-line flex items-center gap-1.5">
-                    <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
-                    <span>
-                      {reservationType === 2 ? t('booking.type.room') : t('booking.type.event')} ({startHour}-{endHour})
-                    </span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
+          {/* Pelipisteen valinta / koko tilan yhteenveto */}
+          <div className="w-full border-2 border-black bg-[#F4F4F5]">
+            {reservationType === 1 ? (
+              <select
+                aria-label={t('booking.selectStation')}
+                className="w-full min-h-[44px] px-3 py-2 rounded-none bg-[#F4F4F5] text-[#09090B] font-mono font-bold text-sm border-0 focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#FACC15]"
+                value={effectiveStationId}
+                onChange={(e) => setSelectedStationId(e.target.value)}
+              >
+                {orderedStations.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.name} ({startHour}-{endHour})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center gap-1.5 min-h-[44px] px-3 py-2 font-mono font-bold text-sm text-[#09090B]">
+                <Building2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                <span>
+                  {reservationType === 2 ? t('booking.type.room') : t('booking.type.event')} ({startHour}-{endHour})
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Submit Pill Button (shadcn/ui Button) */}
-          <div className="xamk-submit-row">
+          <div className="pt-2">
             <Button
               type="submit"
               variant="pill"
+              className="w-full"
               disabled={reservationMutation.isPending || (reservationType === 1 && !effectiveStationId)}
             >
               <span>
@@ -702,22 +695,22 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       </section>
 
       {/* RIGHT COLUMN: Päivän varaukset ja aikataulu */}
-      <section className="xamk-booking-right-col" aria-labelledby="heading-day-schedule">
-        <div className="xamk-section-heading">
-          <h2 id="heading-day-schedule">{t('schedule.title')}</h2>
-          <div className="xamk-heading-underline" />
+      <section className="lg:col-span-7 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6 space-y-5" aria-labelledby="heading-day-schedule">
+        <div className="space-y-2">
+          <h2 id="heading-day-schedule" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.title')}</h2>
+          <div className="h-1 w-16 bg-[#FACC15] border border-black" />
         </div>
 
-        <div className="xamk-schedule-sublabel-row">
-          <span className="xamk-schedule-sublabel">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">
             {isEn ? 'Available TV and station schedule' : 'Aikataulu ja TV-varaukset'}
           </span>
-          <span className="xamk-schedule-drag-hint hidden sm:inline">
+          <span className="hidden sm:inline font-mono font-bold text-xs text-[#FACC15]">
             {isEn
               ? `Drag across hours to select time, up to 4 hours, ${startHour}-${endHour}`
               : `Maalaa aikaväli vetämällä, enintään 4 h, ${startHour}-${endHour}`}
           </span>
-          <span className="xamk-schedule-drag-hint sm:hidden text-[11px]">
+          <span className="sm:hidden font-mono font-bold text-[11px] text-[#FACC15]">
             {isEn
               ? `Drag slots to select, up to 4 hours, ${startHour}-${endHour}`
               : `Valitse vetämällä sormella, enintään 4 h, ${startHour}-${endHour}`}
@@ -727,14 +720,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         {/* All-Devices Hourly Matrix Table with Drag-to-Select */}
         <div
           ref={matrixWrapRef}
-          className={`xamk-compact-matrix-wrap ${
-            dragSelection ? 'matrix-is-dragging' : ''
+          className={`overflow-x-auto overscroll-x-contain border-2 border-[#3F444E] bg-[#121417] ${
+            dragSelection ? 'touch-none select-none cursor-grabbing' : 'touch-pan-x touch-pan-y'
           }`}
         >
-          <table className="xamk-compact-matrix">
+          <table className="w-full min-w-[640px] border-collapse table-fixed">
             <thead>
               <tr>
-                <th className="matrix-station-th">{t('schedule.station')}</th>
+                <th className="w-36 sm:w-44 px-3 py-2.5 text-left font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] bg-[#1C1F24] border-b-2 border-r border-[#3F444E] touch-pan-x touch-pan-y">{t('schedule.station')}</th>
                 {MATRIX_HOURS.map((h, hourIdx) => {
                   const startNum = h.split(':')[0];
                   const endNum = String(parseInt(startNum, 10) + 1).padStart(2, '0');
@@ -742,7 +735,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     <th
                       key={h}
                       data-hour-index={hourIdx}
-                      className="matrix-hour-th"
+                      className="matrix-hour-th px-1 py-2.5 text-center font-mono font-bold text-[11px] text-[#A1A1AA] bg-[#1C1F24] border-b-2 border-r border-[#3F444E] last:border-r-0 select-none touch-pan-x"
                       title={`${h}-${endNum}:00`}
                     >
                       {`${startNum}-${endNum}`}
@@ -759,18 +752,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 return (
                   <tr
                     key={station.id}
-                    className={
-                      effectiveStationId === station.id ? 'matrix-row-selected' : ''
-                    }
+                    className={`border-b border-[#3F444E] last:border-b-0 ${
+                      effectiveStationId === station.id ? 'bg-[#1C1F24]' : 'bg-[#121417]'
+                    }`}
                   >
                     <td
-                      className="matrix-station-td"
+                      className={`px-3 py-2 border-r border-[#3F444E] cursor-pointer hover:bg-[#252930] transition-colors touch-pan-x touch-pan-y ${
+                        effectiveStationId === station.id ? 'border-l-4 border-l-[#FACC15]' : ''
+                      }`}
                       onClick={() => setSelectedStationId(station.id)}
                       title={station.name}
                     >
-                      <div className="matrix-station-cell-inner">
+                      <div className="flex items-center gap-2 font-mono font-bold text-xs text-[#F4F4F5] truncate">
                         <StationIcon type={station.type} name={station.name} />
-                        <span>{station.name}</span>
+                        <span className="truncate">{station.name}</span>
                       </div>
                     </td>
                     {MATRIX_HOURS.map((h, hourIdx) => {
@@ -792,12 +787,12 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
                           aria-label={`${station.name} ${h} ${
                             busy ? t('schedule.busy') : t('schedule.free')
                           }`}
-                          className={`matrix-slot-td ${
+                          className={`matrix-slot-td h-10 border-r border-[#3F444E] last:border-r-0 transition-colors select-none touch-none ${
                             busy
-                              ? 'slot-td-busy'
+                              ? 'bg-[#EF4444]/85 cursor-not-allowed'
                               : isSelectedHour
-                              ? 'slot-td-selected'
-                              : 'slot-td-free'
+                              ? 'bg-[#FACC15] text-[#09090B] cursor-pointer shadow-[inset_0_0_0_2px_#000000]'
+                              : 'bg-[#1C1F24] hover:bg-[#252930] hover:shadow-[inset_0_0_0_2px_#22C55E] cursor-pointer'
                           }`}
                           onPointerDown={(e) => {
                             if (busy || (e.pointerType === 'mouse' && e.button !== 0)) return;
@@ -839,39 +834,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
               })}
             </tbody>
           </table>
-        </div>
-
-        {/* 2-Column Grid of 8 Station Cards (4 rows x 2 cols) */}
-        <div className="xamk-stations-8grid" role="listbox" aria-label={t('booking.selectStation')}>
-          {orderedStations.map((station) => {
-            const isSelected = effectiveStationId === station.id;
-            const isAvailable = availableIdSet ? availableIdSet.has(station.id) : true;
-
-            return (
-              <Button
-                key={station.id}
-                type="button"
-                variant="station"
-                role="option"
-                aria-selected={isSelected}
-                className={`${isSelected ? 'xamk-station-card-selected' : ''} ${
-                  !isAvailable ? 'xamk-station-card-busy' : ''
-                }`}
-                onClick={() => {
-                  setSelectedStationId(station.id);
-                  setReservationType(1);
-                }}
-              >
-                <div className="xamk-station-card-left">
-                  <StationIcon type={station.type} name={station.name} />
-                  <span className="xamk-station-card-name">{station.name}</span>
-                </div>
-                <Badge variant={!isAvailable ? 'occupied' : 'status'}>
-                  {!isAvailable ? (isEn ? 'Booked' : 'Varattu') : isEn ? 'Free' : 'Vapaa'}
-                </Badge>
-              </Button>
-            );
-          })}
         </div>
       </section>
     </div>

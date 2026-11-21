@@ -15,7 +15,10 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('xamk-admin-panel-card', className)}
+    className={cn(
+      'rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6 flex flex-col gap-3.5 w-full max-w-full min-w-0 box-border',
+      className
+    )}
     {...props}
   />
 ))
@@ -45,7 +48,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('xamk-admin-card-title', className)}
+    className={cn(
+      'font-extrabold uppercase tracking-tight text-lg text-[#F4F4F5] m-0',
+      className
+    )}
     {...props}
   />
 ))
@@ -60,7 +66,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('xamk-admin-card-desc', className)}
+    className={cn('text-sm text-[#9CA3AF] leading-relaxed m-0', className)}
     {...props}
   />
 ))

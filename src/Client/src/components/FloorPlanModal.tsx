@@ -36,39 +36,39 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="xamk-modal-lg">
+      <DialogContent className="max-w-[720px]">
         <DialogHeader>
-          <div className="xamk-modal-header-row">
-            <div className="xamk-modal-icon-badge" aria-hidden="true">
-              <Map className="w-5 h-5 shrink-0" aria-hidden="true" />
+          <div className="flex items-start gap-3">
+            <div className="rounded-none w-10 h-10 bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] flex items-center justify-center shrink-0" aria-hidden="true">
+              <Map className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             </div>
-            <div className="xamk-modal-title-group">
+            <div className="flex-1 min-w-0">
               <DialogTitle>{t('floorplan.title')}</DialogTitle>
-              <div className="xamk-modal-underline" />
+              <div className="h-1 w-14 bg-[#FACC15] border border-black my-2" />
               <DialogDescription>{t('floorplan.desc')}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         {/* Kuva-ikkuna / Luonnosalue */}
-        <div className="floorplan-image-box">
-          <div className="floorplan-empty-area">
-            <div className="floorplan-sketch">
-              <div className="sketch-header">
-                <span className="sketch-title">{t('floorplan.sketchHeader')}</span>
+        <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black p-4">
+          <div className="w-full">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#3F444E]">
+                <span className="font-mono font-bold text-sm uppercase tracking-wider text-[#FACC15]">{t('floorplan.sketchHeader')}</span>
                 <Badge variant="status">
                   {isEn ? '6 PCs and 2 consoles' : '6 PC ja 2 konsolia'}
                 </Badge>
               </div>
 
-              <div className="sketch-room">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 6 PC:tä */}
-                <div className="sketch-zone pc-group">
-                  <div className="zone-tag">{t('floorplan.pcZone')}</div>
-                  <div className="pc-grid-sketch">
+                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3">
+                  <div className="font-mono font-bold text-xs uppercase tracking-wider text-[#FACC15] border-b border-[#3F444E] pb-1.5">{t('floorplan.pcZone')}</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {['PC 1', 'PC 2', 'PC 3', 'PC 4', 'PC 5', 'PC 6'].map((pcName) => (
-                      <div key={pcName} className="sketch-station inline-flex items-center justify-center gap-1.5">
-                        <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <div key={pcName} className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black shadow-[2px_2px_0px_#000000] px-2.5 py-2 font-mono font-bold text-xs inline-flex items-center justify-center gap-1.5">
+                        <Monitor className="w-4 h-4 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                         <span>{pcName}</span>
                       </div>
                     ))}
@@ -76,26 +76,26 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
                 </div>
 
                 {/* Konsolit ja yhteinen TV */}
-                <div className="sketch-zone console-group">
-                  <div className="zone-tag">{t('floorplan.consoleZone')}</div>
-                  <div className="tv-box inline-flex items-center justify-center gap-1.5">
-                    <Tv className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3">
+                  <div className="font-mono font-bold text-xs uppercase tracking-wider text-[#3B82F6] border-b border-[#3F444E] pb-1.5">{t('floorplan.consoleZone')}</div>
+                  <div className="rounded-none bg-[#3B82F6] text-white border-2 border-black shadow-[3px_3px_0px_#000000] px-3 py-2 font-mono font-bold text-xs uppercase tracking-wide inline-flex items-center justify-center gap-1.5">
+                    <Tv className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                     <span>{t('floorplan.sharedTvZone')}</span>
                   </div>
-                  <div className="console-grid-sketch">
-                    <div className="sketch-station console-st inline-flex items-center justify-center gap-1.5">
-                      <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black shadow-[2px_2px_0px_#000000] px-2.5 py-2 font-mono font-bold text-xs inline-flex items-center justify-center gap-1.5">
+                      <Gamepad2 className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
                       <span>PlayStation 5</span>
                     </div>
-                    <div className="sketch-station console-st inline-flex items-center justify-center gap-1.5">
-                      <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black shadow-[2px_2px_0px_#000000] px-2.5 py-2 font-mono font-bold text-xs inline-flex items-center justify-center gap-1.5">
+                      <Gamepad2 className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
                       <span>Nintendo Switch</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="sketch-empty-notice">
+              <div className="border-t border-[#3F444E] pt-3 text-center text-xs font-mono text-[#A1A1AA]">
                 <p>
                   <em>
                     {isEn

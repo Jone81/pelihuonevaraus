@@ -311,93 +311,105 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
   const totalBookingsCount = dayReservations?.length ?? 0;
 
   return (
-    <div className="daily-schedule-card">
+    <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-6 space-y-5">
       {/* Yläpalkki ja otsikko */}
-      <div className="daily-schedule-header">
-        <div className="schedule-header-text">
-          <div className="schedule-title-row">
-            <span className="schedule-icon" aria-hidden="true">
-              <Calendar className="w-5 h-5 shrink-0" aria-hidden="true" />
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 pb-4 border-b border-[#3F444E]">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shrink-0" aria-hidden="true">
+              <Calendar className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             </span>
-            <h3>{t('schedule.title')}</h3>
-            <span className="bookings-count-pill">
+            <h3 className="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.title')}</h3>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-none bg-[#121417] text-[#FACC15] border border-[#3F444E] font-mono font-bold text-xs uppercase">
               {totalBookingsCount > 0
                 ? `${totalBookingsCount} ${t('schedule.todayBookingsCount')}`
                 : t('schedule.noBookingsForDay')}
             </span>
           </div>
-          <p className="schedule-description">{t('schedule.desc')}</p>
+          <p className="text-sm text-[#A1A1AA]">{t('schedule.desc')}</p>
         </div>
 
         {/* Näkymävalitsin (Aikajana / Kortit / Yhteenveto) */}
-        <div className="schedule-view-toggle">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
-            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'timeline' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-none font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+              viewMode === 'timeline'
+                ? 'bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-[#121417] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15]'
+            }`}
             onClick={() => setViewMode('timeline')}
             title="Näytä graafinen aikataulumatriisi"
           >
-            <BarChart3 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span className="btn-full-text">{t('schedule.timelineView')}</span>
-            <span className="btn-short-text">{isEn ? 'Timeline' : 'Aikataulu'}</span>
+            <BarChart3 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span className="hidden sm:inline">{t('schedule.timelineView')}</span>
+            <span className="sm:hidden">{isEn ? 'Timeline' : 'Aikataulu'}</span>
           </button>
           <button
             type="button"
-            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-none font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+              viewMode === 'cards'
+                ? 'bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-[#121417] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15]'
+            }`}
             onClick={() => setViewMode('cards')}
             title="Näytä pelipisteiden varauskortit"
           >
-            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span className="btn-full-text">{t('schedule.listView')}</span>
-            <span className="btn-short-text">{isEn ? 'Stations' : 'Pisteet'}</span>
+            <Monitor className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span className="hidden sm:inline">{t('schedule.listView')}</span>
+            <span className="sm:hidden">{isEn ? 'Stations' : 'Pisteet'}</span>
           </button>
           <button
             type="button"
-            className={`btn btn-sm inline-flex items-center gap-1.5 ${viewMode === 'summary' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-none font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+              viewMode === 'summary'
+                ? 'bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-[#121417] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15]'
+            }`}
             onClick={() => setViewMode('summary')}
             title="Kaikki varaukset listana"
           >
-            <ClipboardList className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span className="btn-full-text">{t('schedule.summaryView')}</span>
-            <span className="btn-short-text">{isEn ? 'List' : 'Lista'}</span>
+            <ClipboardList className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span className="hidden sm:inline">{t('schedule.summaryView')}</span>
+            <span className="sm:hidden">{isEn ? 'List' : 'Lista'}</span>
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-secondary refresh-icon-btn inline-flex items-center justify-center"
+            className="inline-flex items-center justify-center p-2 rounded-none font-mono font-bold text-xs bg-[#121417] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] transition-colors cursor-pointer"
             onClick={() => refetch()}
             title={t('status.refresh')}
           >
-            <RefreshCw className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <RefreshCw className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           </button>
         </div>
       </div>
 
       {/* Päivämäärän valintapalkki */}
       {showDateSelector && (
-        <div className="schedule-date-bar">
-          <div className="date-nav-buttons">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3.5 rounded-none bg-[#121417] border border-[#3F444E]">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              className="btn btn-secondary btn-touch date-nav-btn inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1 px-3 py-2 min-h-[42px] rounded-none font-mono font-bold text-xs uppercase bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] transition-colors cursor-pointer"
               onClick={handlePrevDay}
               aria-label={t('schedule.prevDay')}
             >
-              <ChevronLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span className="btn-full-text">{t('schedule.prevDay')}</span>
+              <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+              <span className="hidden sm:inline">{t('schedule.prevDay')}</span>
             </button>
 
-            <div className="schedule-date-picker-wrap">
+            <div className="relative flex-1 sm:flex-none">
               <label htmlFor="schedule-date-input" className="sr-only">
                 {t('schedule.dateLabel')}
               </label>
-              <div className="date-input-with-icon">
-                <span className="calendar-indicator-badge" aria-hidden="true">
-                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="relative flex items-center">
+                <span className="pointer-events-none absolute left-3 text-[#09090B] inline-flex items-center" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
                 <input
                   id="schedule-date-input"
                   type="date"
-                  className="input-touch schedule-date-input"
+                  className="w-full sm:w-auto pl-9 pr-3 py-2 min-h-[42px] rounded-none bg-white text-[#09090B] font-mono font-bold text-sm border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                   value={selectedDate}
                   onChange={(e) => onDateChange && onDateChange(e.target.value)}
                 />
@@ -406,56 +418,56 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
             <button
               type="button"
-              className="btn btn-secondary btn-touch date-nav-btn inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1 px-3 py-2 min-h-[42px] rounded-none font-mono font-bold text-xs uppercase bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] transition-colors cursor-pointer"
               onClick={handleNextDay}
               aria-label={t('schedule.nextDay')}
             >
-              <span className="btn-full-text">{t('schedule.nextDay')}</span>
-              <ChevronRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline">{t('schedule.nextDay')}</span>
+              <ChevronRight className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             </button>
           </div>
 
-          <div className="date-quick-chips">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              className="chip-btn"
+              className="px-3 py-1.5 rounded-none font-mono font-bold text-xs uppercase bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] hover:bg-[#FACC15] hover:text-[#09090B] hover:border-black transition-colors cursor-pointer"
               onClick={handleSetToday}
             >
               {t('schedule.today')}
             </button>
             <button
               type="button"
-              className="chip-btn"
+              className="px-3 py-1.5 rounded-none font-mono font-bold text-xs uppercase bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] hover:bg-[#FACC15] hover:text-[#09090B] hover:border-black transition-colors cursor-pointer"
               onClick={handleSetTomorrow}
             >
               {t('schedule.tomorrow')}
             </button>
-            <span className="current-date-title">{formattedDateTitle}</span>
+            <span className="ml-1 font-mono font-bold text-xs sm:text-sm uppercase text-[#FACC15]">{formattedDateTitle}</span>
           </div>
         </div>
       )}
 
       {/* Koko tilan varaukset / Tapahtumat varoitusbanneri */}
       {roomReservations.length > 0 && (
-        <div className="schedule-room-alert" role="alert">
-          <div className="alert-icon" aria-hidden="true">
-            <Building2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+        <div className="flex items-start gap-3 p-4 rounded-none bg-[#121417] border-2 border-[#3B82F6] text-[#F4F4F5] shadow-[4px_4px_0px_#000000]" role="alert">
+          <div className="inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#3B82F6] text-white border border-black shrink-0" aria-hidden="true">
+            <Building2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           </div>
-          <div className="alert-content">
-            <strong>{t('schedule.roomAlert')}.</strong>
-            <ul className="room-res-list">
+          <div className="flex-1 space-y-2 text-sm">
+            <strong className="font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.roomAlert')}.</strong>
+            <ul className="space-y-1.5 list-none p-0 m-0">
               {roomReservations.map((r) => {
                 const s = parseTimeToMinutes(r.startUtc).timeStr;
                 const e = parseTimeToMinutes(r.endUtc).timeStr;
                 return (
-                  <li key={r.id}>
-                    <span className="res-badge res-room-badge">
+                  <li key={r.id} className="text-sm text-[#F4F4F5]">
+                    <span className="inline-block px-2 py-0.5 rounded-none bg-[#3B82F6] text-white font-mono font-bold text-xs uppercase border border-black">
                       {r.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}
                     </span>{' '}
-                    <strong>klo {s}-{e}</strong>, {t('booking.booker')}{' '}
+                    <strong className="font-mono font-bold text-[#FACC15]">klo {s}-{e}</strong>, {t('booking.booker')}{' '}
                     <strong>{r.bookerName || 'Opiskelija tai Admin'}</strong>{' '}
                     {r.bookerEmail && (
-                      <a href={`mailto:${r.bookerEmail}`} className="booker-email-link">
+                      <a href={`mailto:${r.bookerEmail}`} className="font-mono text-xs text-[#FACC15] underline hover:text-white">
                         ({r.bookerEmail})
                       </a>
                     )}
@@ -468,94 +480,94 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
       )}
 
       {loadingStations || loadingReservations ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
+        <div className="flex flex-col items-center justify-center gap-3 py-12 text-[#A1A1AA] font-mono font-bold text-sm">
+          <div className="w-8 h-8 border-4 border-[#3F444E] border-t-[#FACC15] rounded-none animate-spin"></div>
           <span>{t('booking.checkingAvailable')}</span>
         </div>
       ) : (
         <>
           {/* Vinkkiteksti klikkaamisesta, jos onSelectSlot on käytössä */}
           {onSelectSlot && (
-            <div className="schedule-hint-bar">
+            <div className="px-3.5 py-2 rounded-none bg-[#121417] border-l-4 border-[#FACC15] text-xs font-mono font-bold text-[#F4F4F5]">
               <span>{t('schedule.clickSlotHint')}</span>
             </div>
           )}
 
           {/* 1. VISUAALINEN AIKATAULUMATRIISI (TIMELINE VIEW) */}
           {viewMode === 'timeline' && (
-            <div className="timeline-container">
+            <div className="space-y-3">
               {/* Väriselitteet */}
-              <div className="timeline-legend">
-                <span className="legend-item">
-                  <span className="legend-dot dot-free"></span> {t('schedule.free')}
+              <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-bold text-[#F4F4F5]">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-none bg-[#22C55E] border border-black inline-block"></span> {t('schedule.free')}
                 </span>
-                <span className="legend-item">
-                  <span className="legend-dot dot-busy"></span> {t('schedule.busy')}
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-none bg-[#EF4444] border border-black inline-block"></span> {t('schedule.busy')}
                 </span>
-                <span className="legend-item">
-                  <span className="legend-dot dot-tv"></span> {t('schedule.tvLocked')}
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-none bg-[#FACC15] border border-black inline-block"></span> {t('schedule.tvLocked')}
                 </span>
                 {roomReservations.length > 0 && (
-                  <span className="legend-item">
-                    <span className="legend-dot dot-room"></span> {t('schedule.roomLocked')}
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-none bg-[#3B82F6] border border-black inline-block"></span> {t('schedule.roomLocked')}
                   </span>
                 )}
-                <span className="legend-item sm:hidden text-[#d49a15] font-semibold text-[11px] ml-auto">
+                <span className="inline-flex items-center gap-1.5 sm:hidden text-[#FACC15] font-mono font-bold text-[11px] uppercase ml-auto">
                   {isEn ? 'Swipe timeline' : 'Pyyhkäise aikajanaa'}
                 </span>
               </div>
 
-              <div className="timeline-scroll-area">
+              <div className="overflow-x-auto border border-[#3F444E] bg-[#121417]">
                 {/* Tuntimerkinnät yläreunassa */}
-                <div className="timeline-header-row">
-                  <div className="timeline-station-col-header">
+                <div className="flex items-stretch border-b-2 border-[#3F444E] bg-[#1C1F24] min-w-[780px]">
+                  <div className="w-44 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] flex items-center">
                     {t('schedule.station')}
                   </div>
-                  <div className="timeline-hours-track">
+                  <div className="relative flex-1 h-10 mx-5">
                     {HOURS.map((hour, idx) => (
                       <div
                         key={hour}
-                        className="timeline-hour-mark"
+                        className="absolute top-0 bottom-0 -translate-x-1/2 flex flex-col items-center justify-end pb-1 pointer-events-none"
                         style={{ left: `${(idx / (HOURS.length - 1)) * 100}%` }}
                       >
-                        <span className="hour-label">{hour}</span>
-                        <span className="hour-tick"></span>
+                        <span className="font-mono font-bold text-[11px] text-[#A1A1AA]">{hour}</span>
+                        <span className="w-px h-1.5 bg-[#3F444E] mt-0.5"></span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Jokaisen pelipisteen aikajanarivi */}
-                <div className="timeline-rows">
+                <div className="divide-y divide-[#3F444E] min-w-[780px]">
                   {stations?.map((station) => {
                     const intervals = computeStationIntervals(station);
                     return (
-                      <div key={station.id} className="timeline-row">
+                      <div key={station.id} className="flex items-stretch bg-[#121417] hover:bg-[#1C1F24]/60 transition-colors">
                         {/* Laiteinfo vasemmalla */}
-                        <div className="timeline-station-cell">
-                          <span className="station-mini-icon" aria-hidden="true">
+                        <div className="w-44 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] flex items-center gap-2 bg-[#1C1F24]">
+                          <span className="text-[#FACC15] shrink-0" aria-hidden="true">
                             {station.type === 'PC' ? (
-                              <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                              <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                             ) : (
-                              <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                              <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                             )}
                           </span>
-                          <span className="station-cell-name">{station.name}</span>
+                          <span className="font-mono font-bold text-xs text-[#F4F4F5] truncate">{station.name}</span>
                           {station.usesSharedTv && (
-                            <span className="mini-tv-tag inline-flex items-center gap-1" title="Käyttää yhteistä televisiota">
-                              <Tv className="w-3 h-3 shrink-0" aria-hidden="true" />
+                            <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-none bg-[#121417] text-[#FACC15] border border-[#3F444E] font-mono font-bold text-[10px] uppercase shrink-0" title="Käyttää yhteistä televisiota">
+                              <Tv className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                               <span>TV</span>
                             </span>
                           )}
                         </div>
 
                         {/* 08:00-18:00 aikajana */}
-                        <div className="timeline-track">
+                        <div className="relative flex-1 h-12 mx-5">
                           {/* Taustan tuntiviivat */}
                           {HOURS.slice(0, -1).map((_, idx) => (
                             <div
                               key={idx}
-                              className="timeline-grid-line"
+                              className="absolute top-0 bottom-0 w-px bg-[#3F444E]/50 pointer-events-none"
                               style={{ left: `${(idx / (HOURS.length - 1)) * 100}%` }}
                             />
                           ))}
@@ -570,12 +582,16 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                 <button
                                   key={i}
                                   type="button"
-                                  className={`timeline-block block-free ${onSelectSlot ? 'clickable-slot' : ''}`}
+                                  className={`absolute top-1.5 bottom-1.5 rounded-none overflow-hidden flex items-center justify-center px-1.5 font-mono font-bold text-[11px] bg-[#1C1F24] text-[#22C55E] border border-[#22C55E]/70 transition-colors ${
+                                    onSelectSlot
+                                      ? 'cursor-pointer hover:bg-[#22C55E] hover:text-[#09090B] hover:border-black'
+                                      : 'cursor-default'
+                                  }`}
                                   style={{ left: `${left}%`, width: `${width}%` }}
                                   title={`${station.name}: ${interval.title}${onSelectSlot ? ', ' + t('schedule.clickSlotHint') : ''}`}
                                   onClick={() => handleSlotClick(station.id, interval)}
                                 >
-                                  <span className="block-label">
+                                  <span className="truncate">
                                     {interval.startStr}-{interval.endStr}
                                   </span>
                                 </button>
@@ -586,13 +602,13 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                               return (
                                 <div
                                   key={i}
-                                  className="timeline-block block-tv-locked"
+                                  className="absolute top-1.5 bottom-1.5 rounded-none overflow-hidden flex items-center justify-center px-1.5 font-mono font-bold text-[11px] bg-[#121417] text-[#FACC15] border border-[#FACC15] cursor-not-allowed"
                                   style={{ left: `${left}%`, width: `${width}%` }}
                                   title={interval.title}
                                 >
-                                  <span className="block-label inline-flex items-center gap-1">
-                                    <Tv className="w-3 h-3 shrink-0" aria-hidden="true" />
-                                    <span>{interval.startStr}-{interval.endStr}</span>
+                                  <span className="inline-flex items-center gap-1 max-w-full truncate">
+                                    <Tv className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                                    <span className="truncate">{interval.startStr}-{interval.endStr}</span>
                                   </span>
                                 </div>
                               );
@@ -602,13 +618,13 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                               return (
                                 <div
                                   key={i}
-                                  className="timeline-block block-room-locked"
+                                  className="absolute top-1.5 bottom-1.5 rounded-none overflow-hidden flex items-center justify-center px-1.5 font-mono font-bold text-[11px] bg-[#3B82F6] text-white border border-black cursor-not-allowed"
                                   style={{ left: `${left}%`, width: `${width}%` }}
                                   title={interval.title}
                                 >
-                                  <span className="block-label inline-flex items-center gap-1">
-                                    <Building2 className="w-3 h-3 shrink-0" aria-hidden="true" />
-                                    <span>{interval.startStr}-{interval.endStr}</span>
+                                  <span className="inline-flex items-center gap-1 max-w-full truncate">
+                                    <Building2 className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                                    <span className="truncate">{interval.startStr}-{interval.endStr}</span>
                                   </span>
                                 </div>
                               );
@@ -618,13 +634,13 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                             return (
                               <div
                                 key={i}
-                                className="timeline-block block-busy"
+                                className="absolute top-1.5 bottom-1.5 rounded-none overflow-hidden flex items-center justify-center px-1.5 font-mono font-bold text-[11px] bg-[#EF4444] text-white border border-black cursor-not-allowed"
                                 style={{ left: `${left}%`, width: `${width}%` }}
                                 title={interval.title}
                               >
-                                <span className="block-label inline-flex items-center gap-1">
-                                  <Lock className="w-3 h-3 shrink-0" aria-hidden="true" />
-                                  <span>
+                                <span className="inline-flex items-center gap-1 max-w-full truncate">
+                                  <Lock className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                                  <span className="truncate">
                                     {interval.startStr}-{interval.endStr}
                                     {interval.reservation?.bookerName ? ` (${interval.reservation.bookerName})` : ''}
                                   </span>
@@ -643,44 +659,44 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
           {/* 2. PISTEIDEN KORTIT (LIST / CARDS VIEW) */}
           {viewMode === 'cards' && (
-            <div className="schedule-cards-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {stations?.map((station) => {
                 const intervals = computeStationIntervals(station);
                 const busyIntervals = intervals.filter((it) => it.type !== 'free');
                 const freeIntervals = intervals.filter((it) => it.type === 'free');
 
                 return (
-                  <div key={station.id} className="schedule-station-card">
-                    <div className="schedule-station-header">
-                      <div className="station-title-box">
-                        <span className="station-icon" aria-hidden="true">
+                  <div key={station.id} className="rounded-none bg-[#121417] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] flex flex-col">
+                    <div className="flex items-start justify-between gap-2 p-4 border-b border-[#3F444E] bg-[#1C1F24]">
+                      <div className="flex items-center gap-2.5">
+                        <span className="inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] text-[#FACC15] border border-[#3F444E] shrink-0" aria-hidden="true">
                           {station.type === 'PC' ? (
-                            <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+                            <Monitor className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           ) : (
-                            <Gamepad2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                            <Gamepad2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           )}
                         </span>
                         <div>
-                          <h4 className="station-card-title">{station.name}</h4>
-                          <span className="station-card-code">{station.type}</span>
+                          <h4 className="font-extrabold uppercase tracking-tight text-sm text-[#F4F4F5]">{station.name}</h4>
+                          <span className="font-mono font-bold text-xs text-[#A1A1AA] uppercase">{station.type}</span>
                         </div>
                       </div>
                       {station.usesSharedTv && (
-                        <span className="tv-badge">{t('booking.sharedTvBadge')}</span>
+                        <span className="px-2 py-0.5 rounded-none bg-[#FACC15] text-[#09090B] border border-black font-mono font-bold text-[10px] uppercase shrink-0">{t('booking.sharedTvBadge')}</span>
                       )}
                     </div>
 
-                    <div className="station-schedule-body">
+                    <div className="p-4 flex-1 flex flex-col gap-3">
                       {busyIntervals.length === 0 ? (
-                        <div className="station-all-free">
-                          <span className="free-check-icon" aria-hidden="true">
-                            <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <div className="flex flex-col items-start gap-2.5 p-3 rounded-none bg-[#1C1F24] border border-[#22C55E]/60 text-sm text-[#22C55E] font-mono font-bold">
+                          <span className="inline-flex items-center text-[#22C55E]" aria-hidden="true">
+                            <CheckCircle2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           </span>
                           <span>{t('schedule.freeAllDay')}</span>
                           {onSelectSlot && (
                             <button
                               type="button"
-                              className="btn btn-sm btn-secondary quick-pick-btn"
+                              className="mt-1 px-3 py-1.5 rounded-none font-mono font-bold text-xs uppercase bg-[#FACC15] text-[#09090B] border-2 border-black hover:bg-white transition-colors cursor-pointer"
                               onClick={() => onSelectSlot(station.id, '10:00', '12:00')}
                             >
                               {t('schedule.quickSelectSlot')} (10:00-12:00)
@@ -688,23 +704,23 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                           )}
                         </div>
                       ) : (
-                        <div className="station-bookings-list">
-                          <div className="bookings-subhead">{t('booking.upcomingToday')}</div>
+                        <div className="space-y-2.5">
+                          <div className="font-mono font-bold text-xs uppercase text-[#A1A1AA]">{t('booking.upcomingToday')}</div>
                           {busyIntervals.map((b, idx) => (
                             <div
                               key={idx}
-                              className={`schedule-booking-pill ${
+                              className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-none font-mono font-bold text-xs border ${
                                 b.type === 'tv-locked'
-                                  ? 'pill-tv-locked'
+                                  ? 'bg-[#1C1F24] text-[#FACC15] border-[#FACC15]'
                                   : b.type === 'room-locked'
-                                  ? 'pill-room-locked'
-                                  : 'pill-station-busy'
+                                  ? 'bg-[#3B82F6] text-white border-black'
+                                  : 'bg-[#EF4444]/20 text-[#FCA5A5] border-[#EF4444]'
                               }`}
                             >
-                              <span className="pill-time">
+                              <span className="whitespace-nowrap">
                                 {b.startStr}-{b.endStr}
                               </span>
-                              <span className="pill-desc">
+                              <span className="truncate">
                                 {b.type === 'tv-locked'
                                   ? t('schedule.tvLocked')
                                   : b.type === 'room-locked'
@@ -715,14 +731,18 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                           ))}
 
                           {/* Näytetään myös vapaat ajat */}
-                          <div className="free-slots-summary">
-                            <span className="free-subhead">{t('schedule.free')}:</span>
-                            <div className="free-chips-row">
+                          <div className="pt-2 border-t border-[#3F444E] space-y-1.5">
+                            <span className="block font-mono font-bold text-xs uppercase text-[#22C55E]">{t('schedule.free')}:</span>
+                            <div className="flex flex-wrap gap-1.5">
                               {freeIntervals.map((f, fIdx) => (
                                 <button
                                   key={fIdx}
                                   type="button"
-                                  className={`free-chip ${onSelectSlot ? 'free-chip-clickable' : ''}`}
+                                  className={`px-2 py-1 rounded-none font-mono font-bold text-xs bg-[#1C1F24] text-[#22C55E] border border-[#22C55E] ${
+                                    onSelectSlot
+                                      ? 'cursor-pointer hover:bg-[#22C55E] hover:text-[#09090B] hover:border-black transition-colors'
+                                      : 'cursor-default'
+                                  }`}
                                   onClick={() => handleSlotClick(station.id, f)}
                                   title={onSelectSlot ? t('schedule.clickSlotHint') : undefined}
                                 >
@@ -742,23 +762,23 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
           {/* 3. YHTEENVETO KAIKISTA PÄIVÄN VARAUKSISTA (SUMMARY VIEW) */}
           {viewMode === 'summary' && (
-            <div className="schedule-summary-table-wrap">
+            <div className="overflow-x-auto border border-[#3F444E] bg-[#121417]">
               {(!dayReservations || dayReservations.length === 0) ? (
-                <div className="empty-state-card">
+                <div className="p-8 text-center font-mono font-bold text-sm text-[#A1A1AA]">
                   <p>{t('schedule.noBookingsForDay')}</p>
                 </div>
               ) : (
-                <table className="schedule-summary-table">
-                  <thead>
+                <table className="w-full border-collapse text-left text-sm">
+                  <thead className="bg-[#1C1F24] border-b-2 border-[#3F444E]">
                     <tr>
-                      <th>{t('schedule.time')}</th>
-                      <th>{t('schedule.station')}</th>
-                      <th>{t('schedule.type')}</th>
-                      <th>{t('schedule.bookerInfo')}</th>
-                      <th>{t('common.actions')}</th>
+                      <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('schedule.time')}</th>
+                      <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('schedule.station')}</th>
+                      <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('schedule.type')}</th>
+                      <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('schedule.bookerInfo')}</th>
+                      <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('common.actions')}</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-[#3F444E]">
                     {dayReservations.map((r) => {
                       const start = parseTimeToMinutes(r.startUtc).timeStr;
                       const end = parseTimeToMinutes(r.endUtc).timeStr;
@@ -769,23 +789,23 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                           : station?.name || 'Pelipiste';
 
                       return (
-                        <tr key={r.id}>
-                          <td>
-                            <strong className="table-time-cell">
+                        <tr key={r.id} className="hover:bg-[#1C1F24]/70 transition-colors">
+                          <td className="px-4 py-3 align-middle">
+                            <strong className="font-mono font-bold text-[#FACC15] whitespace-nowrap">
                               klo {start}-{end}
                             </strong>
                           </td>
-                          <td>
-                            <span className="table-station-name">{targetName}</span>
+                          <td className="px-4 py-3 align-middle">
+                            <span className="font-mono font-bold text-[#F4F4F5]">{targetName}</span>
                           </td>
-                          <td>
+                          <td className="px-4 py-3 align-middle">
                             <span
-                              className={`res-badge ${
+                              className={`inline-block px-2 py-0.5 rounded-none font-mono font-bold text-xs uppercase ${
                                 r.reservationType === 'Event'
-                                  ? 'res-event-badge'
+                                  ? 'bg-[#FACC15] text-[#09090B] border border-black'
                                   : r.reservationType === 'Room'
-                                  ? 'res-room-badge'
-                                  : 'res-individual-badge'
+                                  ? 'bg-[#3B82F6] text-white border border-black'
+                                  : 'bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E]'
                               }`}
                             >
                               {r.reservationType === 'Event'
@@ -795,23 +815,23 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                                 : t('booking.type.individual')}
                             </span>
                           </td>
-                          <td>
-                            <div className="booker-contact-cell">
+                          <td className="px-4 py-3 align-middle">
+                            <div className="flex flex-col gap-0.5 text-[#F4F4F5]">
                               <strong>{r.bookerName || 'Opiskelija'}</strong>
                               {r.bookerEmail && (
-                                <a href={`mailto:${r.bookerEmail}`} className="booker-email-link">
+                                <a href={`mailto:${r.bookerEmail}`} className="font-mono text-xs text-[#FACC15] underline hover:text-white">
                                   {r.bookerEmail}
                                 </a>
                               )}
                             </div>
                           </td>
-                          <td>
+                          <td className="px-4 py-3 align-middle">
                             {r.bookerEmail && (
                               <a
                                 href={`mailto:${r.bookerEmail}?subject=Pelihuonevaraus klo ${start}-${end}`}
-                                className="btn btn-sm btn-secondary inline-flex items-center gap-1.5"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none font-mono font-bold text-xs uppercase bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] hover:bg-[#FACC15] hover:text-[#09090B] hover:border-black transition-colors whitespace-nowrap"
                               >
-                                <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                                <MessageSquare className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                                 <span>{t('schedule.contactBooker')}</span>
                               </a>
                             )}

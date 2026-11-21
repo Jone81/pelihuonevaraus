@@ -140,11 +140,13 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
   };
 
   return (
-    <div className="status-container">
-      <div className="section-header flex justify-between items-center flex-wrap gap-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center flex-wrap gap-4 border-b-2 border-[#3F444E] pb-4">
         <div>
-          <h2>{t('status.title')}</h2>
-          <p className="section-description">
+          <h2 className="text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">
+            {t('status.title')}
+          </h2>
+          <p className="text-sm text-[#A1A1AA] mt-1">
             {t('status.desc')}
           </p>
         </div>
@@ -153,28 +155,31 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
             <Button
               type="button"
               variant="secondary"
-              className="btn-touch flex items-center gap-1.5"
+              className="min-h-[44px] rounded-none font-mono font-bold flex items-center gap-1.5"
               onClick={onOpenFloorPlan}
             >
-              <Map className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <Map className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{t('booking.openFloorPlan')}</span>
             </Button>
           )}
           <Button
             type="button"
             variant="outline"
-            className="btn-touch flex items-center gap-1.5"
+            className="min-h-[44px] rounded-none font-mono font-bold flex items-center gap-1.5"
             onClick={() => refetch()}
           >
-            <RefreshCw className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <RefreshCw className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{t('status.refresh')}</span>
           </Button>
         </div>
       </div>
 
       {activeRoomReservation && (
-        <div className="alert alert-warning" role="alert">
-          <strong>
+        <div
+          className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] p-4 text-sm"
+          role="alert"
+        >
+          <strong className="font-mono font-bold text-[#EF4444]">
             {t('status.roomBookedNow')},{' '}
             {activeRoomReservation.reservationType === 'Event'
               ? t('booking.type.event')
@@ -183,9 +188,15 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
           </strong>{' '}
           {activeRoomReservation.bookerName ? (
             <>
-              {t('status.booker')} <strong>{activeRoomReservation.bookerName}</strong>{' '}
+              {t('status.booker')}{' '}
+              <strong className="font-mono font-bold text-[#F4F4F5]">
+                {activeRoomReservation.bookerName}
+              </strong>{' '}
               {activeRoomReservation.bookerEmail && (
-                <a href={`mailto:${activeRoomReservation.bookerEmail}`} className="booker-email-link">
+                <a
+                  href={`mailto:${activeRoomReservation.bookerEmail}`}
+                  className="underline font-mono font-bold text-[#FACC15] hover:text-white"
+                >
                   ({activeRoomReservation.bookerEmail})
                 </a>
               )}. {t('booking.contactBooker')}
@@ -197,16 +208,18 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
       )}
 
       {isSharedTvInUse && (
-        <div className="alert alert-info">
+        <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3B82F6] shadow-[4px_4px_0px_#000000] p-4 text-sm font-mono font-bold">
           {t('status.sharedTvInUse')}
         </div>
       )}
 
       {/* Pikalaitelaatikot (Live status + päivän varaukset) */}
       {loadingStations || loadingAvailable ? (
-        <div className="loading-state">{t('booking.checkingAvailable')}</div>
+        <div className="rounded-none bg-[#1C1F24] text-[#A1A1AA] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-6 text-center font-mono font-bold text-sm uppercase tracking-wider">
+          {t('booking.checkingAvailable')}
+        </div>
       ) : (
-        <div className="station-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {stations?.map((station) => {
             const isAvailable = availableIds.has(station.id);
             const isTvLocked = station.usesSharedTv && isSharedTvInUse && !isAvailable;
@@ -216,40 +229,49 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
             return (
               <div
                 key={station.id}
-                className={`station-card ${isAvailable ? 'station-free' : 'station-busy'}`}
+                className={`rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 shadow-[4px_4px_0px_#000000] p-4 flex flex-col justify-between gap-4 ${
+                  isAvailable ? 'border-[#22C55E]' : 'border-[#EF4444]'
+                }`}
               >
-                <div className="station-card-header">
-                  <div className="station-card-identity">
-                    <span className="station-icon" aria-hidden="true">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-[#121417] border-2 border-[#3F444E] text-[#FACC15]"
+                      aria-hidden="true"
+                    >
                       {station.type === 'PC' ? (
-                        <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+                        <Monitor className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                       ) : (
-                        <Gamepad2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                        <Gamepad2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                       )}
                     </span>
-                    <div className="station-card-title-group">
-                      <h3 className="station-name">{station.name}</h3>
-                      <span className="station-type">{station.type}</span>
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold uppercase tracking-tight text-base text-[#F4F4F5] truncate">
+                        {station.name}
+                      </h3>
+                      <span className="block font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">
+                        {station.type}
+                      </span>
                     </div>
                   </div>
-                  <div className="station-card-badges flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end shrink-0">
                     {station.usesSharedTv && (
-                      <span className="tv-badge flex items-center gap-1">
-                        <Tv className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <span className="rounded-none bg-[#3B82F6] text-white border border-black px-2 py-0.5 text-xs font-mono font-bold uppercase flex items-center gap-1">
+                        <Tv className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>{t('booking.sharedTvBadge')}</span>
                       </span>
                     )}
                     <span
-                      className={`status-pill ${
+                      className={`rounded-none border-2 border-black px-2.5 py-0.5 text-xs font-mono font-bold uppercase ${
                         isToday
                           ? isAvailable
-                            ? 'pill-free'
+                            ? 'bg-[#22C55E] text-[#09090B]'
                             : isTvLocked
-                            ? 'pill-busy'
-                            : 'pill-busy'
+                            ? 'bg-[#EF4444] text-white'
+                            : 'bg-[#EF4444] text-white'
                           : hasBookingsToday
-                          ? 'pill-busy'
-                          : 'pill-free'
+                          ? 'bg-[#EF4444] text-white'
+                          : 'bg-[#22C55E] text-[#09090B]'
                       }`}
                     >
                       {isToday
@@ -266,35 +288,47 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
                 </div>
 
                 {/* Päivän varatut ajat tälle laitteelle vaikka nyt olisi vapaana */}
-                <div className="station-day-schedule-preview">
-                  <div className="schedule-preview-title flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <div className="pt-3 border-t border-[#3F444E] space-y-2">
+                  <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#A1A1AA] flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                     <span>{isToday ? t('schedule.today') : selectedDate}:</span>
                   </div>
                   {hasBookingsToday ? (
-                    <div className="schedule-preview-pills">
+                    <div className="flex flex-wrap gap-1.5">
                       {summary.direct.map((b, idx) => (
-                        <span key={`dir-${idx}`} className="preview-pill preview-pill-busy inline-flex items-center gap-1" title={`Varaaja: ${b.booker}`}>
-                          <Lock className="w-3 h-3 shrink-0" aria-hidden="true" />
+                        <span
+                          key={`dir-${idx}`}
+                          className="rounded-none bg-[#121417] border border-[#EF4444] text-[#EF4444] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          title={`Varaaja: ${b.booker}`}
+                        >
+                          <Lock className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           <span>{b.time} ({b.booker})</span>
                         </span>
                       ))}
                       {summary.tvLocked.map((tv, idx) => (
-                        <span key={`tv-${idx}`} className="preview-pill preview-pill-tv inline-flex items-center gap-1" title="TV käytössä toisella konsolilla">
-                          <Tv className="w-3 h-3 shrink-0" aria-hidden="true" />
+                        <span
+                          key={`tv-${idx}`}
+                          className="rounded-none bg-[#121417] border border-[#3B82F6] text-[#3B82F6] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          title="TV käytössä toisella konsolilla"
+                        >
+                          <Tv className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           <span>{tv.time} TV</span>
                         </span>
                       ))}
                       {summary.room.map((rm, idx) => (
-                        <span key={`rm-${idx}`} className="preview-pill preview-pill-room inline-flex items-center gap-1" title={`Koko tila: ${rm.booker}`}>
-                          <Building2 className="w-3 h-3 shrink-0" aria-hidden="true" />
+                        <span
+                          key={`rm-${idx}`}
+                          className="rounded-none bg-[#121417] border border-[#FACC15] text-[#FACC15] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          title={`Koko tila: ${rm.booker}`}
+                        >
+                          <Building2 className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           <span>{rm.time} {rm.type}</span>
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <span className="preview-all-free inline-flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span className="text-xs font-mono font-bold text-[#22C55E] inline-flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                       <span>{t('schedule.freeAllDay')}</span>
                     </span>
                   )}

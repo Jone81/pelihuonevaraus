@@ -14,18 +14,18 @@ import { useLanguage } from '../context/LanguageContext';
  */
 const XamkXEmblem: React.FC = () => (
   <svg
-    viewBox="0 0 100 100"
-    className="xamk-x-emblem"
+    viewBox="0 0 64 64"
+    width="54"
+    height="54"
     aria-hidden="true"
-    focusable="false"
+    className="shrink-0"
   >
     <path
-      d="M 12 12 L 34 12 L 50 34 L 66 12 L 88 12 L 88 34 L 66 50 L 88 66 L 88 88 L 66 88 L 50 66 L 34 88 L 12 88 L 12 66 L 34 50 L 12 34 Z"
+      d="M6 6 H25 L32 13 L39 6 H58 V25 L51 32 L58 39 V58 H39 L32 51 L25 58 H6 V39 L13 32 L6 25 Z"
       fill="none"
-      stroke="#d49a15"
-      strokeWidth="11"
+      stroke="#FACC15"
+      strokeWidth="3.2"
       strokeLinejoin="miter"
-      strokeMiterlimit="10"
     />
   </svg>
 );
@@ -47,17 +47,17 @@ export const NewsBanner: React.FC = () => {
   const pinnedNews = newsList?.find((n) => n.isPinned) || newsList?.[0];
 
   return (
-    <section className="xamk-hero-banner" aria-label={isEn ? 'Welcome banner' : 'Tervetulobanneri'}>
-      <div className="xamk-hero-overlay">
-        <div className="xamk-hero-container">
+    <section className="bg-[#121417] text-[#F4F4F5] border-b-2 border-black" aria-label={isEn ? 'Welcome banner' : 'Tervetulobanneri'}>
+      <div className="bg-[#1C1F24] border-b border-[#3F444E]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           {/* Left: Xamk Highlighted Headline Strips */}
           {/* Vasen puoli: Xamk-korostuspalkit pääotsikolle */}
-          <div className="xamk-hero-headline-group">
-            <h1 className="xamk-hero-title">
-              <span className="xamk-highlight-strip">
+          <div className="flex flex-col items-start">
+            <h1 className="bg-[#FACC15] text-[#09090B] border-[3px] border-black shadow-[6px_6px_0px_#000000] -rotate-1 inline-block px-6 py-3 rounded-none font-extrabold uppercase tracking-tight text-2xl sm:text-3xl lg:text-4xl leading-tight">
+              <span className="block">
                 {isEn ? 'Welcome to Xamk' : 'Tervetuloa Xamk'}
               </span>
-              <span className="xamk-highlight-strip">
+              <span className="block">
                 {isEn ? 'Game Room' : 'Game Roomiin'}
               </span>
             </h1>
@@ -65,17 +65,17 @@ export const NewsBanner: React.FC = () => {
 
           {/* Right: Black Floating Info Box with Xamk X Emblem */}
           {/* Oikea puoli: kelluva musta infolaatikko X-logolla, aukioloajoilla ja tiedotteella */}
-          <div className="xamk-hero-info-box">
-            <div className="xamk-hero-emblem-wrap">
+          <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 flex items-center gap-4 max-w-xl w-full">
+            <div className="shrink-0">
               <XamkXEmblem />
             </div>
-            <div className="xamk-hero-info-text">
-              <h2 className="xamk-hero-info-heading">
+            <div className="min-w-0 flex-1">
+              <h2 className="font-extrabold uppercase tracking-tight text-base sm:text-lg text-[#FACC15]">
                 {isEn
                   ? 'Opening hours Mon-Fri 08:00-18:00'
                   : 'Aukioloajat ma-pe klo 08:00-18:00'}
               </h2>
-              <p className="xamk-hero-info-sub">
+              <p className="font-mono text-xs sm:text-sm text-[#F4F4F5] mt-1">
                 {pinnedNews && !pinnedNews.title.includes('Tervetuloa Xamk Game Roomiin')
                   ? pinnedNews.title
                   : t('landing.subtitle')}

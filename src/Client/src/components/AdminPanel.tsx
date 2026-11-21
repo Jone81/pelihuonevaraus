@@ -19,7 +19,6 @@ import {
   BarChart3,
   AlertTriangle,
   Zap,
-  Star,
   Pin,
   Shield,
   CheckCircle2,
@@ -34,7 +33,6 @@ import {
   Tv,
   RotateCcw,
   Wrench,
-  MessageSquare,
   ClipboardList,
   Calendar,
   Trophy,
@@ -50,6 +48,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { DiscordIcon } from '@/components/ui/discord-icon';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -516,7 +515,7 @@ export const AdminPanel: React.FC = () => {
   // Varmistetaan, että vain Admin- tai SuperAdmin-käyttäjät näkevät paneelin
   if (!isAdmin) {
     return (
-      <div className="alert alert-error">
+      <div className="rounded-none bg-[#EF4444]/15 border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#FCA5A5]">
         {isEn
           ? 'Only administrators have access to this control panel.'
           : 'Vain ylläpitäjillä on pääsy tähän paneeliin.'}
@@ -664,37 +663,37 @@ export const AdminPanel: React.FC = () => {
   const subTabs: { id: AdminSubTab; icon: React.ReactNode; labelFi: string; labelEn: string; badge?: number }[] = [
     {
       id: 'games',
-      icon: <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: `Pelit ja toivelista (${allGames?.length ?? 0})`,
       labelEn: `Games and wishlist (${allGames?.length ?? 0})`,
     },
     {
       id: 'news',
-      icon: <Newspaper className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <Newspaper className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: `Uutiset ja tiedotteet (${allNews?.length ?? 0})`,
       labelEn: `News and announcements (${allNews?.length ?? 0})`,
     },
     {
       id: 'users',
-      icon: <Users className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <Users className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: `Käyttäjät ja roolit (${allUsers?.length ?? 0})`,
       labelEn: `Users and roles (${allUsers?.length ?? 0})`,
     },
     {
       id: 'settings',
-      icon: <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <Settings className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: 'Asetukset ja Discord',
       labelEn: 'Settings and Discord',
     },
     {
       id: 'statistics',
-      icon: <BarChart3 className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <BarChart3 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: 'Tilastot ja käyttöaste',
       labelEn: 'Statistics and usage',
     },
     {
       id: 'issues',
-      icon: <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />,
+      icon: <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
       labelFi: 'Vikailmoitukset',
       labelEn: 'Issue reports',
       badge: openIssuesCount,
@@ -702,16 +701,16 @@ export const AdminPanel: React.FC = () => {
   ];
 
   return (
-    <div className="xamk-admin-page">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-6 bg-[#121417] text-[#F4F4F5]">
       {/* Top Header Row */}
-      <div className="xamk-admin-header">
-        <div className="xamk-admin-header-titles">
-          <div className="xamk-admin-kicker">XAMK GAME ROOM, ADMIN CONTROL PANEL</div>
-          <h2 className="xamk-section-heading" style={{ textAlign: 'left' }}>
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 pb-4 border-b-2 border-[#3F444E]">
+        <div className="flex flex-col gap-2 max-w-3xl">
+          <div className="font-mono text-xs font-bold uppercase tracking-widest text-[#FACC15]">XAMK GAME ROOM, ADMIN CONTROL PANEL</div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#F4F4F5] m-0 text-left">
             {isEn ? 'Administrator control panel' : 'Ylläpitäjän hallintapaneeli'}
           </h2>
-          <div className="xamk-section-underline" style={{ margin: '10px 0 12px' }} />
-          <p className="xamk-admin-subtitle">
+          <div className="w-16 h-1 bg-[#FACC15] my-1" />
+          <p className="text-sm text-[#9CA3AF] leading-relaxed m-0">
             {isEn
               ? 'Manage the installed game catalog, student wishlist, announcements, user roles, Discord webhooks, usage statistics, and hardware issue reports.'
               : 'Hallinnoi pelivalikoimaa, opiskelijoiden toivelistaa, uutistiedotteita, käyttöoikeuksia, Discord-ilmoituksia sekä laitteiden vikailmoituksia.'}
@@ -719,18 +718,18 @@ export const AdminPanel: React.FC = () => {
         </div>
 
         {isSuperAdmin && (
-          <div className="xamk-admin-mode-switcher">
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 w-full lg:w-auto lg:min-w-[290px]">
             <Button
               type="button"
               variant="station"
-              className="xamk-station-card-selected"
+              className="border-[#FACC15] bg-[#252930] shadow-[4px_4px_0px_#FACC15]"
               onClick={() => setActiveTab('admin')}
             >
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shrink-0" aria-hidden="true">
+                  <Settings className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <span className="xamk-station-card-name">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5] truncate">
                   {isEn ? 'Admin control panel' : 'Ylläpitopaneeli'}
                 </span>
               </div>
@@ -741,11 +740,11 @@ export const AdminPanel: React.FC = () => {
               variant="station"
               onClick={() => setActiveTab('superadmin')}
             >
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#121417] text-[#FACC15] border-2 border-[#3F444E] shrink-0" aria-hidden="true">
+                  <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <span className="xamk-station-card-name">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5] truncate">
                   {isEn ? 'SuperAdmin, event override' : 'SuperAdmin, tapahtumajyräys'}
                 </span>
               </div>
@@ -755,122 +754,32 @@ export const AdminPanel: React.FC = () => {
         )}
       </div>
 
-      {/* 4-Card Xamk KPI Strip */}
-      <div className="xamk-admin-kpi-grid">
-        <button
-          type="button"
-          className={`xamk-admin-kpi-card btn-touch ${activeSubTab === 'games' ? 'kpi-active' : ''}`}
-          onClick={() => setActiveSubTab('games')}
-        >
-          <div className="xamk-admin-kpi-top">
-            <span className="xamk-admin-kpi-label">
-              {isEn ? 'Installed games' : 'Asennetut pelit'}
-            </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">
-              <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
-            </span>
-          </div>
-          <div className="xamk-admin-kpi-value">{installedGamesCount}</div>
-          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>{wishlistGamesCount} {isEn ? 'on student wishlist' : 'opiskelijoiden toivelistalla'}</span>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`xamk-admin-kpi-card btn-touch ${activeSubTab === 'news' ? 'kpi-active' : ''}`}
-          onClick={() => setActiveSubTab('news')}
-        >
-          <div className="xamk-admin-kpi-top">
-            <span className="xamk-admin-kpi-label">
-              {isEn ? 'Announcements' : 'Julkaistut tiedotteet'}
-            </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">
-              <Newspaper className="w-4 h-4 shrink-0" aria-hidden="true" />
-            </span>
-          </div>
-          <div className="xamk-admin-kpi-value">{allNews?.length ?? 0}</div>
-          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
-            <Pin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              {(allNews ?? []).filter((n) => n.isPinned).length}{' '}
-              {isEn ? 'pinned to banner' : 'kiinnitettynä yläreunaan'}
-            </span>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`xamk-admin-kpi-card btn-touch ${activeSubTab === 'users' ? 'kpi-active' : ''}`}
-          onClick={() => setActiveSubTab('users')}
-        >
-          <div className="xamk-admin-kpi-top">
-            <span className="xamk-admin-kpi-label">
-              {isEn ? 'Registered users' : 'Rekisteröidyt käyttäjät'}
-            </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">
-              <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
-            </span>
-          </div>
-          <div className="xamk-admin-kpi-value">{allUsers?.length ?? 0}</div>
-          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
-            <Shield className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              {(allUsers ?? []).filter((u) => u.role.toLowerCase().includes('admin')).length}{' '}
-              {isEn ? 'administrators' : 'ylläpitäjää'}
-            </span>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`xamk-admin-kpi-card btn-touch ${activeSubTab === 'issues' ? 'kpi-active' : ''}`}
-          onClick={() => setActiveSubTab('issues')}
-        >
-          <div className="xamk-admin-kpi-top">
-            <span className="xamk-admin-kpi-label">
-              {isEn ? 'Open issue reports' : 'Avoimet vikailmoitukset'}
-            </span>
-            <span className="xamk-admin-kpi-icon" aria-hidden="true">
-              <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
-            </span>
-          </div>
-          <div className="xamk-admin-kpi-value">{openIssuesCount}</div>
-          <div className="xamk-admin-kpi-meta inline-flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              {(allIssues ?? []).filter((i) => i.isResolved).length}{' '}
-              {isEn ? 'resolved total' : 'ratkaistua ilmoitusta'}
-            </span>
-          </div>
-        </button>
-      </div>
-
       {statusMessage && (
-        <div className="alert alert-success flex items-center gap-2" role="alert">
-          <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+        <div className="rounded-none bg-[#22C55E]/15 border-2 border-[#22C55E] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#86EFAC] flex items-center gap-2" role="alert">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
           <span>{statusMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="alert alert-error flex items-center gap-2" role="alert">
-          <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+        <div className="rounded-none bg-[#EF4444]/15 border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#FCA5A5] flex items-center gap-2" role="alert">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-[#EF4444]" strokeWidth={2.5} aria-hidden="true" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* Xamk Sub-navigation Bar */}
-      <div className="xamk-admin-tabbar" role="tablist" aria-label="Ylläpidon osiot">
+      <div className="flex flex-wrap gap-2 p-2 bg-[#1C1F24] border-2 border-black shadow-[4px_4px_0px_#000000]" role="tablist" aria-label="Ylläpidon osiot">
         {subTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             role="tab"
             aria-selected={activeSubTab === tab.id}
-            className={`xamk-admin-tab-btn btn-touch ${
-              activeSubTab === tab.id ? 'admin-tab-active' : ''
+            className={`inline-flex items-center justify-center gap-2 min-h-[42px] px-3.5 py-2 rounded-none font-mono text-xs font-bold uppercase tracking-wider border-2 transition-transform duration-100 cursor-pointer select-none ${
+              activeSubTab === tab.id
+                ? 'bg-[#FACC15] text-[#09090B] border-black font-extrabold shadow-[3px_3px_0px_#000000]'
+                : 'bg-[#121417] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15] hover:bg-[#252930]'
             }`}
             onClick={() => {
               setStatusMessage(null);
@@ -881,7 +790,9 @@ export const AdminPanel: React.FC = () => {
             {tab.icon}
             <span>{isEn ? tab.labelEn : tab.labelFi}</span>
             {tab.badge !== undefined && tab.badge > 0 && (
-              <span className="xamk-admin-tab-badge">{tab.badge}</span>
+              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-none bg-[#EF4444] text-white border border-black font-mono text-[11px] font-extrabold">
+                {tab.badge}
+              </span>
             )}
           </button>
         ))}
@@ -889,14 +800,14 @@ export const AdminPanel: React.FC = () => {
 
       {/* 1. PELIEN HALLINTA */}
       {activeSubTab === 'games' && (
-        <div className="xamk-admin-2col">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Add New Game */}
-          <Card>
+          <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle>
                 {isEn ? 'Add new game to catalog' : 'Lisää uusi peli suoraan valikoimaan'}
               </CardTitle>
-              <div className="xamk-modal-underline" />
+              <div className="w-12 h-1 bg-[#FACC15] my-1" />
               <CardDescription>
                 {isEn
                   ? 'Games added here are immediately marked as installed in the Xamk Game Room catalog.'
@@ -904,8 +815,8 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </CardHeader>
 
-            <form onSubmit={handleAddGame} className="xamk-modal-form">
-              <div className="xamk-field-group">
+            <form onSubmit={handleAddGame} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="game-name">
                   {isEn ? 'Game title *' : 'Pelin nimi *'}
                 </Label>
@@ -923,7 +834,7 @@ export const AdminPanel: React.FC = () => {
                 />
               </div>
 
-              <div className="xamk-field-group">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="game-platform">
                   {isEn ? 'Hardware platform *' : 'Alusta *'}
                 </Label>
@@ -938,7 +849,7 @@ export const AdminPanel: React.FC = () => {
                 </NativeSelect>
               </div>
 
-              <div className="xamk-field-group">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="game-desc">
                   {isEn ? 'Short description' : 'Lyhyt kuvaus'}
                 </Label>
@@ -953,7 +864,7 @@ export const AdminPanel: React.FC = () => {
                 />
               </div>
 
-              <div className="xamk-submit-row" style={{ marginTop: '4px' }}>
+              <div className="flex flex-wrap items-center gap-2.5 mt-1">
                 <Button
                   type="submit"
                   variant="pill"
@@ -974,13 +885,13 @@ export const AdminPanel: React.FC = () => {
           </Card>
 
           {/* Right Column: All Games & Wishlist Management */}
-          <Card>
-            <div className="xamk-admin-card-header-flex">
+          <Card className="lg:col-span-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
                 <CardTitle>
                   {isEn ? 'Catalog and wishlist approval' : 'Kaikki pelit ja toivelistan hyväksyminen'}
                 </CardTitle>
-                <div className="xamk-modal-underline mt-1.5" />
+                <div className="w-12 h-1 bg-[#FACC15] mt-1.5" />
               </div>
 
               <Tabs
@@ -1001,7 +912,7 @@ export const AdminPanel: React.FC = () => {
               </Tabs>
             </div>
 
-            <div className="xamk-field-group" style={{ marginBottom: '14px' }}>
+            <div className="flex flex-col gap-1.5 mb-3.5">
               <Input
                 type="text"
                 placeholder={
@@ -1026,28 +937,28 @@ export const AdminPanel: React.FC = () => {
                 {filteredGames.map((game) => (
                   <TableRow key={game.id}>
                     <TableCell>
-                      <div className="xamk-table-primary-cell">
-                        <strong>{game.name}</strong>
+                      <div className="flex flex-col gap-0.5">
+                        <strong className="font-bold text-[#F4F4F5]">{game.name}</strong>
                         {game.description && (
-                          <span className="xamk-table-subtext">{game.description}</span>
+                          <span className="text-xs text-[#9CA3AF] leading-snug">{game.description}</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="xamk-platform-chip inline-flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-none bg-[#121417] border border-[#3F444E] font-mono text-xs font-bold text-[#F4F4F5]">
                         {game.platform === 'PC' ? (
                           <>
-                            <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <Monitor className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                             <span>PC</span>
                           </>
                         ) : game.platform === 'PlayStation5' ? (
                           <>
-                            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <Gamepad2 className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
                             <span>PS5</span>
                           </>
                         ) : (
                           <>
-                            <Gamepad2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <Gamepad2 className="w-3.5 h-3.5 shrink-0 text-[#EF4444]" strokeWidth={2.5} aria-hidden="true" />
                             <span>Switch</span>
                           </>
                         )}
@@ -1055,9 +966,11 @@ export const AdminPanel: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {game.isWishlist ? (
-                        <span className="votes-count-badge">{game.votesCount || 0}</span>
+                        <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black font-mono text-xs font-extrabold">
+                          {game.votesCount || 0}
+                        </span>
                       ) : (
-                        <span className="xamk-table-muted">-</span>
+                        <span className="font-mono text-xs text-[#9CA3AF]">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -1076,15 +989,15 @@ export const AdminPanel: React.FC = () => {
                         type="button"
                         className={
                           game.isWishlist
-                            ? 'xamk-table-action-btn action-gold btn-touch inline-flex items-center gap-1.5'
-                            : 'xamk-table-action-btn btn-touch'
+                            ? 'inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase tracking-wider cursor-pointer transition-transform duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#000000] disabled:opacity-50'
+                            : 'inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#3F444E] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors hover:border-[#FACC15] hover:bg-[#252930] disabled:opacity-50'
                         }
                         onClick={() => toggleWishlistMutation.mutate(game.id)}
                         disabled={toggleWishlistMutation.isPending}
                       >
                         {game.isWishlist ? (
                           <>
-                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                             <span>{isEn ? 'Approve to catalog' : 'Hyväksy valikoimaan'}</span>
                           </>
                         ) : isEn ? (
@@ -1104,14 +1017,14 @@ export const AdminPanel: React.FC = () => {
 
       {/* 2. UUTISTEN HALLINTA */}
       {activeSubTab === 'news' && (
-        <div className="xamk-admin-2col">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Create News */}
-          <Card>
+          <Card className="lg:col-span-5">
             <CardHeader>
               <CardTitle>
                 {isEn ? 'Publish new announcement' : 'Julkaise uusi tiedote'}
               </CardTitle>
-              <div className="xamk-modal-underline" />
+              <div className="w-12 h-1 bg-[#FACC15] my-1" />
               <CardDescription>
                 {isEn
                   ? 'Announcements appear on the landing page and optionally pinned in the top hero banner.'
@@ -1119,8 +1032,8 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </CardHeader>
 
-            <form onSubmit={handleCreateNews} className="xamk-modal-form">
-              <div className="xamk-field-group">
+            <form onSubmit={handleCreateNews} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="news-title">
                   {isEn ? 'Headline *' : 'Tiedotteen otsikko *'}
                 </Label>
@@ -1138,39 +1051,43 @@ export const AdminPanel: React.FC = () => {
                 />
               </div>
 
-              <div className="xamk-editor-toolbar">
-                <span className="xamk-editor-label">{isEn ? 'Format:' : 'Muotoile:'}</span>
+              <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-none bg-[#121417] border border-[#3F444E]">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF] mr-1">{isEn ? 'Format:' : 'Muotoile:'}</span>
                 <button
                   type="button"
-                  className="xamk-toolbar-chip btn-touch"
+                  className="inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] font-mono text-xs font-bold cursor-pointer hover:border-[#FACC15] hover:bg-[#252930]"
                   onClick={() => setNewsContent((c) => c + ' **lihavoitu teksti**')}
                 >
                   <strong>B</strong> {isEn ? 'Bold' : 'Lihavoi'}
                 </button>
                 <button
                   type="button"
-                  className="xamk-toolbar-chip btn-touch"
+                  className="inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] font-mono text-xs font-bold cursor-pointer hover:border-[#FACC15] hover:bg-[#252930]"
                   onClick={() => setNewsContent((c) => c + '\n- Kohta 1\n- Kohta 2')}
                 >
                   - {isEn ? 'List' : 'Lista'}
                 </button>
                 <button
                   type="button"
-                  className="xamk-toolbar-chip btn-touch inline-flex items-center gap-1"
+                  className="inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] font-mono text-xs font-bold cursor-pointer hover:border-[#FACC15] hover:bg-[#252930]"
                   onClick={() => setNewsContent((c) => c + ' [Linkki](https://www.xamk.fi)')}
                 >
-                  <Link className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <Link className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                   <span>{isEn ? 'Link' : 'Linkki'}</span>
                 </button>
                 <button
                   type="button"
-                  className={`xamk-toolbar-chip btn-touch inline-flex items-center gap-1 ${previewNews ? 'chip-active' : ''}`}
+                  className={`inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-none border font-mono text-xs font-bold cursor-pointer ${
+                    previewNews
+                      ? 'bg-[#FACC15] text-[#09090B] border-black font-extrabold'
+                      : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15] hover:bg-[#252930]'
+                  }`}
                   onClick={() => setPreviewNews(!previewNews)}
                 >
                   {previewNews ? (
-                    <EyeOff className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <EyeOff className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                   ) : (
-                    <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <Eye className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                   )}
                   <span>
                     {previewNews ? (isEn ? 'Hide preview' : 'Piilota esikatselu') : isEn ? 'Preview' : 'Esikatsele'}
@@ -1178,7 +1095,7 @@ export const AdminPanel: React.FC = () => {
                 </button>
               </div>
 
-              <div className="xamk-field-group">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="news-content">
                   {isEn ? 'Announcement content *' : 'Tiedotteen sisältö *'}
                 </Label>
@@ -1197,36 +1114,37 @@ export const AdminPanel: React.FC = () => {
               </div>
 
               {previewNews && (
-                <div className="xamk-landing-news-card card-pinned">
-                  <div className="xamk-landing-news-meta">
+                <div className="rounded-none bg-[#121417] border-2 border-[#FACC15] shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <Badge variant="status">
                       {newsIsPinned ? (isEn ? 'Pinned notice' : 'Kiinnitetty tiedote') : isEn ? 'Preview' : 'Esikatselu'}
                     </Badge>
-                    <time className="xamk-landing-news-date">
+                    <time className="font-mono text-xs font-bold text-[#9CA3AF]">
                       {new Date().toLocaleDateString('fi-FI')}
                     </time>
                   </div>
-                  <h4 className="xamk-landing-news-title">
+                  <h4 className="font-extrabold uppercase tracking-tight text-base text-[#F4F4F5] m-0">
                     {newsTitle || (isEn ? 'Headline preview' : 'Tiedotteen otsikko')}
                   </h4>
-                  <p className="xamk-landing-news-body" style={{ whiteSpace: 'pre-wrap' }}>
+                  <p className="text-sm text-[#D1D5DB] leading-relaxed m-0 whitespace-pre-wrap">
                     {newsContent || (isEn ? 'Content preview...' : 'Tiedotteen sisältöteksti...')}
                   </p>
                 </div>
               )}
 
-              <label className="xamk-checkbox-card">
+              <label className="flex items-start gap-3 p-3.5 rounded-none bg-[#121417] border-2 border-[#3F444E] cursor-pointer hover:border-[#FACC15] transition-colors">
                 <input
                   type="checkbox"
+                  className="mt-1 h-4 w-4 accent-[#FACC15] rounded-none cursor-pointer"
                   checked={newsIsPinned}
                   onChange={(e) => setNewsIsPinned(e.target.checked)}
                 />
-                <div className="xamk-checkbox-text">
-                  <strong className="inline-flex items-center gap-1.5">
-                    <Pin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <div className="flex flex-col gap-1">
+                  <strong className="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
+                    <Pin className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                     <span>{isEn ? 'Pin to hero banner and top of feed' : 'Kiinnitä tiedote yläbanneriin ja uutislistan kärkeen'}</span>
                   </strong>
-                  <span>
+                  <span className="text-xs text-[#9CA3AF] leading-snug">
                     {isEn
                       ? 'Pinned announcements are highlighted in gold on the welcome banner.'
                       : 'Kiinnitetty tiedote korostetaan kultaisella reunuksella etusivulla.'}
@@ -1234,7 +1152,7 @@ export const AdminPanel: React.FC = () => {
                 </div>
               </label>
 
-              <div className="xamk-submit-row">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <Button
                   type="submit"
                   variant="pill"
@@ -1255,12 +1173,12 @@ export const AdminPanel: React.FC = () => {
           </Card>
 
           {/* Right Column: Published News List */}
-          <Card>
+          <Card className="lg:col-span-7">
             <CardHeader>
               <CardTitle>
                 {isEn ? 'Published announcements' : 'Julkaistut tiedotteet'}
               </CardTitle>
-              <div className="xamk-modal-underline" />
+              <div className="w-12 h-1 bg-[#FACC15] my-1" />
               <CardDescription>
                 {isEn
                   ? 'Manage active announcements currently visible to students and staff.'
@@ -1268,13 +1186,15 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </CardHeader>
 
-            <div className="xamk-landing-news-stack">
+            <div className="flex flex-col gap-3.5">
               {(allNews ?? []).map((news) => (
                 <article
                   key={news.id}
-                  className={`xamk-landing-news-card ${news.isPinned ? 'card-pinned' : ''}`}
+                  className={`rounded-none bg-[#121417] p-4 flex flex-col gap-2.5 border-2 shadow-[4px_4px_0px_#000000] ${
+                    news.isPinned ? 'border-[#FACC15]' : 'border-[#3F444E]'
+                  }`}
                 >
-                  <div className="xamk-landing-news-meta">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
                     <Badge variant="status">
                       {news.isPinned
                         ? isEn
@@ -1284,8 +1204,8 @@ export const AdminPanel: React.FC = () => {
                         ? 'Notice'
                         : 'Tiedote'}
                     </Badge>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <time className="xamk-landing-news-date">
+                    <div className="flex items-center gap-2.5">
+                      <time className="font-mono text-xs font-bold text-[#9CA3AF]">
                         {new Date(news.createdAtUtc).toLocaleDateString('fi-FI')}
                       </time>
                       <Button
@@ -1295,13 +1215,13 @@ export const AdminPanel: React.FC = () => {
                         onClick={() => deleteNewsMutation.mutate(news.id)}
                         disabled={deleteNewsMutation.isPending}
                       >
-                        <Trash2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>{isEn ? 'Delete' : 'Poista'}</span>
                       </Button>
                     </div>
                   </div>
-                  <h4 className="xamk-landing-news-title">{news.title}</h4>
-                  <p className="xamk-landing-news-body">{news.content}</p>
+                  <h4 className="font-extrabold uppercase tracking-tight text-base text-[#F4F4F5] m-0">{news.title}</h4>
+                  <p className="text-sm text-[#D1D5DB] leading-relaxed m-0 whitespace-pre-wrap">{news.content}</p>
                 </article>
               ))}
             </div>
@@ -1312,14 +1232,14 @@ export const AdminPanel: React.FC = () => {
       {/* 3. KÄYTTÄJIEN, OIKEUKSIEN JA KÄYTTÖESTOJEN HALLINTA */}
       {activeSubTab === 'users' && (
         <Card>
-          <div className="xamk-admin-card-header-flex">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <CardTitle>
                 {isEn
                   ? 'System users, access roles, and ban controls'
                   : 'Järjestelmäkäyttäjät, käyttöoikeudet ja käyttöestot'}
               </CardTitle>
-              <div className="xamk-modal-underline mt-1.5 mb-2" />
+              <div className="w-12 h-1 bg-[#FACC15] mt-1.5 mb-2" />
               <CardDescription>
                 {isEn
                   ? 'Manage registered students and staff. Change roles between User and Admin, or apply temporary and permanent bans with custom duration.'
@@ -1327,7 +1247,7 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </div>
 
-            <div className="xamk-field-group w-full sm:w-auto sm:min-w-[280px]">
+            <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[280px]">
               <Input
                 type="text"
                 placeholder={isEn ? 'Search users by name or email...' : 'Hae nimen tai sähköpostin perusteella...'}
@@ -1363,12 +1283,12 @@ export const AdminPanel: React.FC = () => {
                 return (
                   <TableRow key={u.id}>
                     <TableCell>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <div className="xamk-user-row-cell">
-                          <span className="xamk-user-row-avatar">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2.5">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black font-mono text-xs font-extrabold shrink-0">
                             {u.displayName.charAt(0).toUpperCase()}
                           </span>
-                          <strong>{u.displayName}</strong>
+                          <strong className="font-bold text-[#F4F4F5]">{u.displayName}</strong>
                         </div>
                         <div>
                           {u.isBanned ? (
@@ -1383,7 +1303,7 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{u.email}</TableCell>
+                    <TableCell className="font-mono text-xs text-[#D1D5DB]">{u.email}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
@@ -1399,13 +1319,13 @@ export const AdminPanel: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {u.role === 'SuperAdmin' ? (
-                        <span className="xamk-table-muted inline-flex items-center gap-1">
-                          <Zap className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                           <span>{isEn ? 'Primary SuperAdmin, locked' : 'Pääkäyttäjä, pysyvä oikeus'}</span>
                         </span>
                       ) : !isSuperAdmin ? (
-                        <span className="xamk-table-muted inline-flex items-center gap-1">
-                          <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 shrink-0 text-[#9CA3AF]" strokeWidth={2.5} aria-hidden="true" />
                           <span>{isEn ? 'SuperAdmin required' : 'Vaatii SuperAdmin-oikeuden'}</span>
                         </span>
                       ) : (
@@ -1424,33 +1344,16 @@ export const AdminPanel: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {u.role === 'SuperAdmin' ? (
-                        <span className="xamk-table-muted inline-flex items-center gap-1">
-                          <Shield className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <span className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
+                          <Shield className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
                           <span>{isEn ? 'Cannot be banned' : 'Pääkäyttäjää ei voi estää'}</span>
                         </span>
                       ) : (
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px',
-                            minWidth: '280px',
-                            maxWidth: '380px',
-                          }}
-                        >
+                        <div className="flex flex-col gap-2 min-w-[280px] max-w-[380px]">
                           {/* Näytetään voimassa olevan bannin tiedot ja päättymisaika */}
                           {u.isBanned && (
-                            <div
-                              style={{
-                                padding: '8px 10px',
-                                borderRadius: '8px',
-                                background: 'rgba(239, 68, 68, 0.14)',
-                                border: '1px solid rgba(239, 68, 68, 0.35)',
-                                fontSize: '0.78rem',
-                                lineHeight: 1.35,
-                              }}
-                            >
-                              <div style={{ fontWeight: 700, color: '#fca5a5' }}>
+                            <div className="px-2.5 py-2 rounded-none bg-[#EF4444]/15 border-2 border-[#EF4444] text-xs leading-snug">
+                              <div className="font-mono font-bold text-[#FCA5A5]">
                                 {isPermanentBan
                                   ? isEn
                                     ? 'Permanent ban active'
@@ -1472,7 +1375,7 @@ export const AdminPanel: React.FC = () => {
                                     })} asti`}
                               </div>
                               {u.banReason && (
-                                <div className="xamk-table-subtext" style={{ marginTop: '2px' }}>
+                                <div className="text-xs text-[#D1D5DB] mt-0.5">
                                   {isEn ? 'Reason:' : 'Syy:'} {u.banReason}
                                 </div>
                               )}
@@ -1480,7 +1383,7 @@ export const AdminPanel: React.FC = () => {
                           )}
 
                           {/* Bannin keston valinta (tunnit / päivät / viikot / kuukaudet / pysyvä) */}
-                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <div className="flex gap-1.5 items-center flex-wrap">
                             <NativeSelect
                               aria-label={
                                 isEn
@@ -1590,28 +1493,28 @@ export const AdminPanel: React.FC = () => {
 
       {/* 4. SIVUSTOASETUKSET, VARAUSKIINTIÖT JA JÄRJESTELMÄNHALLINTA */}
       {activeSubTab === 'settings' && (
-        <div className="xamk-admin-subcontent" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           {settingsSuccess && (
-            <div className="alert alert-success" role="alert">
+            <div className="rounded-none bg-[#22C55E]/15 border-2 border-[#22C55E] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#86EFAC]" role="alert">
               <span>{settingsSuccess}</span>
             </div>
           )}
 
           {settingsError && (
-            <div className="alert alert-error" role="alert">
+            <div className="rounded-none bg-[#EF4444]/15 border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#FCA5A5]" role="alert">
               <span>{settingsError}</span>
             </div>
           )}
 
-          <div className="xamk-admin-2col">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* VARAUSKIINTIÖT JA TILASÄÄNNÖT */}
-            <Card>
+            <Card className="lg:col-span-7">
               <CardHeader>
                 <CardTitle className="inline-flex items-center gap-2">
-                  <Settings className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <Settings className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                   <span>{isEn ? 'Active booking quotas and room policy' : 'Voimassa olevat varauskiintiöt ja tilasäännöt'}</span>
                 </CardTitle>
-                <div className="xamk-modal-underline" />
+                <div className="w-12 h-1 bg-[#FACC15] my-1" />
                 <CardDescription>
                   {isEn
                     ? 'Configure opening hours, advance limits, booking quotas, and console TV locking enforced by the backend.'
@@ -1619,23 +1522,20 @@ export const AdminPanel: React.FC = () => {
                 </CardDescription>
               </CardHeader>
 
-              <form onSubmit={handleSaveSettings} noValidate className="xamk-modal-form">
-                <div className="xamk-stations-2col-grid">
+              <form onSubmit={handleSaveSettings} noValidate className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {/* 1. Aukioloajat */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Clock className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'Opening hours' : 'Aukioloajat'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {`${String(openTimeHour).padStart(2, '0')}:00-${String(closeTimeHour).padStart(2, '0')}:00, ${
                               onlyWeekdays ? (isEn ? 'Mon-Fri' : 'ma-pe') : isEn ? 'Mon-Sun' : 'ma-su'
                             }`}
@@ -1645,7 +1545,7 @@ export const AdminPanel: React.FC = () => {
                       <Badge variant="status">{onlyWeekdays ? 'MA-PE' : 'MA-SU'}</Badge>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label htmlFor="open-hour-select" className="text-xs">
                           {isEn ? 'Opens' : 'Avaus'}
@@ -1713,20 +1613,17 @@ export const AdminPanel: React.FC = () => {
                   </div>
 
                   {/* 2. Ennakkovarausraja */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'Advance window' : 'Ennakkovarausraja'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {isEn
                               ? `Up to ${maxAdvanceBookingMonths} months`
                               : `Korkeintaan ${maxAdvanceBookingMonths} kuukautta`}
@@ -1759,20 +1656,17 @@ export const AdminPanel: React.FC = () => {
                   </div>
 
                   {/* 3. Yksittäisvaraus ja päiväkiintiö */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'Single station quota' : 'Yksittäisvaraus'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {maxIndividualHours} {isEn ? 'hours per day' : 'tuntia päivässä'}
                           </div>
                         </div>
@@ -1803,20 +1697,17 @@ export const AdminPanel: React.FC = () => {
                   </div>
 
                   {/* 4. Opiskelijan tilavaraus */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Building2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'Student room booking' : 'Opiskelijan tilavaraus'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {isEn
                               ? `Up to ${maxStudentRoomHours} hours`
                               : `Enintään ${maxStudentRoomHours} tuntia`}
@@ -1849,20 +1740,17 @@ export const AdminPanel: React.FC = () => {
                   </div>
 
                   {/* 5. Varauksen vähimmäiskesto */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Clock className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'Minimum duration' : 'Vähimmäisvaraus'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {isEn
                               ? `At least ${minReservationMinutes} minutes`
                               : `Vähintään ${minReservationMinutes} minuuttia`}
@@ -1893,20 +1781,17 @@ export const AdminPanel: React.FC = () => {
                   </div>
 
                   {/* 6. Konsolien SharedTV-rinnakkaislukko */}
-                  <div
-                    className="xamk-station-row-card"
-                    style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', cursor: 'default' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <div className="xamk-station-card-left">
-                        <span className="xamk-station-card-icon" aria-hidden="true">
-                          <Tv className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
+                          <Tv className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         </span>
-                        <div>
-                          <div className="xamk-station-card-name">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                             {isEn ? 'SharedTV console lock' : 'Konsolien yhteinen TV'}
                           </div>
-                          <div className="xamk-table-subtext">
+                          <div className="font-mono text-xs text-[#9CA3AF]">
                             {enforceSharedTvLock
                               ? isEn
                                 ? 'PS5 and Switch lock each other'
@@ -1950,7 +1835,7 @@ export const AdminPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="xamk-submit-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+                <div className="flex gap-2.5 flex-wrap mt-3.5">
                   <Button
                     type="submit"
                     variant="pill"
@@ -1973,7 +1858,7 @@ export const AdminPanel: React.FC = () => {
                     onClick={handleResetDefaultQuotas}
                     disabled={updateSettingsMutation.isPending}
                   >
-                    <RotateCcw className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <RotateCcw className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                     <span>{isEn ? 'Restore defaults' : 'Palauta oletusarvot'}</span>
                   </Button>
                 </div>
@@ -1981,14 +1866,14 @@ export const AdminPanel: React.FC = () => {
             </Card>
 
             {/* OIKEA SARAKE: PELITILAN HUOLTOTILA + DISCORD WEBHOOK */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="lg:col-span-5 flex flex-col gap-5">
               <Card>
                 <CardHeader>
                   <CardTitle className="inline-flex items-center gap-2">
-                    <Wrench className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <Wrench className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                     <span>{isEn ? 'Room operational status and maintenance' : 'Pelitilan tila ja poikkeussulku'}</span>
                   </CardTitle>
-                  <div className="xamk-modal-underline" />
+                  <div className="w-12 h-1 bg-[#FACC15] my-1" />
                   <CardDescription>
                     {isEn
                       ? 'Temporarily lock the Game Room for maintenance, cleaning, or equipment upgrades.'
@@ -1996,8 +1881,8 @@ export const AdminPanel: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
 
-                <form onSubmit={handleSaveSettings} noValidate className="xamk-modal-form">
-                  <div className="xamk-field-group">
+                <form onSubmit={handleSaveSettings} noValidate className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
                     <Label htmlFor="maintenance-mode-select">
                       {isEn ? 'Room operational mode' : 'Pelihuoneen toimintatila'}
                     </Label>
@@ -2018,7 +1903,7 @@ export const AdminPanel: React.FC = () => {
                     </NativeSelect>
                   </div>
 
-                  <div className="xamk-field-group">
+                  <div className="flex flex-col gap-1.5">
                     <Label htmlFor="maintenance-msg-input">
                       {isEn ? 'Maintenance notice to students' : 'Huoltotiedote käyttäjille'}
                     </Label>
@@ -2038,7 +1923,7 @@ export const AdminPanel: React.FC = () => {
                     />
                   </div>
 
-                  <div className="xamk-submit-row">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <Button
                       type="submit"
                       variant="pill"
@@ -2055,10 +1940,10 @@ export const AdminPanel: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="inline-flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 shrink-0" aria-hidden="true" />
+                    <DiscordIcon className="w-5 h-5 shrink-0 text-[#5865F2]" />
                     <span>{isEn ? 'Discord Webhook integration' : 'Discord Webhook ja automaatti-ilmoitukset'}</span>
                   </CardTitle>
-                  <div className="xamk-modal-underline" />
+                  <div className="w-12 h-1 bg-[#FACC15] my-1" />
                   <CardDescription>
                     {isEn
                       ? 'When an administrator schedules an official tournament or event, the system automatically posts an announcement to your Discord server.'
@@ -2066,14 +1951,14 @@ export const AdminPanel: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
 
-                <form onSubmit={handleSaveSettings} noValidate className="xamk-modal-form">
+                <form onSubmit={handleSaveSettings} noValidate className="flex flex-col gap-4">
                   {testWebhookStatus && (
-                    <div className="alert alert-info" role="alert">
+                    <div className="rounded-none bg-[#3B82F6]/15 border-2 border-[#3B82F6] shadow-[4px_4px_0px_#000000] px-4 py-3 font-mono text-sm font-bold text-[#93C5FD]" role="alert">
                       <span>{testWebhookStatus}</span>
                     </div>
                   )}
 
-                  <div className="xamk-field-group">
+                  <div className="flex flex-col gap-1.5">
                     <Label htmlFor="webhook-url">Discord Webhook URL</Label>
                     <Input
                       id="webhook-url"
@@ -2087,14 +1972,14 @@ export const AdminPanel: React.FC = () => {
                         setTestWebhookStatus(null);
                       }}
                     />
-                    <span className="xamk-field-hint">
+                    <span className="text-xs text-[#9CA3AF] leading-snug">
                       {isEn
                         ? 'Create a webhook in your Discord channel settings under Integrations and Webhooks, and paste the URL above.'
                         : 'Luo webhook Discord-palvelimesi kanavan asetuksista kohdasta Integrations ja Webhooks, ja liitä URL-osoite tähän.'}
                     </span>
                   </div>
 
-                  <div className="xamk-submit-row" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div className="flex gap-2.5 flex-wrap">
                     <Button
                       type="submit"
                       variant="pill"
@@ -2119,7 +2004,7 @@ export const AdminPanel: React.FC = () => {
                         disabled={updateSettingsMutation.isPending}
                         title="Lähetä testi-ilmoitus kanavalle"
                       >
-                        <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        <DiscordIcon className="w-3.5 h-3.5 shrink-0" />
                         <span>{isEn ? 'Test Webhook' : 'Testaa yhteys'}</span>
                       </Button>
                     )}
@@ -2133,10 +2018,10 @@ export const AdminPanel: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="inline-flex items-center gap-2">
-                <Monitor className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <Monitor className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                 <span>{isEn ? 'Gaming stations hardware and maintenance control' : 'Pelipisteiden laitehallinta ja huoltotila, 8 laitetta'}</span>
               </CardTitle>
-              <div className="xamk-modal-underline" />
+              <div className="w-12 h-1 bg-[#FACC15] my-1" />
               <CardDescription>
                 {isEn
                   ? 'Enable or disable individual gaming stations. Disabled stations are immediately hidden from student bookings during maintenance or repairs.'
@@ -2144,31 +2029,32 @@ export const AdminPanel: React.FC = () => {
               </CardDescription>
             </CardHeader>
 
-            <div className="xamk-stations-2col-grid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {(adminStations ?? []).map((st) => (
                 <div
                   key={st.id}
-                  className="xamk-station-row-card"
-                  style={{ cursor: 'default', opacity: st.isActive ? 1 : 0.78 }}
+                  className={`rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-3 flex-wrap ${
+                    st.isActive ? 'opacity-100' : 'opacity-75'
+                  }`}
                 >
-                  <div className="xamk-station-card-left">
-                    <span className="xamk-station-card-icon" aria-hidden="true">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
                       {st.type === 'PC' ? (
-                        <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                       ) : (
-                        <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                       )}
                     </span>
-                    <div>
-                      <div className="xamk-station-card-name">{st.name}</div>
-                      <div className="xamk-table-subtext">
+                    <div className="min-w-0">
+                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">{st.name}</div>
+                      <div className="font-mono text-xs text-[#9CA3AF]">
                         {st.type}
                         {st.usesSharedTv ? ', SharedTV' : ''}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={st.isActive ? 'installed' : 'wishlist'}>
                       {st.isActive
                         ? isEn
@@ -2208,10 +2094,10 @@ export const AdminPanel: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="inline-flex items-center gap-2">
-                <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <ClipboardList className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                 <span>{isEn ? 'Active reservations management, next 14 days' : 'Voimassa olevien varausten hallinta, seuraavat 14 vrk'}</span>
               </CardTitle>
-              <div className="xamk-modal-underline" />
+              <div className="w-12 h-1 bg-[#FACC15] my-1" />
               <CardDescription>
                 {isEn
                   ? 'Review upcoming student and room reservations and cancel bookings if needed due to schedule changes or device maintenance.'
@@ -2220,7 +2106,7 @@ export const AdminPanel: React.FC = () => {
             </CardHeader>
 
             {(upcomingReservations ?? []).length === 0 ? (
-              <div className="xamk-table-muted" style={{ padding: '14px 0' }}>
+              <div className="font-mono text-sm text-[#9CA3AF] py-3.5">
                 {isEn
                   ? 'No active reservations for the next 14 days.'
                   : 'Ei aktiivisia varauksia seuraavan 14 vuorokauden aikana.'}
@@ -2253,8 +2139,8 @@ export const AdminPanel: React.FC = () => {
                     return (
                       <TableRow key={r.id}>
                         <TableCell>
-                          <strong>{startD.toLocaleDateString('fi-FI')}</strong>{' '}
-                          <span className="xamk-table-subtext">
+                          <strong className="font-mono font-bold text-[#F4F4F5]">{startD.toLocaleDateString('fi-FI')}</strong>{' '}
+                          <span className="font-mono text-xs text-[#9CA3AF]">
                             {startD.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}-
                             {endD.toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}
                           </span>
@@ -2263,8 +2149,8 @@ export const AdminPanel: React.FC = () => {
                           <Badge variant="status">{stName}</Badge>
                         </TableCell>
                         <TableCell>
-                          <div>{r.bookerName || (isEn ? 'Student' : 'Opiskelija')}</div>
-                          {r.bookerEmail && <div className="xamk-table-subtext">{r.bookerEmail}</div>}
+                          <div className="font-bold text-[#F4F4F5]">{r.bookerName || (isEn ? 'Student' : 'Opiskelija')}</div>
+                          {r.bookerEmail && <div className="font-mono text-xs text-[#9CA3AF]">{r.bookerEmail}</div>}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -2274,7 +2160,7 @@ export const AdminPanel: React.FC = () => {
                             disabled={adminCancelReservationMutation.isPending}
                             onClick={() => adminCancelReservationMutation.mutate(r.id)}
                           >
-                            <Trash2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <Trash2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                             <span>{isEn ? 'Cancel' : 'Peru varaus'}</span>
                           </Button>
                         </TableCell>
@@ -2290,98 +2176,98 @@ export const AdminPanel: React.FC = () => {
 
       {/* 5. TILASTOT JA KÄYTTÖASTE */}
       {activeSubTab === 'statistics' && (
-        <div className="xamk-admin-subcontent">
-          <div className="xamk-admin-kpi-grid" style={{ marginBottom: '20px' }}>
-            <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
-              <div className="xamk-admin-kpi-top">
-                <span className="xamk-admin-kpi-label">
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF]">
                   {isEn ? 'Total reservations' : 'Kokonaisvaraukset'}
                 </span>
-                <span className="xamk-admin-kpi-icon" aria-hidden="true">
-                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#121417] border border-[#3F444E] text-[#FACC15]" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
               </div>
-              <div className="xamk-admin-kpi-value">{statistics?.totalReservations ?? 0}</div>
-              <div className="xamk-admin-kpi-meta">
+              <div className="font-mono text-3xl font-extrabold text-[#F4F4F5] leading-none">{statistics?.totalReservations ?? 0}</div>
+              <div className="font-mono text-xs font-bold text-[#9CA3AF]">
                 {isEn ? 'All recorded bookings' : 'Kaikki järjestelmän varaukset'}
               </div>
             </div>
 
-            <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
-              <div className="xamk-admin-kpi-top">
-                <span className="xamk-admin-kpi-label">
+            <div className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF]">
                   {isEn ? 'Active reservations' : 'Aktiiviset varaukset'}
                 </span>
-                <span className="xamk-admin-kpi-icon" aria-hidden="true">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#121417] border border-[#3F444E] text-[#22C55E]" aria-hidden="true">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
               </div>
-              <div className="xamk-admin-kpi-value">{statistics?.activeReservations ?? 0}</div>
-              <div className="xamk-admin-kpi-meta">
+              <div className="font-mono text-3xl font-extrabold text-[#F4F4F5] leading-none">{statistics?.activeReservations ?? 0}</div>
+              <div className="font-mono text-xs font-bold text-[#9CA3AF]">
                 {isEn ? 'Upcoming and ongoing sessions' : 'Voimassa olevat varaukset'}
               </div>
             </div>
 
-            <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
-              <div className="xamk-admin-kpi-top">
-                <span className="xamk-admin-kpi-label">
+            <div className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF]">
                   {isEn ? 'Total users' : 'Käyttäjämäärä'}
                 </span>
-                <span className="xamk-admin-kpi-icon" aria-hidden="true">
-                  <Users className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#121417] border border-[#3F444E] text-[#3B82F6]" aria-hidden="true">
+                  <Users className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
               </div>
-              <div className="xamk-admin-kpi-value">{statistics?.totalUsers ?? 0}</div>
-              <div className="xamk-admin-kpi-meta">
+              <div className="font-mono text-3xl font-extrabold text-[#F4F4F5] leading-none">{statistics?.totalUsers ?? 0}</div>
+              <div className="font-mono text-xs font-bold text-[#9CA3AF]">
                 {isEn ? 'Verified Xamk accounts' : 'Vahvistetut Xamk-tunnukset'}
               </div>
             </div>
 
-            <div className="xamk-admin-kpi-card" style={{ cursor: 'default' }}>
-              <div className="xamk-admin-kpi-top">
-                <span className="xamk-admin-kpi-label">
+            <div className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF]">
                   {isEn ? 'Catalog games' : 'Asennetut pelit'}
                 </span>
-                <span className="xamk-admin-kpi-icon" aria-hidden="true">
-                  <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#121417] border border-[#3F444E] text-[#FACC15]" aria-hidden="true">
+                  <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
               </div>
-              <div className="xamk-admin-kpi-value">{statistics?.totalGames ?? 0}</div>
-              <div className="xamk-admin-kpi-meta">
+              <div className="font-mono text-3xl font-extrabold text-[#F4F4F5] leading-none">{statistics?.totalGames ?? 0}</div>
+              <div className="font-mono text-xs font-bold text-[#9CA3AF]">
                 {isEn ? 'Available across PC, PS5, and Switch' : 'PC-, PS5- ja Switch-pelit'}
               </div>
             </div>
           </div>
 
-          <div className="xamk-admin-2col">
-            <Card>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <Card className="lg:col-span-7">
               <CardHeader>
                 <CardTitle className="inline-flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <BarChart3 className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                   <span>{isEn ? 'Station utilization and hours' : 'Pelipisteiden käyttöaste ja varausmäärät'}</span>
                 </CardTitle>
-                <div className="xamk-modal-underline" />
+                <div className="w-12 h-1 bg-[#FACC15] my-1" />
               </CardHeader>
-              <div className="station-stats-list" style={{ marginTop: '6px' }}>
+              <div className="flex flex-col gap-3.5 mt-1.5">
                 {statistics?.stationUsage?.map((st) => (
-                  <div key={st.stationId} className="station-stat-row">
-                    <div className="station-stat-meta">
-                      <span className="st-name inline-flex items-center gap-1.5">
+                  <div key={st.stationId} className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5] inline-flex items-center gap-1.5">
                         {st.stationType === 'PC' ? (
-                          <Monitor className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <Monitor className="w-4 h-4 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                         ) : (
-                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <Gamepad2 className="w-4 h-4 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
                         )}
                         <span>{st.stationName}</span>
                       </span>
-                      <span className="st-numbers">
+                      <span className="font-mono text-xs font-bold text-[#9CA3AF]">
                         {st.reservationCount} {isEn ? 'bookings' : 'varausta'}, {st.totalHours}{' '}
                         {isEn ? 'hours' : 'tuntia'}
                       </span>
                     </div>
-                    <div className="progress-bar-track">
+                    <div className="w-full h-3 rounded-none bg-[#121417] border-2 border-black overflow-hidden">
                       <div
-                        className="progress-bar-fill"
+                        className="h-full bg-[#FACC15]"
                         style={{
                           width: `${Math.min(
                             100,
@@ -2395,28 +2281,28 @@ export const AdminPanel: React.FC = () => {
               </div>
             </Card>
 
-            <Card>
+            <Card className="lg:col-span-5">
               <CardHeader>
                 <CardTitle className="inline-flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+                  <ClipboardList className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                   <span>{isEn ? 'Reservations by type' : 'Varausten jakautuminen tyypeittäin'}</span>
                 </CardTitle>
-                <div className="xamk-modal-underline" />
+                <div className="w-12 h-1 bg-[#FACC15] my-1" />
               </CardHeader>
-              <div className="xamk-stations-2col-grid" style={{ marginTop: '6px' }}>
+              <div className="grid grid-cols-1 gap-3 mt-1.5">
                 {statistics?.typeBreakdown?.map((tb) => (
-                  <div key={tb.reservationType} className="xamk-station-row-card" style={{ cursor: 'default' }}>
-                    <div className="xamk-station-card-left">
-                      <span className="xamk-station-card-icon" aria-hidden="true">
+                  <div key={tb.reservationType} className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0" aria-hidden="true">
                         {tb.reservationType === 'Individual' ? (
-                          <Gamepad2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         ) : tb.reservationType === 'Room' ? (
-                          <Building2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <Building2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         ) : (
-                          <Trophy className="w-4 h-4 shrink-0" aria-hidden="true" />
+                          <Trophy className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         )}
                       </span>
-                      <span className="xamk-station-card-name">
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#F4F4F5]">
                         {tb.reservationType === 'Individual'
                           ? isEn
                             ? 'Single station'
@@ -2442,13 +2328,13 @@ export const AdminPanel: React.FC = () => {
       {/* 6. VIKAILMOITUSTEN HALLINTA */}
       {activeSubTab === 'issues' && (
         <Card>
-          <div className="xamk-admin-card-header-flex">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <CardTitle className="inline-flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
+                <AlertTriangle className="w-5 h-5 shrink-0 text-[#EF4444]" strokeWidth={2.5} aria-hidden="true" />
                 <span>{isEn ? 'Hardware and software issue reports' : 'Saapuneet vika- ja virheilmoitukset'}</span>
               </CardTitle>
-              <div className="xamk-modal-underline mt-1.5 mb-2" />
+              <div className="w-12 h-1 bg-[#FACC15] mt-1.5 mb-2" />
               <CardDescription>
                 {isEn
                   ? 'Review and resolve student reports regarding gaming stations, peripherals, or room condition.'
@@ -2475,24 +2361,26 @@ export const AdminPanel: React.FC = () => {
           </div>
 
           {filteredIssues.length === 0 ? (
-            <div className="empty-state">
-              <p>
+            <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-8 text-center font-mono text-sm font-bold text-[#9CA3AF]">
+              <p className="m-0">
                 {isEn
                   ? 'No issue reports matching the selected filter.'
                   : 'Ei rekisteröityjä vikailmoituksia valitulla suodattimella.'}
               </p>
             </div>
           ) : (
-            <div className="issues-list">
+            <div className="flex flex-col gap-4">
               {filteredIssues.map((issue) => (
                 <div
                   key={issue.id}
-                  className={`issue-card ${issue.isResolved ? 'issue-resolved' : 'issue-open'}`}
+                  className={`rounded-none bg-[#121417] border-2 shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3 ${
+                    issue.isResolved ? 'border-[#22C55E]' : 'border-[#EF4444]'
+                  }`}
                 >
-                  <div className="issue-card-header">
-                    <div className="issue-meta">
-                      <span className="target-tag inline-flex items-center gap-1.5">
-                        <Monitor className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[#1C1F24] border border-[#3F444E] font-mono text-xs font-bold text-[#F4F4F5]">
+                        <Monitor className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                         <span>{issue.target}</span>
                       </span>
                       <Badge variant={issue.isResolved ? 'installed' : 'wishlist'}>
@@ -2504,7 +2392,7 @@ export const AdminPanel: React.FC = () => {
                           ? 'OPEN'
                           : 'AVOIN'}
                       </Badge>
-                      <time className="issue-date">
+                      <time className="font-mono text-xs font-bold text-[#9CA3AF]">
                         {new Date(issue.createdAt).toLocaleDateString('fi-FI', {
                           day: 'numeric',
                           month: 'numeric',
@@ -2516,8 +2404,8 @@ export const AdminPanel: React.FC = () => {
                     </div>
 
                     {issue.reporterEmail && (
-                      <div className="issue-reporter inline-flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <div className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
                         <span>
                           {issue.reporterName || (isEn ? 'Student' : 'Opiskelija')} ({issue.reporterEmail})
                         </span>
@@ -2525,15 +2413,15 @@ export const AdminPanel: React.FC = () => {
                     )}
                   </div>
 
-                  <h4 className="issue-title">{issue.title}</h4>
-                  <p className="issue-desc">{issue.description}</p>
+                  <h4 className="font-extrabold uppercase tracking-tight text-base text-[#F4F4F5] m-0">{issue.title}</h4>
+                  <p className="text-sm text-[#D1D5DB] leading-relaxed m-0">{issue.description}</p>
 
                   {issue.isResolved ? (
-                    <div className="issue-resolution-info">
-                      <strong>{isEn ? 'Resolution:' : 'Ratkaistu:'}</strong>{' '}
+                    <div className="rounded-none bg-[#22C55E]/15 border-2 border-[#22C55E] px-3.5 py-2.5 text-xs text-[#D1D5DB] leading-relaxed">
+                      <strong className="font-mono font-bold uppercase text-[#86EFAC]">{isEn ? 'Resolution:' : 'Ratkaistu:'}</strong>{' '}
                       {issue.adminNotes || (isEn ? 'Marked resolved without additional notes.' : 'Kuitattu ilman lisähuomioita.')}
                       {issue.resolvedAt && (
-                        <span className="resolution-date">
+                        <span className="font-mono font-bold text-[#9CA3AF]">
                           {' '}
                           (
                           {new Date(issue.resolvedAt).toLocaleDateString('fi-FI', {
@@ -2547,8 +2435,8 @@ export const AdminPanel: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    <div className="xamk-issue-resolve-row">
-                      <div style={{ flex: 1 }}>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+                      <div className="flex-1">
                         <Input
                           type="text"
                           placeholder={
@@ -2573,7 +2461,7 @@ export const AdminPanel: React.FC = () => {
                         }
                         disabled={resolveIssueMutation.isPending}
                       >
-                        <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <CheckCircle2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                         <span>
                           {isEn ? 'Mark resolved' : 'Merkitse ratkaistuksi'}
                         </span>

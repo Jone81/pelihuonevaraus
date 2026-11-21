@@ -22,6 +22,7 @@ import { FloorPlanModal } from './components/FloorPlanModal';
 import { RulesAndGuide } from './components/RulesAndGuide';
 import { LandingPage } from './components/LandingPage';
 import { IssueReportModal } from './components/IssueReportModal';
+import { DiscordIcon } from '@/components/ui/discord-icon';
 
 /**
  * React Query -asiakasinstanssi palvelinpyyntöjen välimuistitukseen ja hallintaan.
@@ -65,11 +66,11 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
     // Jos virhe on havaittu, näytetään palautumisnäkymä ja uudelleenlatauspainike
     if (this.state.hasError) {
       return (
-        <div className="p-8 text-center text-white bg-[#151618] min-h-screen flex flex-col items-center justify-center gap-4" role="alert">
-          <h2 className="text-xl font-bold">Näkymän latauksessa tapahtui virhe</h2>
+        <div className="p-8 text-center text-[#F4F4F5] bg-[#121417] min-h-screen flex flex-col items-center justify-center gap-4" role="alert">
+          <h2 className="text-xl font-extrabold uppercase tracking-tight">Näkymän latauksessa tapahtui virhe</h2>
           <button
             type="button"
-            className="xamk-confirm-pill-btn btn-touch"
+            className="rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[4px_4px_0px_#000000] px-5 py-3 min-h-[44px] font-mono font-bold uppercase tracking-wide cursor-pointer hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#000000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_#000000] transition-transform"
             onClick={() => window.location.reload()}
           >
             Lataa sivu uudelleen
@@ -139,7 +140,7 @@ export const AppContent: React.FC = () => {
 
   // Kirjautuneen käyttäjän sovelluskehikko: navigaatio, tiedotebanneri, aktiivinen välilehti ja alatunniste
   return (
-    <div className="xamk-app-shell">
+    <div className="min-h-screen flex flex-col bg-[#121417] text-[#F4F4F5]">
       <Navbar
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
@@ -154,8 +155,8 @@ export const AppContent: React.FC = () => {
 
       {/* Main Content Surface */}
       {/* Pääsisältöalue, joka renderöidään aktiivisen välilehden (activeTab) perusteella */}
-      <main className="xamk-main-surface">
-        <div className="xamk-main-container">
+      <main className="flex-1 bg-[#121417] text-[#F4F4F5] py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {activeTab === 'book' && (
             <BookingCalendar
               onRequireLogin={() => setIsLoginOpen(true)}
@@ -188,107 +189,84 @@ export const AppContent: React.FC = () => {
 
       {/* Dark Separator Band + Gold Top Line + Multi-Column Xamk Footer */}
       {/* Koristeellinen kultainen erotinviiva ja monisarakkeinen Xamk-alatunniste */}
-      <div className="xamk-footer-gold-line" aria-hidden="true" />
+      <div className="h-1.5 w-full bg-[#FACC15] border-y-2 border-black" aria-hidden="true" />
 
-      <footer className="xamk-footer">
-        <div className="xamk-footer-grid">
-          {/* Column 1: Varaa */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'Book' : 'Varaa'}</h3>
-            <ul className="xamk-footer-links">
+      <footer className="bg-[#1C1F24] text-[#F4F4F5] border-t-2 border-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Column 1: Pelihuone */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-extrabold uppercase tracking-tight text-[#FACC15] border-b border-[#3F444E] pb-2">
+              {isEn ? 'Game Room' : 'Pelihuone'}
+            </h3>
+            <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
               <li>
-                <button type="button" onClick={() => setActiveTab('book')}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('book')}>
                   {isEn ? 'Book station' : 'Varaa laite'}
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => setActiveTab('status')}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('status')}>
                   {isEn ? 'Live status' : 'Tilan tilanne'}
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => setActiveTab('games')}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('games')}>
                   {isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}
                 </button>
               </li>
               <li>
-                <button type="button" onClick={() => setActiveTab('book')}>
-                  {isEn ? 'Reservation system' : 'Maksuton varausjärjestelmä'}
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 2: Tietoa */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'Home' : 'Tietoa'}</h3>
-            <ul className="xamk-footer-links">
-              <li>
-                <button type="button" onClick={() => setActiveTab('games')}>
-                  {isEn ? 'Game wishlist' : 'Pelien toivelista'}
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => setActiveTab('rules')}>
-                  {isEn ? 'Guides' : 'Ohjeet'}
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => setActiveTab('status')}>
-                  {isEn ? 'Availability' : 'Saatavuus'}
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Pohjakuva */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'Floor plan' : 'Pohjakuva'}</h3>
-            <ul className="xamk-footer-links">
-              <li>
-                <button type="button" onClick={() => setActiveTab('rules')}>
-                  {isEn ? 'Rules' : 'Säännöt'}
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => setActiveTab('rules')}>
-                  {isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => setIsFloorPlanOpen(true)}>
-                  {isEn ? 'Room layout' : 'Tilan pohjakuva'}
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: Omat tiedot */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">{isEn ? 'My links' : 'Omat tiedot'}</h3>
-            <ul className="xamk-footer-links">
-              <li>
-                <a href="https://discord.gg/xamk" target="_blank" rel="noopener noreferrer">
-                  Discord
-                </a>
-              </li>
-              <li>
-                <button type="button" onClick={() => setIsIssueModalOpen(true)}>
-                  {isEn ? 'Report issue' : 'Ilmoita viasta'}
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => setActiveTab('my-bookings')}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('my-bookings')}>
                   {isEn ? 'My bookings' : 'Omat varaukset'}
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 5: Contact info */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">Contact info</h3>
-            <ul className="xamk-footer-links">
+          {/* Column 2: Ohjeet ja tila */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-extrabold uppercase tracking-tight text-[#FACC15] border-b border-[#3F444E] pb-2">
+              {isEn ? 'Guides & room' : 'Ohjeet ja tila'}
+            </h3>
+            <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
+              <li>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('rules')}>
+                  {isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}
+                </button>
+              </li>
+              <li>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setIsFloorPlanOpen(true)}>
+                  {isEn ? 'Floor plan' : 'Tilan pohjakuva'}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Yhteisö ja tuki */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-extrabold uppercase tracking-tight text-[#FACC15] border-b border-[#3F444E] pb-2">
+              {isEn ? 'Community & support' : 'Yhteisö ja tuki'}
+            </h3>
+            <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
+              <li>
+                <a href="https://discord.gg/xamk" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono font-bold text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4">
+                  <DiscordIcon className="w-4 h-4 shrink-0" />
+                  Discord
+                </a>
+              </li>
+              <li>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setIsIssueModalOpen(true)}>
+                  {isEn ? 'Report issue' : 'Ilmoita viasta'}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: User & Organization Info */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-extrabold uppercase tracking-tight text-[#FACC15] border-b border-[#3F444E] pb-2">
+              {displayName} <span className="rounded-none inline-block ml-1.5 px-1.5 py-0.5 text-[11px] font-mono font-bold uppercase bg-[#FACC15] text-[#09090B] border border-black">{displayRole}</span>
+            </h3>
+            <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
               <li>
                 <span>
                   {isEn
@@ -297,32 +275,7 @@ export const AppContent: React.FC = () => {
                 </span>
               </li>
               <li>
-                <button type="button" onClick={() => setIsIssueModalOpen(true)}>
-                  {isEn ? 'Contact us' : 'Ota yhteyttä'}
-                </button>
-              </li>
-              <li>
-                <span>{isEn ? 'Campus Game Room' : 'Kampuksen pelitila'}</span>
-              </li>
-              <li>
                 <span>Kotka, Kouvola, Mikkeli, Savonlinna</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 6: User & Organization Info */}
-          <div className="xamk-footer-col">
-            <h3 className="xamk-footer-heading">
-              {displayName} <span className="xamk-footer-role">{displayRole}</span>
-            </h3>
-            <ul className="xamk-footer-links">
-              <li>
-                <span>Kaakkois-Suomen ammattikorkeakoulu</span>
-              </li>
-              <li>
-                <span>
-                  Xamk Game Room, {isEn ? 'all for the future' : 'tulevaisuutta varten'}
-                </span>
               </li>
               <li>
                 <span>T: (05) 3555 39 88</span>
@@ -332,7 +285,7 @@ export const AppContent: React.FC = () => {
                   href="https://www.xamk.fi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="xamk-footer-domain-link"
+                  className="font-mono font-bold text-[#FACC15] hover:underline underline-offset-4"
                 >
                   www.xamk.fi
                 </a>
@@ -341,7 +294,7 @@ export const AppContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="xamk-footer-bottom-bar">
+        <div className="border-t border-[#3F444E] bg-[#121417] px-4 sm:px-6 lg:px-8 py-4 text-center text-xs font-mono font-bold uppercase tracking-wider text-[#A1A1AA]">
           <span>
             {t('footer.school')}, Xamk Game Room,{' '}
             {isEn ? 'all for the future' : 'tulevaisuutta varten'}

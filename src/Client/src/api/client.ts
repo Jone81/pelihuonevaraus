@@ -11,6 +11,7 @@ import type {
   CreateIssueReportRequest,
   CreateNewsRequest,
   CreateReservationRequest,
+  EndReservationRequest,
   Game,
   GamingStation,
   IssueReportResponse,
@@ -180,6 +181,18 @@ export const api = {
   async cancelReservation(id: string, request: CancelReservationRequest): Promise<Reservation> {
     const res = await fetch(`/api/reservations/${id}`, {
       method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<Reservation>(res);
+  },
+
+  /**
+   * Lopettaa parhaillaan käynnissä olevan aktiivisen varauksen kesken ja vapauttaa laitteen.
+   */
+  async endReservationEarly(id: string, request: EndReservationRequest): Promise<Reservation> {
+    const res = await fetch(`/api/reservations/${id}/end`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });

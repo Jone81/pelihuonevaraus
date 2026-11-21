@@ -89,7 +89,7 @@ export const SuperAdminPanel: React.FC = () => {
   // Varmistetaan, että vain SuperAdmin pääsee käsiksi näkymään
   if (!isSuperAdmin) {
     return (
-      <div className="alert alert-error">
+      <div className="rounded-none border-2 border-black bg-[#EF4444] text-white px-4 py-3 text-sm font-mono font-bold shadow-[4px_4px_0px_#000000]">
         {isEn
           ? 'Only SuperAdmin accounts have access to this panel.'
           : 'Vain pääkäyttäjällä, SuperAdmin, on pääsy tähän paneeliin.'}
@@ -144,35 +144,36 @@ export const SuperAdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="xamk-admin-page">
+    <div className="space-y-6 text-[#F4F4F5]">
       {/* Header Row with Switcher */}
       {/* Ylätunniste ja pikavaihtaja tavallisen Admin-paneelin ja SuperAdmin-näkymän välillä */}
-      <div className="xamk-admin-header">
-        <div className="xamk-admin-header-titles">
-          <div className="xamk-admin-kicker">XAMK GAME ROOM, SUPERADMIN AUTHORITY</div>
-          <h2 className="xamk-section-heading inline-flex items-center gap-2" style={{ textAlign: 'left' }}>
-            <Zap className="w-5 h-5 shrink-0" aria-hidden="true" />
+      <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div className="space-y-2 max-w-2xl">
+          <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#FACC15]">XAMK GAME ROOM, SUPERADMIN AUTHORITY</div>
+          <h2 className="text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5] inline-flex items-center gap-2 text-left">
+            <Zap className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
             <span>{isEn ? 'SuperAdmin, official event override' : 'SuperAdmin, tapahtumajyräys'}</span>
           </h2>
-          <div className="xamk-section-underline" style={{ margin: '10px 0 12px' }} />
-          <p className="xamk-admin-subtitle">
+          <div className="h-1 w-16 bg-[#FACC15]" />
+          <p className="text-sm text-[#A1A1AA]">
             {isEn
               ? 'Rule #10. SuperAdmin has authority to schedule official university events and override overlapping student reservations for that time slot.'
               : 'Sääntö #10. SuperAdminilla on oikeus järjestää oppilaitoksen virallinen tapahtuma ja jyrätä yksittäisten opiskelijoiden varaukset kyseiseltä ajankohdalta.'}
           </p>
         </div>
 
-        <div className="xamk-admin-mode-switcher">
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 min-w-[260px]">
           <Button
             type="button"
             variant="station"
+            className="w-full justify-between rounded-none bg-[#121417] text-[#F4F4F5] border border-[#3F444E] hover:border-[#FACC15] px-4 py-3 h-auto"
             onClick={() => setActiveTab('admin')}
           >
-            <div className="xamk-station-card-left">
-              <span className="xamk-station-card-icon" aria-hidden="true">
-                <Settings className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shrink-0" aria-hidden="true">
+                <Settings className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               </span>
-              <span className="xamk-station-card-name">
+              <span className="font-mono font-bold text-xs uppercase text-left">
                 {isEn ? 'Admin control panel' : 'Ylläpitopaneeli'}
               </span>
             </div>
@@ -181,14 +182,14 @@ export const SuperAdminPanel: React.FC = () => {
           <Button
             type="button"
             variant="station"
-            className="xamk-station-card-selected"
+            className="w-full justify-between rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#FACC15] px-4 py-3 h-auto"
             onClick={() => setActiveTab('superadmin')}
           >
-            <div className="xamk-station-card-left">
-              <span className="xamk-station-card-icon" aria-hidden="true">
-                <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border border-black shrink-0" aria-hidden="true">
+                <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               </span>
-              <span className="xamk-station-card-name">
+              <span className="font-mono font-bold text-xs uppercase text-left">
                 {isEn ? 'SuperAdmin, event override' : 'SuperAdmin, tapahtumajyräys'}
               </span>
             </div>
@@ -197,36 +198,36 @@ export const SuperAdminPanel: React.FC = () => {
         </div>
       </div>
 
-      {statusMessage && <div className="alert alert-success">{statusMessage}</div>}
-      {errorMessage && <div className="alert alert-error">{errorMessage}</div>}
+      {statusMessage && <div className="rounded-none border-2 border-black bg-[#22C55E] text-[#09090B] px-4 py-3 text-sm font-mono font-bold shadow-[4px_4px_0px_#000000]">{statusMessage}</div>}
+      {errorMessage && <div className="rounded-none border-2 border-black bg-[#EF4444] text-white px-4 py-3 text-sm font-mono font-bold shadow-[4px_4px_0px_#000000]">{errorMessage}</div>}
 
-      <div className="xamk-admin-2col">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left Column: Override Form */}
         {/* Vasen sarake: Tapahtuma-ajan ja jyräysperusteen syöttölomake */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="inline-flex items-center gap-2">
-              <Trophy className="w-5 h-5 shrink-0" aria-hidden="true" />
+        <Card className="rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-6 space-y-5">
+          <CardHeader className="p-0 space-y-2">
+            <CardTitle className="inline-flex items-center gap-2 text-lg font-extrabold uppercase tracking-tight text-[#09090B]">
+              <Trophy className="w-5 h-5 shrink-0 text-[#09090B]" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Create official event and override slot' : 'Aseta tapahtuma-aika ja jyräysperuste'}</span>
             </CardTitle>
-            <div className="xamk-modal-underline" />
-            <CardDescription>
+            <div className="h-1 w-12 bg-[#FACC15]" />
+            <CardDescription className="text-sm text-[#3F444E]">
               {isEn
                 ? 'Select the date, start and end hours, and provide the official reason that will be recorded in the audit log.'
                 : 'Valitse päivämäärä, alkamis- ja päättymisaika sekä virallinen perustelu, joka tallentuu peruutettavien varausten lokitietoihin.'}
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleOpenConfirm} className="xamk-modal-form">
-            <div className="xamk-field-group">
-              <Label htmlFor="admin-date">
+          <form onSubmit={handleOpenConfirm} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-date" className="text-[#09090B] font-mono font-bold uppercase text-xs">
                 {isEn ? 'Event date *' : 'Tapahtuman päivämäärä *'}
               </Label>
-              <div className="xamk-input-box xamk-date-box">
+              <div className="w-full">
                 <input
                   id="admin-date"
                   type="date"
-                  className="xamk-date-native-input"
+                  className="w-full px-3 py-2 text-sm rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
@@ -234,15 +235,16 @@ export const SuperAdminPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="xamk-form-row-2col">
-              <div className="xamk-field-group">
-                <Label htmlFor="admin-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-start" className="text-[#09090B] font-mono font-bold uppercase text-xs">
                   {isEn ? 'Start time 08:00-17:00 *' : 'Alkamisaika klo 08:00-17:00 *'}
                 </Label>
                 <NativeSelect
                   id="admin-start"
                   value={startHour}
                   onChange={(e) => setStartHour(e.target.value)}
+                  className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                 >
                   {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(
                     (t) => (
@@ -254,14 +256,15 @@ export const SuperAdminPanel: React.FC = () => {
                 </NativeSelect>
               </div>
 
-              <div className="xamk-field-group">
-                <Label htmlFor="admin-end">
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-end" className="text-[#09090B] font-mono font-bold uppercase text-xs">
                   {isEn ? 'End time 09:00-18:00 *' : 'Päättymisaika klo 09:00-18:00 *'}
                 </Label>
                 <NativeSelect
                   id="admin-end"
                   value={endHour}
                   onChange={(e) => setEndHour(e.target.value)}
+                  className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                 >
                   {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map(
                     (t) => (
@@ -274,8 +277,8 @@ export const SuperAdminPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="override-reason">
+            <div className="space-y-1.5">
+              <Label htmlFor="override-reason" className="text-[#09090B] font-mono font-bold uppercase text-xs">
                 {isEn ? 'Official event title and override reason *' : 'Jyräyksen ja tapahtuman perustelu *'}
               </Label>
               <Input
@@ -288,22 +291,23 @@ export const SuperAdminPanel: React.FC = () => {
                 }
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
+                className="rounded-none bg-white text-[#09090B] font-mono border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
                 required
               />
-              <span className="xamk-field-hint">
+              <span className="block text-xs text-[#3F444E]">
                 {isEn
                   ? 'This reason is stored on cancelled reservations and displayed on the public schedule.'
                   : 'Tämä viesti tallentuu peruttujen varausten syyksi ja näkyy päivän aikataulussa.'}
               </span>
             </div>
 
-            <div className="xamk-submit-row">
+            <div className="pt-2 flex justify-end">
               <Button
                 type="submit"
                 variant="pill"
                 disabled={overrideMutation.isPending}
               >
-                <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 <span>
                   {overrideMutation.isPending
                     ? isEn
@@ -320,35 +324,35 @@ export const SuperAdminPanel: React.FC = () => {
 
         {/* Right Column: Override Summary & Impact Preview */}
         {/* Oikea sarake: Yhteenveto valitusta aikaikkunasta ja jyräyksen vaikutuksista */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="inline-flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 shrink-0" aria-hidden="true" />
+        <Card className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-6 space-y-5">
+          <CardHeader className="p-0 space-y-2">
+            <CardTitle className="inline-flex items-center gap-2 text-lg font-extrabold uppercase tracking-tight text-[#F4F4F5]">
+              <ClipboardList className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Override operation summary' : 'Jyräysoperaation esikatselu ja vaikutukset'}</span>
             </CardTitle>
-            <div className="xamk-modal-underline" />
-            <CardDescription>
+            <div className="h-1 w-12 bg-[#FACC15]" />
+            <CardDescription className="text-sm text-[#A1A1AA]">
               {isEn
                 ? 'Verify the selected window and check how Rule #10 affects active reservations.'
                 : 'Tarkista valittu aikaikkuna ja mitä säännön #10 mukainen tapahtumajyräys tekee päällekkäisille varauksille.'}
             </CardDescription>
           </CardHeader>
 
-          <div className="xamk-stations-2col-grid" style={{ marginBottom: '18px' }}>
-            <div className="xamk-station-row-card xamk-station-card-selected" style={{ cursor: 'default' }}>
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <Calendar className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border border-black shrink-0" aria-hidden="true">
+                  <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
                 <div>
-                  <div className="xamk-station-card-name">
+                  <div className="font-mono font-bold text-sm text-[#F4F4F5]">
                     {new Date(`${date}T12:00:00`).toLocaleDateString('fi-FI', {
                       day: 'numeric',
                       month: 'numeric',
                       year: 'numeric',
                     })}
                   </div>
-                  <div className="xamk-table-subtext">
+                  <div className="text-xs font-mono text-[#A1A1AA]">
                     {isEn ? 'Target date' : 'Kohdepäivämäärä'}
                   </div>
                 </div>
@@ -356,16 +360,16 @@ export const SuperAdminPanel: React.FC = () => {
               <Badge variant="status">DATE</Badge>
             </div>
 
-            <div className="xamk-station-row-card xamk-station-card-selected" style={{ cursor: 'default' }}>
-              <div className="xamk-station-card-left">
-                <span className="xamk-station-card-icon" aria-hidden="true">
-                  <Clock className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border border-black shrink-0" aria-hidden="true">
+                  <Clock className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
                 <div>
-                  <div className="xamk-station-card-name">
+                  <div className="font-mono font-bold text-sm text-[#F4F4F5]">
                     {startHour}-{endHour}
                   </div>
-                  <div className="xamk-table-subtext">
+                  <div className="text-xs font-mono text-[#A1A1AA]">
                     {isEn ? 'Locked window' : 'Lukittava aikaväli'}
                   </div>
                 </div>
@@ -374,12 +378,12 @@ export const SuperAdminPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="xamk-landing-rules-card">
-            <h4 className="xamk-landing-rules-heading inline-flex items-center gap-1.5">
-              <Zap className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <div className="rounded-none bg-[#121417] border border-[#3F444E] p-4 space-y-3">
+            <h4 className="text-sm font-extrabold uppercase tracking-tight text-[#FACC15] inline-flex items-center gap-1.5">
+              <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'What happens when you confirm' : 'Mitä jyräyksen vahvistaminen tekee'}</span>
             </h4>
-            <ul className="xamk-landing-rules-list">
+            <ul className="space-y-2 text-sm text-[#D4D4D8] list-disc pl-5 marker:text-[#FACC15]">
               <li>
                 {isEn
                   ? 'All overlapping single-station and student room bookings in the selected window are automatically cancelled.'
@@ -403,18 +407,18 @@ export const SuperAdminPanel: React.FC = () => {
       {/* Confirmation Dialog Modal */}
       {/* Vahvistusmodaali ennen peruuttamattoman jyräyksen suorittamista */}
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
-        <DialogContent className="xamk-modal-md">
+        <DialogContent className="max-w-lg rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15]">
           <DialogHeader>
-            <div className="xamk-modal-header-row">
-              <div className="xamk-modal-icon-badge" aria-hidden="true">
-                <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <div className="flex items-start gap-3">
+              <div className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-none bg-[#EF4444] text-white border-2 border-black" aria-hidden="true">
+                <AlertTriangle className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               </div>
-              <div className="xamk-modal-title-group">
-                <DialogTitle>
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-extrabold uppercase tracking-tight text-[#09090B]">
                   {isEn ? 'Confirm SuperAdmin event override' : 'Vahvista tapahtumajyräys'}
                 </DialogTitle>
-                <div className="xamk-modal-underline" />
-                <DialogDescription>
+                <div className="h-1 w-12 bg-[#EF4444]" />
+                <DialogDescription className="text-sm text-[#3F444E]">
                   {isEn
                     ? 'This action automatically cancels all overlapping reservations made by other users during the selected time window.'
                     : 'Tämä toiminto peruuttaa automaattisesti kaikki samalle aikavälille osuvat muiden käyttäjien varaukset.'}
@@ -423,8 +427,8 @@ export const SuperAdminPanel: React.FC = () => {
             </div>
           </DialogHeader>
 
-          <div className="xamk-landing-rules-card" style={{ marginTop: '4px' }}>
-            <div className="xamk-table-primary-cell" style={{ gap: '6px' }}>
+          <div className="rounded-none bg-[#F4F4F5] text-[#09090B] border-2 border-black p-4 text-sm font-mono mt-1">
+            <div className="flex flex-col gap-1.5">
               <div>
                 <strong>{isEn ? 'Date and time:' : 'Ajankohta:'}</strong> {date} klo {startHour}-{endHour}
               </div>

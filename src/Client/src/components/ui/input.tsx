@@ -15,14 +15,15 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (
-      <div className="xamk-input-box">
-        <input
-          type={type}
-          className={cn('xamk-text-input', className)}
-          ref={ref}
-          {...props}
-        />
-      </div>
+      <input
+        type={type}
+        className={cn(
+          'flex w-full min-h-[42px] rounded-none bg-white px-3 py-2 font-mono text-sm font-bold text-[#09090B] placeholder:text-[#6B7280] border-2 border-black transition-shadow duration-100 focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15] disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
     )
   }
 )

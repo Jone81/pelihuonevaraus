@@ -31,7 +31,10 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={cn('xamk-dropdown-content', className)}
+      className={cn(
+        'z-[220] min-w-[230px] rounded-none bg-[#1C1F24] text-[#F4F4F5] border-[3px] border-black shadow-[6px_6px_0px_#FACC15] p-2',
+        className
+      )}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -51,7 +54,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'xamk-dropdown-item',
+      'relative flex items-center gap-2.5 px-3 py-2 rounded-none font-mono text-xs font-bold uppercase tracking-wide text-[#F4F4F5] cursor-pointer select-none outline-none transition-colors hover:bg-[#FACC15] hover:text-[#09090B] focus:bg-[#FACC15] focus:text-[#09090B]',
       inset && 'pl-8',
       className
     )}
@@ -73,7 +76,7 @@ const DropdownMenuLabel = React.forwardRef<
   <DropdownMenuPrimitive.Label
     ref={ref}
     className={cn(
-      'xamk-dropdown-label',
+      'px-3 pt-2 pb-1.5 font-mono text-xs font-bold uppercase tracking-wider text-[#9CA3AF]',
       inset && 'pl-8',
       className
     )}
@@ -91,7 +94,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn('xamk-dropdown-separator', className)}
+    className={cn('h-[2px] bg-[#3F444E] my-1.5 mx-1', className)}
     {...props}
   />
 ))

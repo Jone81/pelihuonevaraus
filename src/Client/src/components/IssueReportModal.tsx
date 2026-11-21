@@ -119,43 +119,58 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="xamk-modal-md">
+      <DialogContent className="max-w-[560px]">
         <DialogHeader>
-          <div className="xamk-modal-header-row">
-            <div className="xamk-modal-icon-badge" aria-hidden="true">
-              <AlertTriangle className="w-5 h-5 shrink-0" aria-hidden="true" />
+          <div className="flex items-start gap-3.5">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[2px_2px_0px_#000000]"
+              aria-hidden="true"
+            >
+              <AlertTriangle className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             </div>
-            <div className="xamk-modal-title-group">
-              <DialogTitle>{t('issue.title')}</DialogTitle>
-              <div className="xamk-modal-underline" />
-              <DialogDescription>{t('issue.desc')}</DialogDescription>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <DialogTitle className="font-extrabold uppercase tracking-tight text-[#F4F4F5]">
+                {t('issue.title')}
+              </DialogTitle>
+              <div className="h-1 w-12 bg-[#FACC15]" />
+              <DialogDescription className="text-sm text-[#A1A1AA]">
+                {t('issue.desc')}
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         {successMessage ? (
-          <div className="alert alert-success flex items-start gap-2.5">
-            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="rounded-none bg-[#121417] border-2 border-[#22C55E] shadow-[4px_4px_0px_#000000] p-4 text-[#F4F4F5] flex items-start gap-2.5">
+            <CheckCircle2
+              className="w-5 h-5 shrink-0 mt-0.5 text-[#22C55E]"
+              strokeWidth={2.5}
+              aria-hidden="true"
+            />
             <div>
-              <strong>{successMessage}</strong>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
-                {t('issue.successDetail')}
-              </p>
+              <strong className="font-mono font-bold text-[#22C55E]">{successMessage}</strong>
+              <p className="mt-1 text-sm text-[#F4F4F5]">{t('issue.successDetail')}</p>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="xamk-modal-form">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {errorMessage && (
-              <div className="alert alert-error flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <div className="rounded-none bg-[#121417] border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] p-3 text-sm font-mono font-bold text-[#EF4444] flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
-            <div className="xamk-field-group">
-              <Label htmlFor="issue-target">{t('issue.target')} *</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="issue-target"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('issue.target')} *
+              </Label>
               <NativeSelect
                 id="issue-target"
+                className="rounded-none bg-white text-[#09090B]"
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
                 required
@@ -168,11 +183,17 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
               </NativeSelect>
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="issue-title">{t('issue.reportTitle')} *</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="issue-title"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('issue.reportTitle')} *
+              </Label>
               <Input
                 id="issue-title"
                 type="text"
+                className="rounded-none bg-white text-[#09090B]"
                 placeholder={t('issue.reportTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -180,10 +201,16 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
               />
             </div>
 
-            <div className="xamk-field-group">
-              <Label htmlFor="issue-desc">{t('issue.reportDesc')} *</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="issue-desc"
+                className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+              >
+                {t('issue.reportDesc')} *
+              </Label>
               <Textarea
                 id="issue-desc"
+                className="rounded-none bg-white text-[#09090B]"
                 placeholder={t('issue.reportDescPlaceholder')}
                 rows={3}
                 value={description}
@@ -192,23 +219,35 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({ isOpen, onCl
               />
             </div>
 
-            <div className="xamk-form-row-2col">
-              <div className="xamk-field-group">
-                <Label htmlFor="issue-name">{t('issue.reporterName')}</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="issue-name"
+                  className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+                >
+                  {t('issue.reporterName')}
+                </Label>
                 <Input
                   id="issue-name"
                   type="text"
+                  className="rounded-none bg-white text-[#09090B]"
                   placeholder={t('issue.reporterNamePlaceholder')}
                   value={reporterName}
                   onChange={(e) => setReporterName(e.target.value)}
                 />
               </div>
 
-              <div className="xamk-field-group">
-                <Label htmlFor="issue-email">{t('issue.reporterEmail')}</Label>
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="issue-email"
+                  className="text-[#F4F4F5] font-mono font-bold uppercase text-xs tracking-wider"
+                >
+                  {t('issue.reporterEmail')}
+                </Label>
                 <Input
                   id="issue-email"
                   type="email"
+                  className="rounded-none bg-white text-[#09090B]"
                   placeholder={t('issue.reporterEmailPlaceholder')}
                   value={reporterEmail}
                   onChange={(e) => setReporterEmail(e.target.value)}
