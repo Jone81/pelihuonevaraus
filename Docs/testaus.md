@@ -67,6 +67,7 @@ Jokaisella `Docs/domain.md`:n säännöllä on oma rivi, kerrostaso ja hylkäysk
 | **9** Vain `@edu.xamk.fi` ja `@xamk.fi` sähköposti | `SchoolEmail` (Domain) | Spec 001: K11 | `Application.Tests` (`UserServiceTests.AuthenticateOrCreateUserAsync_WithNonSchoolEmail_ReturnsValidationError`) |
 | **10** `SuperAdmin` override peruuttaa opiskelijavaraukset syyllä | `ReservationService` (Application) | Spec 002: K2, K5 | `Application.Tests` (`OverrideAndCreateEventAsync_CancelsOverlappingReservations`) |
 | **11** Käyttöesto (`IsBanned`) ja `SuperAdmin`-suoja | `User` (Domain) / `ReservationService` | Spec 002: K6 | `Application.Tests` (`User.Banned` tai `DomainException`) |
+| **12** Aktiivisen varauksen lopettaminen kesken (`EndUtc = nowUtc`) | `Reservation.EndEarly` + `TimeWindow.TruncateEnd` (Domain) / `ReservationService` | Spec 004: K1–K5 | `Application.Tests` ja `WebApi.Tests` (`Reservation.CannotEndEarly`, `Reservation.Forbidden`) |
 | **Vapaana nyt** laskettuna näkymänä | `GamingStationService` (Application) | Spec 001: K1, K8 | `Application.Tests` (`GamingStationServiceTests`) |
 
 ## Milloin ja kuka

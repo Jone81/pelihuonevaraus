@@ -50,6 +50,7 @@ Paikan ratkaisee kysymys: mitä tietoa tarkistus tarvitsee? Yhden olion oma data
 | 9 | Kirjautuminen ja käyttäjän luonti sallitaan vain Xamkin sähköpostilla (`@edu.xamk.fi` tai `@xamk.fi`) | **Koulusähköposti** (`SchoolEmail.Create`, Domain) | Sähköpostin päätesääntö on arvo-objektin oma invariantti: `User`-entiteettiä ei voi luoda ilman kelvollista `SchoolEmail`-arvoa. |
 | 10 | `SuperAdmin` voi luoda tapahtuman päällekkäisten varausten päälle, jolloin ristiriitaiset opiskelijavaraukset peruutetaan syyllä | **Use case** (`ReservationService.OverrideAndCreateEventAsync`, Application) | Vaatii tekijän roolin tarkistuksen (`UserRole.SuperAdmin`), päällekkäisten varausten haun ja jokaisen peruuttamisen (`Cancel`). Katso `ADR 0001`. |
 | 11 | Käyttöestossa (`IsBanned`) oleva käyttäjä ei voi luoda uusia varauksia, eikä `SuperAdmin`-käyttäjää voi asettaa käyttöestoon | **Käyttäjä ja Use case** (`User.Ban` Domainissa + `ReservationService`) | `User.Ban` estää `SuperAdmin`-bannin suoraan entiteetissä; varauksen esto tarkistetaan varauksen luonnissa. |
+| 12 | Aktiivisen ja parhaillaan käynnissä olevan varauksen (`StartUtc < nowUtc < EndUtc`) voi lopettaa kesken, jolloin päättymisajaksi asetetaan `nowUtc` ja varattu laite (sekä mahdollinen `SharedTV`) vapautuu välittömästi | **Varaus ja Aikaikkuna** (`Reservation.EndEarly` + `TimeWindow.TruncateEnd`, Domain) | Varauksen oma tila (`Status`), aikaikkuna (`StartUtc`, `EndUtc`) ja omistajuus/rooli verrattuna parametrina annettuun nykyhetkeen (`nowUtc`). |
 
 ## Arvo vai luku
 
@@ -69,6 +70,7 @@ Vapaita pelipisteitä ("mikä on vapaana juuri nyt tai valitulla aikavälillä")
 | Kirjaudu sisään | Opiskelija tai Henkilökunta | 9 | Ei salli ulkopuolisia sähköpostiosoitteita. |
 | Varaa pelipiste | Opiskelija tai Henkilökunta | 1, 2, 3, 4, 6, 7, 8, 11 | Ei jyrää muiden varauksia, ei salli kahta konsolia samaan TV:seen yhtä aikaa. |
 | Peru varaus | Varaaja tai Admin | 5 | Ei salli jo alkaneen tai päättyneen varauksen perumista; ei poista riviä tietokannasta vaan merkitsee tilaksi `Cancelled`. |
+| Lopeta varaus kesken | Varaaja tai Admin | 1, 12 | Ei salli tulevan, päättyneen tai perutun varauksen lopettamista kesken; katkaisee päättymisajan (`EndUtc = nowUtc`) ilman rivin poistamista. |
 | Järjestä tapahtuma (Override) | `SuperAdmin` | 1, 4, 10 | Ei hylkää varattujen laitteiden takia, vaan peruuttaa ristiriitaiset varaukset syykoodilla. |
 | Katso vapaat pelipisteet | Kaikki | Ei sääntörajoitusta (vain aktiiviset laitteet) | Ei muuta tietokannan tilaa. |
 
