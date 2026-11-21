@@ -24,6 +24,18 @@ public interface IReservationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Lopettaa käynnissä olevan varauksen kesken katkaisemalla sen päättymisajan nykyhetkeen.
+    /// </summary>
+    /// <param name="reservationId">Lopetettavan varauksen tunniste.</param>
+    /// <param name="request">Lopetuspyyntö, joka sisältää pyytäjän käyttäjätunnisteen.</param>
+    /// <param name="cancellationToken">Peruutustoken asynkronista operaatiota varten.</param>
+    /// <returns>Päivitetty varausvastaus tai virhetulos.</returns>
+    Task<Result<ReservationResponse>> EndReservationEarlyAsync(
+        Guid reservationId,
+        EndReservationRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Jyrää (peruu) kaikki aikavälillä olevat varaukset ja luo uuden tapahtumavarauksen (vaatii SuperAdmin-oikeudet).
     /// </summary>
     Task<Result<ReservationResponse>> OverrideAndCreateEventAsync(

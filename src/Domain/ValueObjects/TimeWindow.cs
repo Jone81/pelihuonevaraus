@@ -1,3 +1,4 @@
+using Pelihuone.Domain.Common;
 using Pelihuone.Domain.Enums;
 using Pelihuone.Domain.Exceptions;
 
@@ -152,6 +153,26 @@ public sealed record TimeWindow
     /// <returns><c>true</c>, jos aikaikkunat leikkaavat toisensa; muulloin <c>false</c>.</returns>
     public bool OverlapsWith(TimeWindow other) =>
         StartUtc < other.EndUtc && EndUtc > other.StartUtc;
+
+    /// <summary>
+    /// Sääntö 1: Katkaisee aikaikkunan päättymisajan uuteen aikaisempaan ajankohtaan ja palauttaa uuden muuttumattoman aikaikkunan.
+    /// </summary>
+    /// <param name="newEndUtc">Uusi päättymisaika UTC-ajassa.</param>
+    /// <returns>Uusi <see cref="TimeWindow"/>-arvo-objekti, jonka päättymisaika on <paramref name="newEndUtc"/>.</returns>
+    public TimeWindow TruncateEnd(DateTimeOffset newEndUtc)
+    {
+        if (newEndUtc <= StartUtc)
+        {
+            throw new DomainException("Uuden päättymisajan on oltava alkamisajan jälkeen.");
+        }
+
+        if (newEndUtc >= EndUtc)
+        {
+            throw new DomainException("Uuden päättymisajan on oltava ennen alkuperäistä päättymisaikaa.");
+        }
+
+        return new TimeWindow(StartUtc, newEndUtc);
+    }
 
     /// <summary>
     /// Tarkistaa, sijoittuuko annettu aikaleima tämän aikaikkunan sisälle.

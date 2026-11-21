@@ -55,6 +55,22 @@ public static class ReservationEndpoints
         .WithName("CancelReservation")
         .WithSummary("Peruuta voimassa oleva varaus ennen sen alkamisaikaa");
 
+        // Lopeta parhaillaan käynnissä oleva aktiivinen varaus kesken
+        group.MapPost("/{id:guid}/end", async (
+            Guid id,
+            [FromBody] EndReservationRequest request,
+            IReservationService reservationService,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Lopetetaan käynnissä oleva varaus nykyhetkeen, jolloin laite vapautuu heti
+            Result<ReservationResponse> result = await reservationService.EndReservationEarlyAsync(id, request, cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .RequireRateLimiting(RateLimitPolicies.Reservation)
+        .WithName("EndReservationEarly")
+        .WithSummary("Lopeta parhaillaan käynnissä oleva varaus kesken ja vapauta pelipiste");
+
         // SuperAdmin-jyräys: peruuttaa ristiriitaiset varaukset ja luo tapahtumavarauksen
         group.MapPost("/override", async (
             [FromBody] OverrideReservationRequest request,

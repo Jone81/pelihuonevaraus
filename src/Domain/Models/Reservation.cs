@@ -232,6 +232,43 @@ public sealed class Reservation : AggregateRoot<ReservationId>
     }
 
     /// <summary>
+    /// Sääntö 12: Lopettaa käynnissä olevan varauksen kesken katkaisemalla sen päättymisajan nykyhetkeen.
+    /// </summary>
+    /// <param name="currentUtc">Lopetushetken UTC-aikaleima.</param>
+    /// <param name="requestedByUserId">Lopetusta pyytävän käyttäjän tunniste.</param>
+    /// <param name="requesterRole">Lopetusta pyytävän käyttäjän rooli.</param>
+    public void EndEarly(
+        DateTimeOffset currentUtc,
+        UserId requestedByUserId,
+        UserRole requesterRole)
+    {
+        if (Status == ReservationStatus.Cancelled)
+        {
+            throw new DomainException("Peruttua varausta ei voi lopettaa kesken.");
+        }
+
+        if (currentUtc <= TimeWindow.StartUtc)
+        {
+            throw new DomainException("Varausta ei voi lopettaa kesken ennen sen alkamista. Peruuta varaus sen sijaan.");
+        }
+
+        if (currentUtc >= TimeWindow.EndUtc)
+        {
+            throw new DomainException("Varaus on jo päättynyt.");
+        }
+
+        bool isOwner = requestedByUserId == UserId;
+        bool isStaff = requesterRole is UserRole.Admin or UserRole.SuperAdmin;
+
+        if (!isOwner && !isStaff)
+        {
+            throw new DomainException("Ei oikeutta lopettaa toisen käyttäjän varausta.");
+        }
+
+        TimeWindow = TimeWindow.TruncateEnd(currentUtc);
+    }
+
+    /// <summary>
     /// Sääntö 8: SuperAdmin voi jyrätä muiden varaukset tapahtuman takia.
     /// </summary>
     /// <param name="currentUtc">Jyräyshetken UTC-aikaleima.</param>

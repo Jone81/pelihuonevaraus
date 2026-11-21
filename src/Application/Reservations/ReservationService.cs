@@ -544,6 +544,65 @@ public sealed class ReservationService : IReservationService
         return Result.Success<IReadOnlyList<ReservationResponse>>(responses);
     }
 
+    /// <summary>
+    /// Lopettaa käynnissä olevan varauksen kesken katkaisemalla sen päättymisajan nykyhetkeen ja varmistaa käyttäjän oikeuden operaatioon (Anti-IDOR).
+    /// </summary>
+    /// <param name="reservationId">Lopetettavan varauksen tunniste.</param>
+    /// <param name="request">Lopetuspyynnön tiedot.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Onnistunut tulos päivitetyistä varauksen tiedoista tai virhekuvaus.</returns>
+    public async Task<Result<ReservationResponse>> EndReservationEarlyAsync(
+        Guid reservationId,
+        EndReservationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.UserId == Guid.Empty)
+        {
+            return Result.Failure<ReservationResponse>(Error.Validation("Reservation.ValidationFailed", "Käyttäjän tunniste on pakollinen."));
+        }
+
+        // Haetaan lopetettava varaus
+        ReservationId resId = new ReservationId(reservationId);
+        Reservation? reservation = await _reservationRepository.GetByIdAsync(resId, cancellationToken);
+        if (reservation is null)
+        {
+            return Result.Failure<ReservationResponse>(Error.NotFound("Reservation.NotFound", "Varausta ei löytynyt."));
+        }
+
+        // Haetaan lopetusta pyytävä käyttäjä
+        UserId userId = new UserId(request.UserId);
+        User? user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return Result.Failure<ReservationResponse>(Error.NotFound("User.NotFound", "Käyttäjää ei löytynyt."));
+        }
+
+        // Anti-IDOR käyttöoikeustarkistus: Vain varauksen omistaja tai ylläpitäjä voi lopettaa varauksen kesken
+        if (reservation.UserId != userId && !user.IsAdmin)
+        {
+            return Result.Failure<ReservationResponse>(Error.Forbidden("Reservation.Forbidden", "Ei oikeutta lopettaa toisen käyttäjän varausta."));
+        }
+
+        DateTimeOffset nowUtc = _dateTimeProvider.UtcNow;
+
+        try
+        {
+            // Suoritetaan toimialueen logiikka varauksen katkaisemiseksi nykyhetkeen
+            reservation.EndEarly(nowUtc, userId, user.Role);
+        }
+        catch (DomainException ex)
+        {
+            return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.CannotEndEarly", ex.Message));
+        }
+
+        await _reservationRepository.UpdateAsync(reservation, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Varaus {ReservationId} lopetettu kesken käyttäjän {UserId} toimesta.", reservation.Id.Value, userId.Value);
+
+        return Result.Success(MapToResponse(reservation, user));
+    }
+
     // Muuntaa Reservation-entiteetin ja valinnaisen User-entiteetin ReservationResponse-vastausmalliksi
     private static ReservationResponse MapToResponse(Reservation r, User? user = null)
     {
