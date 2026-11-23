@@ -241,7 +241,7 @@ export const SuperAdminPanel: React.FC = () => {
                   htmlFor="admin-start"
                   className="text-[#09090B] font-mono font-bold uppercase text-xs"
                 >
-                  {isEn ? 'Start time 08:00-17:00 *' : 'Alkamisaika klo 08:00-17:00 *'}
+                  {isEn ? 'Start time *' : 'Alkamisaika *'}
                 </Label>
                 <NativeSelect
                   id="admin-start"
@@ -273,7 +273,7 @@ export const SuperAdminPanel: React.FC = () => {
                   htmlFor="admin-end"
                   className="text-[#09090B] font-mono font-bold uppercase text-xs"
                 >
-                  {isEn ? 'End time 09:00-18:00 *' : 'Päättymisaika klo 09:00-18:00 *'}
+                  {isEn ? 'End time *' : 'Päättymisaika *'}
                 </Label>
                 <NativeSelect
                   id="admin-end"
@@ -339,8 +339,8 @@ export const SuperAdminPanel: React.FC = () => {
                       ? 'Creating event booking...'
                       : 'Luodaan tapahtumavarausta...'
                     : isEn
-                    ? 'Create event & cancel overlaps'
-                    : 'Luo tapahtuma ja peru päällekkäiset'}
+                      ? 'Create event & cancel overlaps'
+                      : 'Luo tapahtuma ja peru päällekkäiset'}
                 </span>
               </Button>
             </div>
@@ -498,8 +498,8 @@ export const SuperAdminPanel: React.FC = () => {
                     ? 'Processing...'
                     : 'Suoritetaan...'
                   : isEn
-                  ? 'Confirm event booking'
-                  : 'Vahvista tapahtumavaraus'}
+                    ? 'Confirm event booking'
+                    : 'Vahvista tapahtumavaraus'}
               </span>
             </Button>
           </DialogFooter>

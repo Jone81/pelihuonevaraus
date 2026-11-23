@@ -177,8 +177,8 @@ export const AdminOverview: React.FC = () => {
         openIssuesCount > 0
           ? `${openIssuesCount} ${isEn ? 'open' : 'avointa'}`
           : isEn
-          ? 'All clear'
-          : 'Kaikki kuitattu',
+            ? 'All clear'
+            : 'Kaikki kuitattu',
       badgeDanger: openIssuesCount > 0,
     },
   ];
@@ -212,9 +212,8 @@ export const AdminOverview: React.FC = () => {
           descFi: 'Lisää pelejä valikoimaan ja hyväksy opiskelijoiden äänestämiä toivepelejä.',
           descEn: 'Add games to the catalog and approve top-voted titles from the student wishlist.',
           icon: <Gamepad2 className="w-6 h-6 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
-          badgeText: `${allGames?.length ?? 0} ${isEn ? 'total' : 'yht.'} • ${wishlistCount} ${
-            isEn ? 'wishes' : 'toivetta'
-          }`,
+          badgeText: `${allGames?.length ?? 0} ${isEn ? 'total' : 'yht.'} • ${wishlistCount} ${isEn ? 'wishes' : 'toivetta'
+            }`,
         },
         {
           section: 'news',
@@ -325,20 +324,18 @@ export const AdminOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleOpenSection('issues')}
-            className={`rounded-none bg-[#1C1F24] border-2 shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors ${
-              openIssuesCount > 0
+            className={`rounded-none bg-[#1C1F24] border-2 shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors ${openIssuesCount > 0
                 ? 'border-[#EF4444] hover:border-[#FACC15]'
                 : 'border-[#3F444E] hover:border-[#FACC15]'
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between gap-2 w-full">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">
                 {isEn ? 'Open issue reports' : 'Avoimet vikailmoitukset'}
               </span>
               <span
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] border-2 border-[#3F444E] ${
-                  openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
-                }`}
+                className={`inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] border-2 border-[#3F444E] ${openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
+                  }`}
               >
                 {openIssuesCount > 0 ? (
                   <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -348,9 +345,8 @@ export const AdminOverview: React.FC = () => {
               </span>
             </div>
             <div
-              className={`font-mono text-3xl font-extrabold leading-none ${
-                openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
-              }`}
+              className={`font-mono text-3xl font-extrabold leading-none ${openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
+                }`}
             >
               {openIssuesCount}
             </div>
@@ -360,8 +356,8 @@ export const AdminOverview: React.FC = () => {
                   ? 'Requires administrator review'
                   : 'Vaatii ylläpidon tarkistusta'
                 : isEn
-                ? 'All reports resolved'
-                : 'Ei avoimia vikailmoituksia'}
+                  ? 'All reports resolved'
+                  : 'Ei avoimia vikailmoituksia'}
             </div>
           </button>
 
@@ -388,8 +384,8 @@ export const AdminOverview: React.FC = () => {
                   ? 'Room in maintenance mode'
                   : 'Koko tila huoltotilassa'
                 : isEn
-                ? 'Ready for student bookings'
-                : 'Käytettävissä varauksiin'}
+                  ? 'Ready for student bookings'
+                  : 'Käytettävissä varauksiin'}
             </div>
           </button>
 
@@ -434,7 +430,7 @@ export const AdminOverview: React.FC = () => {
                   key={card.section}
                   type="button"
                   onClick={() => handleOpenSection(card.section)}
-                  className="group rounded-none bg-[#1C1F24] border-2 border-[#3F444E] border-l-4 border-l-[#FACC15] shadow-[4px_4px_0px_#000000] hover:border-[#FACC15] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#000000] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_#000000] transition-all p-5 flex items-start justify-between gap-4 text-left cursor-pointer"
+                  className="group rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] hover:border-[#FACC15] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#000000] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_#000000] transition-all p-5 flex items-start justify-between gap-4 text-left cursor-pointer"
                 >
                   <div className="flex flex-col gap-2 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -443,11 +439,10 @@ export const AdminOverview: React.FC = () => {
                       </h3>
                       {card.badgeText && (
                         <span
-                          className={`px-1.5 py-0.5 rounded-none font-mono text-[10px] font-extrabold uppercase border border-black ${
-                            card.badgeDanger
+                          className={`px-1.5 py-0.5 rounded-none font-mono text-[10px] font-extrabold uppercase border border-black ${card.badgeDanger
                               ? 'bg-[#EF4444] text-white'
                               : 'bg-[#121417] text-[#FACC15] border-[#3F444E]'
-                          }`}
+                            }`}
                         >
                           {card.badgeText}
                         </span>

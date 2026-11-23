@@ -231,9 +231,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           {user ? (
             <button
               type="button"
-              className={`inline-flex items-center justify-center w-10 h-10 rounded-none bg-[#1C1F24] border-2 cursor-pointer transition-colors ${
-                isMobileMenuOpen ? 'border-[#FACC15]' : 'border-[#3F444E] hover:border-[#FACC15]'
-              }`}
+              className={`inline-flex items-center justify-center w-10 h-10 rounded-none bg-[#1C1F24] border-2 cursor-pointer transition-colors ${isMobileMenuOpen ? 'border-[#FACC15]' : 'border-[#3F444E] hover:border-[#FACC15]'
+                }`}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
               aria-expanded={isMobileMenuOpen}
@@ -268,11 +267,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'book'
-                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                  : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'book'
+                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+                }`}
               onClick={() => setActiveTab('book')}
             >
               <Calendar className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -281,24 +279,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'status'
-                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                  : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'status'
+                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+                }`}
               onClick={() => setActiveTab('status')}
             >
-              <span className="inline-block w-2 h-2 rounded-full bg-[#22C55E] shrink-0" aria-hidden="true" />
               <span>{isEn ? 'Live status' : 'Tilan tilanne'}</span>
             </button>
 
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'games'
-                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                  : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'games'
+                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+                }`}
               onClick={() => setActiveTab('games')}
             >
               <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -307,11 +302,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'rules'
-                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                  : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'rules'
+                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+                }`}
               onClick={() => setActiveTab('rules')}
             >
               <BookOpen className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -323,7 +317,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border border-transparent bg-transparent text-[#D4D4D8] hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E] transition-colors cursor-pointer whitespace-nowrap"
               onClick={onOpenFloorPlan}
             >
-              <Map className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
+              <Map className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Floor plan' : 'Tilan pohjakuva'}</span>
             </button>
 
@@ -340,11 +334,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'my-bookings'
-                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                  : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'my-bookings'
+                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+                }`}
               onClick={() => setActiveTab('my-bookings')}
             >
               <ClipboardList className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -357,11 +350,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="inline-flex items-stretch">
                   <button
                     type="button"
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
-                      activeTab === 'admin' || activeTab === 'superadmin'
-                        ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                        : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'admin' || activeTab === 'superadmin'
+                      ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                      : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
+                      }`}
                     onClick={() => setActiveTab('admin')}
                   >
                     <Settings className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -370,11 +362,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className={`inline-flex items-center justify-center px-2 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border border-l-0 transition-colors cursor-pointer whitespace-nowrap ${
-                        activeTab === 'admin' || activeTab === 'superadmin'
-                          ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                          : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
-                      }`}
+                      className={`inline-flex items-center justify-center px-2 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border border-l-0 transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'admin' || activeTab === 'superadmin'
+                        ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+                        : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
+                        }`}
                       aria-label="Ylläpitovalikko"
                     >
                       <ChevronDown className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -547,44 +538,40 @@ export const Navbar: React.FC<NavbarProps> = ({
             <nav className="flex flex-col p-4 gap-2 flex-1" aria-label="Mobiilin päävalikko">
               <button
                 type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                  activeTab === 'book'
-                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                    : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
-                }`}
+                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'book'
+                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                  : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
+                  }`}
                 onClick={() => handleTabClick('book')}
               >
                 <span>{t('nav.book')}</span>
               </button>
               <button
                 type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                  activeTab === 'status'
-                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                    : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
-                }`}
+                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'status'
+                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                  : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
+                  }`}
                 onClick={() => handleTabClick('status')}
               >
                 <span>{t('nav.status')}</span>
               </button>
               <button
                 type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                  activeTab === 'games'
-                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                    : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
-                }`}
+                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'games'
+                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                  : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
+                  }`}
                 onClick={() => handleTabClick('games')}
               >
                 <span>{t('nav.games')}</span>
               </button>
               <button
                 type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                  activeTab === 'rules'
-                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                    : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
-                }`}
+                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'rules'
+                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                  : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
+                  }`}
                 onClick={() => handleTabClick('rules')}
               >
                 <span>{t('nav.rules')}</span>
@@ -598,11 +585,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
               <button
                 type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                  activeTab === 'my-bookings'
-                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                    : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
-                }`}
+                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'my-bookings'
+                  ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                  : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
+                  }`}
                 onClick={() => handleTabClick('my-bookings')}
               >
                 <span>{t('nav.myBookings')}</span>
@@ -610,11 +596,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               {isAdmin && (
                 <button
                   type="button"
-                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                    activeTab === 'admin'
-                      ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                      : 'bg-[#1C1F24] text-[#3B82F6] border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white'
-                  }`}
+                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'admin'
+                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                    : 'bg-[#1C1F24] text-[#3B82F6] border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white'
+                    }`}
                   onClick={() => handleTabClick('admin')}
                 >
                   <span>{t('nav.admin')}</span>
@@ -623,11 +608,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               {isSuperAdmin && (
                 <button
                   type="button"
-                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${
-                    activeTab === 'superadmin'
-                      ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
-                      : 'bg-[#1C1F24] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
-                  }`}
+                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'superadmin'
+                    ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
+                    : 'bg-[#1C1F24] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
+                    }`}
                   onClick={() => handleTabClick('superadmin')}
                 >
                   <span>{t('nav.superadmin')}</span>

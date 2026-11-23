@@ -97,8 +97,8 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
         err instanceof ApiError
           ? err.message
           : isEn
-          ? 'Failed to save settings.'
-          : 'Asetusten tallennus epäonnistui.'
+            ? 'Failed to save settings.'
+            : 'Asetusten tallennus epäonnistui.'
       );
     },
   });
@@ -235,9 +235,8 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
                       {isEn ? 'Opening hours' : 'Aukioloajat'}
                     </div>
                     <div className="font-mono text-xs text-[#9CA3AF]">
-                      {`${String(openTimeHour).padStart(2, '0')}:00-${String(closeTimeHour).padStart(2, '0')}:00, ${
-                        onlyWeekdays ? (isEn ? 'Mon-Fri' : 'ma-pe') : isEn ? 'Mon-Sun' : 'ma-su'
-                      }`}
+                      {`${String(openTimeHour).padStart(2, '0')}:00-${String(closeTimeHour).padStart(2, '0')}:00, ${onlyWeekdays ? (isEn ? 'Mon-Fri' : 'ma-pe') : isEn ? 'Mon-Sun' : 'ma-su'
+                        }`}
                     </div>
                   </div>
                 </div>
@@ -513,8 +512,8 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
                           ? 'PS5 and Switch lock each other'
                           : 'PS5 ja Switch lukitsevat toisensa'
                         : isEn
-                        ? 'Simultaneous console booking allowed'
-                        : 'Rinnakkaisvaraus sallittu'}
+                          ? 'Simultaneous console booking allowed'
+                          : 'Rinnakkaisvaraus sallittu'}
                     </div>
                   </div>
                 </div>
@@ -563,8 +562,8 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
                     ? 'Saving...'
                     : 'Tallennetaan...'
                   : isEn
-                  ? 'Save quotas and room policy'
-                  : 'Tallenna kiintiöt ja tilasäännöt'}
+                    ? 'Save quotas and room policy'
+                    : 'Tallenna kiintiöt ja tilasäännöt'}
               </span>
             </Button>
 
@@ -641,8 +640,8 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
                     ? 'Saving...'
                     : 'Tallennetaan...'
                   : isEn
-                  ? 'Save Webhook'
-                  : 'Tallenna Webhook'}
+                    ? 'Save Webhook'
+                    : 'Tallenna Webhook'}
               </span>
             </Button>
 

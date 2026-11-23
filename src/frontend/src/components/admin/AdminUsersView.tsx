@@ -6,7 +6,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Zap, Shield, Ban, ChevronDown, UserCheck } from 'lucide-react';
+import { Zap, Shield, Ban, ChevronDown } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -97,8 +97,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         err instanceof ApiError
           ? err.message
           : isEn
-          ? 'Failed to update user role.'
-          : 'Roolin päivitys epäonnistui.'
+            ? 'Failed to update user role.'
+            : 'Roolin päivitys epäonnistui.'
       );
     },
   });
@@ -118,12 +118,12 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
             ? 'permanently'
             : 'pysyvästi'
           : untilDate?.toLocaleString('fi-FI', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            }) ?? '';
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }) ?? '';
         onStatus(
           isEn
             ? `User "${updatedUser.displayName}" banned, ${untilFormatted}.`
@@ -146,8 +146,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         err instanceof ApiError
           ? err.message
           : isEn
-          ? 'Failed to update user ban status.'
-          : 'Käyttöeston päivitys epäonnistui.'
+            ? 'Failed to update user ban status.'
+            : 'Käyttöeston päivitys epäonnistui.'
       );
     },
   });
@@ -283,7 +283,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {u.isBanned ? (
-                        <Badge variant="wishlist">{isEn ? 'BANNED' : 'ESTETTY'}</Badge>
+                        <Badge variant="occupied">{isEn ? 'BANNED' : 'ESTETTY'}</Badge>
                       ) : (
                         <Badge variant="installed">{isEn ? 'Active' : 'Aktiivinen'}</Badge>
                       )}
@@ -302,8 +302,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       u.role === 'SuperAdmin'
                         ? 'wishlist'
                         : u.role === 'Admin'
-                        ? 'installed'
-                        : 'status'
+                          ? 'installed'
+                          : 'status'
                     }
                   >
                     {u.role.toUpperCase()}
@@ -348,30 +348,10 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                                 ? 'Manage ban...'
                                 : 'Hallinnoi käyttöestoa...'
                               : isEn
-                              ? 'Apply ban...'
-                              : 'Aseta käyttöesto...'}
+                                ? 'Apply ban...'
+                                : 'Aseta käyttöesto...'}
                           </span>
                         </DropdownMenuItem>
-                        {u.isBanned && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() =>
-                                updateUserBanMutation.mutate({
-                                  userId: u.id,
-                                  request: {
-                                    durationHours: 0,
-                                    reason: null,
-                                    isPermanent: false,
-                                  },
-                                })
-                              }
-                            >
-                              <UserCheck className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
-                              <span>{isEn ? 'Remove ban' : 'Poista käyttöesto'}</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -615,8 +595,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                         ? 'Update ban'
                         : 'Päivitä esto'
                       : isEn
-                      ? 'Apply ban'
-                      : 'Aseta esto'}
+                        ? 'Apply ban'
+                        : 'Aseta esto'}
                   </Button>
                 </DialogFooter>
               </form>
