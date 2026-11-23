@@ -1,0 +1,67 @@
+using MediatR;
+using Pelihuone.Application.Abstractions.Caching;
+using Pelihuone.Application.Abstractions.Notifications;
+using Pelihuone.Application.Abstractions.Services;
+using Pelihuone.Application.Common;
+using Pelihuone.Contracts.News;
+
+namespace Pelihuone.Application.Features.News.Commands;
+
+/// <summary>
+/// Komento uuden tiedotteen tai uutisen julkaisemiseen (ylläpitäjä).
+/// </summary>
+/// <param name="Request">Julkaistavan tiedotteen tiedot.</param>
+/// <param name="UserId">Toiminnon suorittavan ylläpitäjän tunniste.</param>
+public sealed record CreateNewsCommand(CreateNewsRequest Request, Guid UserId)
+    : IRequest<Result<NewsResponse>>;
+
+/// <summary>
+/// Käsittelijä <see cref="CreateNewsCommand"/>-komennolle.
+/// </summary>
+public sealed class CreateNewsCommandHandler
+    : IRequestHandler<CreateNewsCommand, Result<NewsResponse>>
+{
+    private readonly INewsService _newsService;
+    private readonly ICacheService _cacheService;
+    private readonly IRealtimeNotifier _realtimeNotifier;
+
+    /// <summary>
+    /// Alustaa uuden <see cref="CreateNewsCommandHandler"/>-instanssin.
+    /// </summary>
+    /// <param name="newsService">Uutispalvelu tiedotteen julkaisemiseen.</param>
+    /// <param name="cacheService">Välimuistipalvelu tiedotevälimuistin invalidoimiseen.</param>
+    /// <param name="realtimeNotifier">Reaaliaikailmoitin tiedotemuutoksen välittämiseen.</param>
+    public CreateNewsCommandHandler(
+        INewsService newsService,
+        ICacheService cacheService,
+        IRealtimeNotifier realtimeNotifier)
+    {
+        _newsService = newsService;
+        _cacheService = cacheService;
+        _realtimeNotifier = realtimeNotifier;
+    }
+
+    /// <summary>
+    /// Julkaisee tiedotteen, invalidoi tiedotevälimuistin ja ilmoittaa muutoksesta reaaliajassa onnistuessaan.
+    /// </summary>
+    /// <param name="request">Tiedotteen luontikomento.</param>
+    /// <param name="cancellationToken">Peruutustunniste asynkronisen operaation keskeyttämiseen.</param>
+    /// <returns>Julkaistu tiedote tai virhetulos.</returns>
+    public async Task<Result<NewsResponse>> Handle(
+        CreateNewsCommand request,
+        CancellationToken cancellationToken)
+    {
+        Result<NewsResponse> result = await _newsService.CreateNewsAsync(
+            request.Request,
+            request.UserId,
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            await _cacheService.RemoveByTagAsync(CacheTags.News, cancellationToken);
+            await _realtimeNotifier.NotifyNewsChangedAsync(cancellationToken);
+        }
+
+        return result;
+    }
+}

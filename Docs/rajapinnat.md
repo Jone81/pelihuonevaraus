@@ -1,6 +1,6 @@
-# Rajapinnat ja tietosopimukset (rajapinnat.md)
+﻿# Rajapinnat ja tietosopimukset (rajapinnat.md)
 
-Tämä dokumentti määrittelee Pelihuonevaraus (Xamk Game Room) -järjestelmän kaikki ulkoiset REST HTTP -rajapinnat (Endpoints), jaetut tietosopimukset (`src/Contracts`), sisäiset sovelluspalvelurajapinnat (`I*Service`), repositoriorajapinnat (`I*Repository`) sekä käyttöliittymän API-asiakkaan (`src/Client/src/api/client.ts`).
+Tämä dokumentti määrittelee Pelihuonevaraus (Xamk Game Room) -järjestelmän kaikki ulkoiset REST HTTP -rajapinnat (Endpoints), jaetut tietosopimukset (`src/backend/Contracts`), sisäiset sovelluspalvelurajapinnat (`I*Service`), repositoriorajapinnat (`I*Repository`) sekä käyttöliittymän API-asiakkaan (`src/frontend/src/api/client.ts`).
 
 ---
 
@@ -42,7 +42,7 @@ Kaikki epäonnistuneet API-kutsut palauttavat rakenteisen JSON-virheen:
 ## 2. REST API -päätepisteet ja tietosopimukset
 
 ### 2.1 Autentikointi ja käyttäjähallinta (`/api/auth` ja `/api/users`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/AuthEndpoints.cs`](../src/WebApi/Endpoints/AuthEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Users/UserContracts.cs`](../src/Contracts/Users/UserContracts.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/AuthEndpoints.cs`](../src/backend/WebApi/Endpoints/AuthEndpoints.cs) ja sopimukset tiedostossa [`src/backend/Contracts/Users/UserContracts.cs`](../src/backend/Contracts/Users/UserContracts.cs).
 
 #### `POST /api/auth/send-code`
 Lähettää 6-numeroisen kertakäyttöisen vahvistuskoodin (OTP, voimassa 15 min) koulusähköpostiin (`@edu.xamk.fi` tai `@xamk.fi`). Rajoitus: `AuthPolicy` (5 pyyntöä minuutissa per IP).
@@ -115,7 +115,7 @@ Asettaa käyttäjälle määräaikaisen tai pysyvän käyttöeston valitulla tun
 ---
 
 ## 2.2 Pelipisteet ja laitetila (`/api/stations`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/StationEndpoints.cs`](../src/WebApi/Endpoints/StationEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/GamingStations/GamingStationResponse.cs`](../src/Contracts/GamingStations/GamingStationResponse.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/StationEndpoints.cs`](../src/backend/WebApi/Endpoints/StationEndpoints.cs) ja sopimukset tiedostossa [`src/backend/Contracts/GamingStations/GamingStationResponse.cs`](../src/backend/Contracts/GamingStations/GamingStationResponse.cs).
 
 | Metodi ja polku | Kuvaus | Kyselyparametrit tai runko | Vastaus (`200 OK`) |
 | :--- | :--- | :--- | :--- |
@@ -139,7 +139,7 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/StationEndpoints.cs`](../src/Web
 ---
 
 ## 2.3 Varaukset ja pääkäyttäjän jyräys (`/api/reservations`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/ReservationEndpoints.cs`](../src/WebApi/Endpoints/ReservationEndpoints.cs) ja sopimukset tiedostoissa [`CreateReservationRequest.cs`](../src/Contracts/Reservations/CreateReservationRequest.cs), [`CancelReservationRequest.cs`](../src/Contracts/Reservations/CancelReservationRequest.cs), [`OverrideReservationRequest.cs`](../src/Contracts/Reservations/OverrideReservationRequest.cs) ja [`ReservationResponse.cs`](../src/Contracts/Reservations/ReservationResponse.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/ReservationEndpoints.cs`](../src/backend/WebApi/Endpoints/ReservationEndpoints.cs) ja sopimukset tiedostoissa [`CreateReservationRequest.cs`](../src/backend/Contracts/Reservations/CreateReservationRequest.cs), [`CancelReservationRequest.cs`](../src/backend/Contracts/Reservations/CancelReservationRequest.cs), [`OverrideReservationRequest.cs`](../src/backend/Contracts/Reservations/OverrideReservationRequest.cs) ja [`ReservationResponse.cs`](../src/backend/Contracts/Reservations/ReservationResponse.cs).
 
 #### `POST /api/reservations`
 Luo uuden laite-, tila- tai tapahtumavarauksen. Rajoitus: `ReservationPolicy` (10 pyyntöä minuutissa per IP).
@@ -204,7 +204,7 @@ Palauttaa käyttäjän omat varaukset sivutettuna.
 ---
 
 ## 2.4 Pelivalikoima ja toivelista (`/api/games`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/GameEndpoints.cs`](../src/WebApi/Endpoints/GameEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Games/GameContracts.cs`](../src/Contracts/Games/GameContracts.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/GameEndpoints.cs`](../src/backend/WebApi/Endpoints/GameEndpoints.cs) ja sopimukset tiedostossa [`src/backend/Contracts/Games/GameContracts.cs`](../src/backend/Contracts/Games/GameContracts.cs).
 
 | Metodi ja polku | Suojaus | Request DTO | Response DTO | Kuvaus |
 | :--- | :--- | :--- | :--- | :--- |
@@ -218,7 +218,7 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/GameEndpoints.cs`](../src/WebApi
 ---
 
 ## 2.5 Uutiset ja tiedotteet (`/api/news`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/NewsEndpoints.cs`](../src/WebApi/Endpoints/NewsEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/News/NewsContracts.cs`](../src/Contracts/News/NewsContracts.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/NewsEndpoints.cs`](../src/backend/WebApi/Endpoints/NewsEndpoints.cs) ja sopimukset tiedostossa [`src/backend/Contracts/News/NewsContracts.cs`](../src/backend/Contracts/News/NewsContracts.cs).
 
 - `GET /api/news` palauttaa `IReadOnlyList<NewsResponse>` (kiinnitetyt `isPinned: true` ensin, sitten uusimmat).
 - `POST /api/news` (`X-User-Id`: `Admin` tai `SuperAdmin`, runko `CreateNewsRequest`: `{ title, content, isPinned }`) palauttaa `NewsResponse` (`201 Created`).
@@ -227,7 +227,7 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/NewsEndpoints.cs`](../src/WebApi
 ---
 
 ## 2.6 Sivustoasetukset ja varauskiintiöt (`/api/settings`)
-Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/WebApi/Endpoints/SettingsEndpoints.cs) ja sopimukset tiedostossa [`src/Contracts/Settings/SiteSettingsContracts.cs`](../src/Contracts/Settings/SiteSettingsContracts.cs).
+Määritelty tiedostossa [`src/backend/WebApi/Endpoints/SettingsEndpoints.cs`](../src/backend/WebApi/Endpoints/SettingsEndpoints.cs) ja sopimukset tiedostossa [`src/backend/Contracts/Settings/SiteSettingsContracts.cs`](../src/backend/Contracts/Settings/SiteSettingsContracts.cs).
 
 - `GET /api/settings` palauttaa `SiteSettingsResponse`
 - `PUT /api/settings` (`X-User-Id`: `Admin` tai `SuperAdmin`, runko `UpdateSiteSettingsRequest`) palauttaa `SiteSettingsResponse`
@@ -252,41 +252,41 @@ Määritelty tiedostossa [`src/WebApi/Endpoints/SettingsEndpoints.cs`](../src/We
 ---
 
 ## 2.7 Käyttötilastot ja vikailmoitukset (`/api/statistics` ja `/api/issues`)
-- `GET /api/statistics` ([`StatisticsEndpoints.cs`](../src/WebApi/Endpoints/StatisticsEndpoints.cs)): palauttaa `StatisticsResponse`-olion: `TotalUsers`, `ActiveReservationsCount`, `TotalReservedHoursThisMonth`, `InstalledGamesCount`, `WishlistGamesCount`, `StationUtilizations`.
-- `POST /api/issues` ([`IssueEndpoints.cs`](../src/WebApi/Endpoints/IssueEndpoints.cs)): runko `CreateIssueReportRequest`: `{ reporterEmail, reporterName, target, title, description }`, palauttaa `IssueReportResponse` (`201 Created`).
+- `GET /api/statistics` ([`StatisticsEndpoints.cs`](../src/backend/WebApi/Endpoints/StatisticsEndpoints.cs)): palauttaa `StatisticsResponse`-olion: `TotalUsers`, `ActiveReservationsCount`, `TotalReservedHoursThisMonth`, `InstalledGamesCount`, `WishlistGamesCount`, `StationUtilizations`.
+- `POST /api/issues` ([`IssueEndpoints.cs`](../src/backend/WebApi/Endpoints/IssueEndpoints.cs)): runko `CreateIssueReportRequest`: `{ reporterEmail, reporterName, target, title, description }`, palauttaa `IssueReportResponse` (`201 Created`).
 - `GET /api/issues` (`X-User-Id`: `Admin` tai `SuperAdmin`): palauttaa `IReadOnlyList<IssueReportResponse>`.
 - `PUT /api/issues/{id:guid}/resolve` (`X-User-Id`: `Admin` tai `SuperAdmin`): runko `ResolveIssueReportRequest`: `{ adminNotes }`, merkitsee vikailmoituksen ratkaistuksi (`IsResolved = true`).
 
 ---
 
-## 3. Sisäiset sovellus- ja repositoriorajapinnat (`src/Application`)
+## 3. Sisäiset sovellus- ja repositoriorajapinnat (`src/backend/Application`)
 
 ### 3.1 Sovelluspalvelurajapinnat (`I*Service`)
 
 | Rajapinta | Toteuttava luokka | Metodeja |
 | :--- | :--- | :--- |
-| [`IReservationService`](../src/Application/Reservations/IReservationService.cs) | [`ReservationService`](../src/Application/Reservations/ReservationService.cs) | `CreateReservationAsync`, `CreateAdminOverrideReservationAsync`, `CancelReservationAsync`, `GetReservationByIdAsync`, `GetUserReservationsAsync`, `GetActiveReservationsAsync` |
-| [`IUserService`](../src/Application/Users/IUserService.cs) | [`UserService`](../src/Application/Users/UserService.cs) | `AuthenticateOrCreateUserAsync`, `GetUserByIdAsync`, `GetAllUsersAsync`, `UpdateUserRoleAsync`, `UpdateUserBanAsync`, `SendVerificationCodeAsync`, `VerifyCodeAndLoginAsync` |
-| [`IGamingStationService`](../src/Application/GamingStations/IGamingStationService.cs) | [`GamingStationService`](../src/Application/GamingStations/GamingStationService.cs) | `GetActiveStationsAsync`, `GetAllStationsForAdminAsync`, `GetAvailableStationsAsync`, `UpdateStationStatusAsync` |
-| [`IGameService`](../src/Application/Games/IGameService.cs) | [`GameService`](../src/Application/Games/GameService.cs) | `GetGamesAsync`, `CreateGameAsync`, `SuggestGameToWishlistAsync`, `UpvoteWishlistGameAsync`, `ToggleWishlistStatusAsync`, `DeleteGameAsync` |
-| [`INewsService`](../src/Application/News/INewsService.cs) | [`NewsService`](../src/Application/News/NewsService.cs) | `GetAllNewsAsync`, `CreateNewsAsync`, `DeleteNewsAsync` |
-| [`ISettingsService`](../src/Application/Settings/ISettingsService.cs) | [`SettingsService`](../src/Application/Settings/SettingsService.cs) | `GetSettingsAsync`, `UpdateSettingsAsync` |
-| [`IStatisticsService`](../src/Application/Statistics/IStatisticsService.cs) | [`StatisticsService`](../src/Application/Statistics/StatisticsService.cs) | `GetStatisticsAsync` |
-| [`IIssueReportService`](../src/Application/Issues/IIssueReportService.cs) | [`IssueReportService`](../src/Application/Issues/IssueReportService.cs) | `CreateReportAsync`, `GetAllReportsAsync`, `ResolveReportAsync` |
-| [`IDiscordNotificationService`](../src/Application/Notifications/IDiscordNotificationService.cs) | [`DiscordNotificationService`](../src/Application/Notifications/DiscordNotificationService.cs) | `SendReservationCreatedAsync`, `SendReservationOverriddenAsync` |
-| [`IErrorNotificationService`](../src/Application/Notifications/IErrorNotificationService.cs) | [`ErrorNotificationService`](../src/Application/Notifications/ErrorNotificationService.cs) | `SendErrorAlertAsync(exception, path, traceId)` |
-| [`IEmailSender`](../src/Application/Notifications/IEmailSender.cs) | [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) | `SendEmailAsync(recipients, subject, body, isHtml)` |
+| [`IReservationService`](../src/backend/Application/Reservations/IReservationService.cs) | [`ReservationService`](../src/backend/Application/Reservations/ReservationService.cs) | `CreateReservationAsync`, `CreateAdminOverrideReservationAsync`, `CancelReservationAsync`, `GetReservationByIdAsync`, `GetUserReservationsAsync`, `GetActiveReservationsAsync` |
+| [`IUserService`](../src/backend/Application/Users/IUserService.cs) | [`UserService`](../src/backend/Application/Users/UserService.cs) | `AuthenticateOrCreateUserAsync`, `GetUserByIdAsync`, `GetAllUsersAsync`, `UpdateUserRoleAsync`, `UpdateUserBanAsync`, `SendVerificationCodeAsync`, `VerifyCodeAndLoginAsync` |
+| [`IGamingStationService`](../src/backend/Application/GamingStations/IGamingStationService.cs) | [`GamingStationService`](../src/backend/Application/GamingStations/GamingStationService.cs) | `GetActiveStationsAsync`, `GetAllStationsForAdminAsync`, `GetAvailableStationsAsync`, `UpdateStationStatusAsync` |
+| [`IGameService`](../src/backend/Application/Games/IGameService.cs) | [`GameService`](../src/backend/Application/Games/GameService.cs) | `GetGamesAsync`, `CreateGameAsync`, `SuggestGameToWishlistAsync`, `UpvoteWishlistGameAsync`, `ToggleWishlistStatusAsync`, `DeleteGameAsync` |
+| [`INewsService`](../src/backend/Application/News/INewsService.cs) | [`NewsService`](../src/backend/Application/News/NewsService.cs) | `GetAllNewsAsync`, `CreateNewsAsync`, `DeleteNewsAsync` |
+| [`ISettingsService`](../src/backend/Application/Settings/ISettingsService.cs) | [`SettingsService`](../src/backend/Application/Settings/SettingsService.cs) | `GetSettingsAsync`, `UpdateSettingsAsync` |
+| [`IStatisticsService`](../src/backend/Application/Statistics/IStatisticsService.cs) | [`StatisticsService`](../src/backend/Application/Statistics/StatisticsService.cs) | `GetStatisticsAsync` |
+| [`IIssueReportService`](../src/backend/Application/Issues/IIssueReportService.cs) | [`IssueReportService`](../src/backend/Application/Issues/IssueReportService.cs) | `CreateReportAsync`, `GetAllReportsAsync`, `ResolveReportAsync` |
+| [`IDiscordNotificationService`](../src/backend/Application/Notifications/IDiscordNotificationService.cs) | [`DiscordNotificationService`](../src/backend/Application/Notifications/DiscordNotificationService.cs) | `SendReservationCreatedAsync`, `SendReservationOverriddenAsync` |
+| [`IErrorNotificationService`](../src/backend/Application/Notifications/IErrorNotificationService.cs) | [`ErrorNotificationService`](../src/backend/Application/Notifications/ErrorNotificationService.cs) | `SendErrorAlertAsync(exception, path, traceId)` |
+| [`IEmailSender`](../src/backend/Application/Notifications/IEmailSender.cs) | [`SmtpEmailSender`](../src/backend/Infrastructure/Services/Email/SmtpEmailSender.cs) | `SendEmailAsync(recipients, subject, body, isHtml)` |
 
-### 3.2 Repositorio- ja infrastruktuuriabstraktiot (`src/Application/Abstractions`)
+### 3.2 Repositorio- ja infrastruktuuriabstraktiot (`src/backend/Application/Abstractions`)
 
-| Rajapinta | Toteuttava luokka (`src/Infrastructure`) | Keskeiset metodit |
+| Rajapinta | Toteuttava luokka (`src/backend/Infrastructure`) | Keskeiset metodit |
 | :--- | :--- | :--- |
-| [`IReservationRepository`](../src/Application/Abstractions/Repositories/IReservationRepository.cs) | [`ReservationRepository`](../src/Infrastructure/Repositories/ReservationRepository.cs) | `GetByIdAsync`, `GetOverlappingReservationsAsync`, `GetActiveReservationsInWindowAsync`, `GetUserReservationsForDayAsync`, `GetPagedByUserIdAsync`, `GetAllActiveAsync`, `AddAsync`, `UpdateAsync` |
-| [`IGamingStationRepository`](../src/Application/Abstractions/Repositories/IGamingStationRepository.cs) | [`GamingStationRepository`](../src/Infrastructure/Repositories/GamingStationRepository.cs) | `GetByIdAsync`, `GetAllActiveAsync`, `GetAllAsync`, `GetSharedTvStationsAsync`, `AddAsync`, `UpdateAsync` |
-| [`IUserRepository`](../src/Application/Abstractions/Repositories/IUserRepository.cs) | [`UserRepository`](../src/Infrastructure/Repositories/UserRepository.cs) | `GetByIdAsync`, `GetByEmailAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync` |
-| [`IGameRoomRepository`](../src/Application/Abstractions/Repositories/IGameRoomRepository.cs) | [`GameRoomRepository`](../src/Infrastructure/Repositories/GameRoomRepository.cs) | `GetDefaultRoomAsync`, `GetByIdAsync`, `AddAsync` |
-| [`IGameRepository`](../src/Application/Abstractions/Repositories/IGameRepository.cs) | [`GameRepository`](../src/Infrastructure/Repositories/GameRepository.cs) | `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync` |
-| [`INewsRepository`](../src/Application/Abstractions/Repositories/INewsRepository.cs) | [`NewsRepository`](../src/Infrastructure/Repositories/NewsRepository.cs) | `GetByIdAsync`, `GetAllOrderedAsync`, `AddAsync`, `DeleteAsync` |
-| [`IIssueReportRepository`](../src/Application/Abstractions/Repositories/IIssueReportRepository.cs) | [`IssueReportRepository`](../src/Infrastructure/Repositories/IssueReportRepository.cs) | `GetByIdAsync`, `GetAllOrderedAsync`, `AddAsync`, `UpdateAsync` |
-| [`IUnitOfWork`](../src/Application/Abstractions/Data/IUnitOfWork.cs) | [`ApplicationDbContext`](../src/Infrastructure/Persistence/ApplicationDbContext.cs) | `SaveChangesAsync(CancellationToken)` |
-| [`IDateTimeProvider`](../src/Application/Abstractions/Time/IDateTimeProvider.cs) | [`SystemDateTimeProvider`](../src/Infrastructure/Services/SystemDateTimeProvider.cs) | `UtcNow` |
+| [`IReservationRepository`](../src/backend/Application/Abstractions/Repositories/IReservationRepository.cs) | [`ReservationRepository`](../src/backend/Infrastructure/Repositories/ReservationRepository.cs) | `GetByIdAsync`, `GetOverlappingReservationsAsync`, `GetActiveReservationsInWindowAsync`, `GetUserReservationsForDayAsync`, `GetPagedByUserIdAsync`, `GetAllActiveAsync`, `AddAsync`, `UpdateAsync` |
+| [`IGamingStationRepository`](../src/backend/Application/Abstractions/Repositories/IGamingStationRepository.cs) | [`GamingStationRepository`](../src/backend/Infrastructure/Repositories/GamingStationRepository.cs) | `GetByIdAsync`, `GetAllActiveAsync`, `GetAllAsync`, `GetSharedTvStationsAsync`, `AddAsync`, `UpdateAsync` |
+| [`IUserRepository`](../src/backend/Application/Abstractions/Repositories/IUserRepository.cs) | [`UserRepository`](../src/backend/Infrastructure/Repositories/UserRepository.cs) | `GetByIdAsync`, `GetByEmailAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync` |
+| [`IGameRoomRepository`](../src/backend/Application/Abstractions/Repositories/IGameRoomRepository.cs) | [`GameRoomRepository`](../src/backend/Infrastructure/Repositories/GameRoomRepository.cs) | `GetDefaultRoomAsync`, `GetByIdAsync`, `AddAsync` |
+| [`IGameRepository`](../src/backend/Application/Abstractions/Repositories/IGameRepository.cs) | [`GameRepository`](../src/backend/Infrastructure/Repositories/GameRepository.cs) | `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync` |
+| [`INewsRepository`](../src/backend/Application/Abstractions/Repositories/INewsRepository.cs) | [`NewsRepository`](../src/backend/Infrastructure/Repositories/NewsRepository.cs) | `GetByIdAsync`, `GetAllOrderedAsync`, `AddAsync`, `DeleteAsync` |
+| [`IIssueReportRepository`](../src/backend/Application/Abstractions/Repositories/IIssueReportRepository.cs) | [`IssueReportRepository`](../src/backend/Infrastructure/Repositories/IssueReportRepository.cs) | `GetByIdAsync`, `GetAllOrderedAsync`, `AddAsync`, `UpdateAsync` |
+| [`IUnitOfWork`](../src/backend/Application/Abstractions/Data/IUnitOfWork.cs) | [`ApplicationDbContext`](../src/backend/Infrastructure/Persistence/ApplicationDbContext.cs) | `SaveChangesAsync(CancellationToken)` |
+| [`IDateTimeProvider`](../src/backend/Application/Abstractions/Time/IDateTimeProvider.cs) | [`SystemDateTimeProvider`](../src/backend/Infrastructure/Services/SystemDateTimeProvider.cs) | `UtcNow` |

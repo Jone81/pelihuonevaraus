@@ -1,6 +1,6 @@
 # Rajapinta, pelihuoneen varausjärjestelmä
 
-Tämä tiedosto kuvaa julkisen HTTP-rajapinnan lupaukset sanoina. Yksityiskohtaiset C#-tietosopimukset (`src/Contracts/`) ja päätepisteiden tarkat DTO-mallit löytyvät tiedostosta [`Docs/rajapinnat.md`](./rajapinnat.md).
+Tämä tiedosto kuvaa julkisen HTTP-rajapinnan lupaukset sanoina. Yksityiskohtaiset C#-tietosopimukset (`src/backend/Contracts/`) ja päätepisteiden tarkat DTO-mallit löytyvät tiedostosta [`Docs/rajapinnat.md`](./rajapinnat.md).
 
 ## Versio
 
@@ -38,6 +38,7 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 | POST `/api/reservations` | Luo uuden yksittäis- (`Individual`), tila- (`Room`) tai tapahtumavarauksen (`Event`) | Kirjautunut käyttäjä ja Admin |
 | POST `/api/reservations/override` | Luo `SuperAdmin`-tapahtuman ja peruuttaa päällekkäiset varaukset peruutussyyllä | SuperAdmin |
 | DELETE `/api/reservations/{id}` | Peruuttaa tulevan varauksen ennen sen alkamista | Varaaja ja Admin |
+| POST `/api/reservations/{id}/end` | Lopettaa käynnissä olevan aktiivisen varauksen kesken (`EndUtc = nowUtc`) ja vapauttaa laitteen | Varaaja ja Admin |
 
 ### Pelikirjasto ja toivelista (`/api/games`)
 
@@ -74,11 +75,21 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 | PUT `/api/settings` | Päivittää aukioloaikoja, kiintiöitä, huoltotilaa tai Discord-webhookia | Admin ja SuperAdmin |
 | GET `/api/statistics` | Hakee varausmäärien ja suosituimpien pelipisteiden tilastot | Admin ja SuperAdmin |
 
+### Reaaliaikaiset ilmoitukset (SignalR `/hubs/gameroom`)
+
+Palvelin lähettää SignalR-hubin (`GameRoomHub`, polku `/hubs/gameroom`) kautta reaaliaikaiset tapahtumat yhdistetyille selaimille onnistuneiden kirjoituskomentojen jälkeen:
+- `ReservationChanged` (varauksen luonti, peruutus, kesken lopetus tai tapahtumavaraus)
+- `StationStatusChanged` (pelipisteen huoltotilan muutos)
+- `SettingsChanged` (sivuston asetusten tai huoneen huoltotilan muutos)
+- `IssueReportChanged` (uusi vikailmoitus tai kuittaus)
+- `NewsChanged` (tiedotteen julkaisu tai poisto)
+- `GamesChanged` (pelin lisäys, toivelistaehdotus, tilanvaihto tai äänestys)
+
 ---
 
 ## Kentät sanoina
 
-Vastauksessa palautetaan vain DTO-sopimuksen (`src/Contracts/`) kentät. Domain-entiteettejä ei koskaan palauteta suoraan rajapinnasta.
+Vastauksessa palautetaan vain DTO-sopimuksen (`src/backend/Contracts/`) kentät. Domain-entiteettejä ei koskaan palauteta suoraan rajapinnasta.
 
 | Reitti | Sisään | Ulos |
 |--------|--------|------|
@@ -88,6 +99,7 @@ Vastauksessa palautetaan vain DTO-sopimuksen (`src/Contracts/`) kentät. Domain-
 | Luo varaus (`POST /api/reservations`) | idempotenssiavain, käyttäjän tunniste, varaustyyppi (`1`=laite, `2`=tila, `3`=tapahtuma), pelipisteen tunniste (jos laitevaraus), alkuhetki, loppuhetki | `201 Created`: luodun varauksen täysi vastausmalli (`ReservationResponse`) |
 | Jyräysvaraus (`POST /api/reservations/override`) | varauspyyntö (`reservationRequest`) ja peruutussyy (`reason`) | `201 Created`: luodun tapahtumavarauksen vastausmalli (`ReservationResponse`) |
 | Peru varaus (`DELETE /api/reservations/{id}`) | varauksen tunniste polussa, pyynnön rungossa käyttäjän tunniste ja peruutussyy (`CancelReservationRequest`) | `200 OK`: peruutettu varaus päivitettynä (`ReservationResponse`, `Status = Cancelled`) |
+| Lopeta varaus kesken (`POST /api/reservations/{id}/end`) | varauksen tunniste polussa, pyynnön rungossa käyttäjän tunniste (`EndReservationRequest`) | `200 OK`: päättymisajaltaan katkaistu varaus (`ReservationResponse`, `EndUtc = nowUtc`) |
 | Listaa varaukset (`GET /api/reservations`) | valinnaiset kyselyparametrit: `userId`, `fromUtc`, `toUtc`, `page`, `pageSize` | sivutettu vastaus (`PagedResult<ReservationResponse>`): varaukset (tunniste, varaustyyppi, laitetunniste, alku, loppu, kesto, tila). Muiden opiskelijoiden sähköpostit ja nimet anonymisoidaan julkisesta listasta. |
 
 ---
@@ -101,7 +113,7 @@ Kaikki virheet palautetaan RFC 9457 ProblemDetails -muodossa (`type`, `title`, `
 | Puuttuva tai väärän muotoinen kenttä, virheellinen sähköpostipääte tai sääntöjen vastainen kesto | `400 Bad Request` | `Error.Validation` / `Reservation.InvalidDuration` / `Reservation.OutsideOpeningHours` / `Reservation.StartInPast` | Syötteen muoto- tai raja-arvovirhe tarkistetaan ennen tietokantahakua. |
 | Käyttäjä on käyttöestossa tai yritetään toimenpidettä ilman vaadittua roolia (`Admin`/`SuperAdmin`) | `403 Forbidden` | `User.Banned` / `Reservation.UnauthorizedOverride` / `Reservation.Forbidden` | Käyttäjä tunnistettiin, mutta oikeudet tai aktiivinen banni estävät toimenpiteen. |
 | Pelipistettä, varausta tai käyttäjää ei löydy | `404 Not Found` | `GamingStation.NotFound` / `Reservation.NotFound` / `User.NotFound` | Haettua tunnistetta ei ole tietokannassa. |
-| Sääntö hylkää tilan vuoksi: pelipiste on jo varattu, yhteinen TV (`SharedTV`) on varattu toiselle konsolille, koko tila on varattu tai alkanutta varausta yritetään perua | `409 Conflict` | `Reservation.StationOverlap` / `Reservation.SharedTvConflict` / `Reservation.RoomReserved` / `Reservation.AlreadyStarted` | Pyyntö on muodoltaan kelvollinen, mutta järjestelmän nykytila estää sen suorittamisen. |
+| Sääntö hylkää tilan vuoksi: pelipiste on jo varattu, yhteinen TV (`SharedTV`) on varattu toiselle konsolille, koko tila on varattu, alkanutta varausta yritetään perua tai ei-käynnissä olevaa varausta yritetään lopettaa kesken | `409 Conflict` | `Reservation.StationOverlap` / `Reservation.SharedTvConflict` / `Reservation.RoomReserved` / `Reservation.AlreadyStarted` / `Reservation.CannotEndEarly` | Pyyntö on muodoltaan kelvollinen, mutta järjestelmän nykytila estää sen suorittamisen. |
 
 ---
 

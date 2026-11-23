@@ -1,4 +1,4 @@
-# Full stack -spesifikaatio ja järjestelmän toimintakartta (Xamk Game Room)
+﻿# Full stack -spesifikaatio ja järjestelmän toimintakartta (Xamk Game Room)
 
 Tämä dokumentti kuvaa Pelihuonevaraus (Xamk Game Room) -järjestelmän koko teknologiapinon, kerrosarkkitehtuurin, komponenttien välisen tietovirran, kaikki REST API -kutsut päästä päähän sekä tietomallit.
 
@@ -8,13 +8,13 @@ Tämä dokumentti kuvaa Pelihuonevaraus (Xamk Game Room) -järjestelmän koko te
 
 | Osa-alue | Teknologia tai kirjasto | Sijainti projektissa | Rooli ja konfiguraatio |
 | :--- | :--- | :--- | :--- |
-| **Käyttöliittymä (Frontend)** | React 19 + TypeScript 5.x + Vite | `src/Client/` | SPA-käyttöliittymä, tiukka tyyppitarkistus (`"strict": true`, `"noImplicitReturns": true`), ei `any`- tai `var`-avainsanoja (`no-var: error`). |
-| **Palvelintila ja välimuisti** | TanStack React Query v5 | `src/Client/src/components/` | Asynkroninen datan haku, automaattinen taustapäivitys (`refetchInterval`) ja välimuistin invalidointi mutaatioiden jälkeen. |
-| **Tyylit ja UI-komponentit** | Tailwind CSS + Radix UI / Shadcn | `src/Client/src/components/ui/` | Xamk Dark Cockpit -teema (`#0B0C10`, `#F5B700`, `#D70E2F`), kosketusystävälliset (min. 44×44 px) ja saavutettavat (WCAG 2.1 AA) komponentit. |
-| **HTTP-rajapinta (API)** | ASP.NET Core 10 Minimal APIs | `src/WebApi/` | RESTful JSON API, kiinteän aikaikkunan Rate Limiting (`AuthPolicy`, `ReservationPolicy`), CORS (`AllowClient`) ja RFC 9457 `ProblemDetails`-virheenkäsittely. |
-| **Sovelluslogiikka (Application)** | .NET 10 + FluentValidation | `src/Application/` | Käyttötapauspalvelut (`*Service`), syötteiden validointi, `Result<T>`-virheidenkäsittelymalli ja Discord Webhook -ilmoitukset. |
-| **Toimialuemalli (Domain)** | Puhdas C# (.NET 10, 0 ulkoista riippuvuutta) | `src/Domain/` | Taktinen DDD: Juurientiteetit (`AggregateRoot`), arvo-objektit (`SchoolEmail`, `TimeWindow`, vahvasti tyypitetyt ID:t) ja domain-tapahtumat (`IDomainEvent`). |
-| **Tietokanta ja persistenssi** | EF Core 10 + PostgreSQL (`Npgsql`) / InMemory | `src/Infrastructure/` | `ApplicationDbContext`, optimistinen rivilukitus (`xmin`), `OutboxInterceptor` (Transactional Outbox), automaattinen PostgreSQL ja InMemory -varakäynti ja `DatabaseSeeder`. |
+| **Käyttöliittymä (Frontend)** | React 19 + TypeScript 5.x + Vite | `src/frontend/` | SPA-käyttöliittymä, tiukka tyyppitarkistus (`"strict": true`, `"noImplicitReturns": true`), ei `any`- tai `var`-avainsanoja (`no-var: error`). |
+| **Palvelintila ja välimuisti** | TanStack React Query v5 | `src/frontend/src/components/` | Asynkroninen datan haku, automaattinen taustapäivitys (`refetchInterval`) ja välimuistin invalidointi mutaatioiden jälkeen. |
+| **Tyylit ja UI-komponentit** | Tailwind CSS + Radix UI / Shadcn | `src/frontend/src/components/ui/` | Xamk Dark Cockpit -teema (`#0B0C10`, `#F5B700`, `#D70E2F`), kosketusystävälliset (min. 44×44 px) ja saavutettavat (WCAG 2.1 AA) komponentit. |
+| **HTTP-rajapinta (API)** | ASP.NET Core 10 Minimal APIs | `src/backend/WebApi/` | RESTful JSON API, kiinteän aikaikkunan Rate Limiting (`AuthPolicy`, `ReservationPolicy`), CORS (`AllowClient`) ja RFC 9457 `ProblemDetails`-virheenkäsittely. |
+| **Sovelluslogiikka (Application)** | .NET 10 + FluentValidation | `src/backend/Application/` | Käyttötapauspalvelut (`*Service`), syötteiden validointi, `Result<T>`-virheidenkäsittelymalli ja Discord Webhook -ilmoitukset. |
+| **Toimialuemalli (Domain)** | Puhdas C# (.NET 10, 0 ulkoista riippuvuutta) | `src/backend/Domain/` | Taktinen DDD: Juurientiteetit (`AggregateRoot`), arvo-objektit (`SchoolEmail`, `TimeWindow`, vahvasti tyypitetyt ID:t) ja domain-tapahtumat (`IDomainEvent`). |
+| **Tietokanta ja persistenssi** | EF Core 10 + PostgreSQL (`Npgsql`) / InMemory | `src/backend/Infrastructure/` | `ApplicationDbContext`, optimistinen rivilukitus (`xmin`), `OutboxInterceptor` (Transactional Outbox), automaattinen PostgreSQL ja InMemory -varakäynti ja `DatabaseSeeder`. |
 | **Kääntäjäpalomuuri** | MSBuild + Roslyn Analyzers + `.editorconfig` | `Directory.Build.props`, `.editorconfig` | `TreatWarningsAsErrors=true`, `EnforceCodeStyleInBuild=true`, `GenerateDocumentationFile=true` (`CS1591`), eksplisiittiset tyypit pakotettu (`IDE0008 = error`, `var` kielletty). |
 | **Testaus (QA)** | xUnit + NSubstitute + Testcontainers | `tests/*` | Yksikkö-, repositorio-, API- ja rinnakkaisvarausten rasitustestit (`Application.Tests`, `Infrastructure.Tests`, `WebApi.Tests`, `Integration.Tests`). |
 
@@ -26,18 +26,18 @@ Järjestelmä noudattaa tiukkaa kerrosarkkitehtuuria ja Dependency Inversion -pe
 
 ```mermaid
 flowchart TB
-    subgraph Client ["Frontend (src/Client, React ja TypeScript)"]
+    subgraph Client ["Frontend (src/frontend, React ja TypeScript)"]
         UI_App["App.tsx & RouterProvider\n(Navigaatio, Modaalit, Teema)"]
         UI_Comp["Näkymäkomponentit\n(ReservationCalendar, StationList,\nReservationForm, MyReservations,\nGamesCatalog, AdminPanel)"]
         UI_Query["TanStack Query Välimuisti\n(useQuery / useMutation)"]
-        UI_Api["REST API Client\n(src/Client/src/api/client.ts)"]
+        UI_Api["REST API Client\n(src/frontend/src/api/client.ts)"]
         
         UI_App --> UI_Comp
         UI_Comp --> UI_Query
         UI_Query --> UI_Api
     end
 
-    subgraph WebApi ["Esityskerros (src/WebApi)"]
+    subgraph WebApi ["Esityskerros (src/backend/WebApi)"]
         MW["Middleware-putki\n(GlobalExceptionHandler, CORS, RateLimiter)"]
         EP["Minimal API Päätepisteet\n(Auth, Station, Reservation, Game,\nNews, Settings, Statistics, Issue)"]
         RES["ResultExtensions.ToHttpResult()\n(Result<T> HTTP-vastaukseksi)"]
@@ -46,11 +46,11 @@ flowchart TB
         EP --> RES
     end
 
-    subgraph Contracts ["Jaetut sopimukset (src/Contracts)"]
+    subgraph Contracts ["Jaetut sopimukset (src/backend/Contracts)"]
         DTO["Request & Response DTO-tietueet\n(Reservations, Users, GamingStations,\nGames, News, Settings, Statistics, Issues)"]
     end
 
-    subgraph Application ["Sovelluskerros (src/Application)"]
+    subgraph Application ["Sovelluskerros (src/backend/Application)"]
         VAL["FluentValidation Validaattorit\n(CreateReservation, CancelReservation, Email)"]
         SVC["Sovelluspalvelut\n(ReservationService, UserService,\nGamingStationService, GameService,\nNewsService, SettingsService,\nStatisticsService, IssueReportService,\nDiscordNotificationService)"]
         ABS["Abstraktiot & Rajapinnat\n(I*Repository, IUnitOfWork, IDateTimeProvider)"]
@@ -59,7 +59,7 @@ flowchart TB
         SVC --> ABS
     end
 
-    subgraph Domain ["Toimialuekerros (src/Domain)"]
+    subgraph Domain ["Toimialuekerros (src/backend/Domain)"]
         AGG["Aggregaatit & Entiteetit\n(GameRoom, GamingStation, Reservation,\nUser, Game, News, IssueReport)"]
         VO["Arvo-objektit & Invariantit\n(TimeWindow, OpeningHours, SchoolEmail,\nUserId, ReservationId, GamingStationId)"]
         EVT["Domain-tapahtumat\n(ReservationCreatedDomainEvent,\nReservationCancelledDomainEvent)"]
@@ -68,7 +68,7 @@ flowchart TB
         AGG --> EVT
     end
 
-    subgraph Infrastructure ["Infrastruktuurikerros (src/Infrastructure)"]
+    subgraph Infrastructure ["Infrastruktuurikerros (src/backend/Infrastructure)"]
         REPO["EF Core Repositoriot\n(ReservationRepository, UserRepository,\nGamingStationRepository, GameRepository,\nNewsRepository, GameRoomRepository,\nIssueReportRepository)"]
         DBC["ApplicationDbContext & OutboxInterceptor\n(PostgreSQL timestamptz + xmin / InMemory)"]
         JSON_CFG["Paikallinen Asetustallennus\n(site-settings.json)"]
@@ -186,9 +186,9 @@ sequenceDiagram
 
 ## 4. Täydellinen REST API ja kutsukartta
 
-Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../src/WebApi/Program.cs) ja jaettu toiminnallisiin ryhmiin kansiossa `src/WebApi/Endpoints/`. Ylläpitäjän päätepisteet tarkistavat kutsujan oikeudet `X-User-Id`-otsakkeesta.
+Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../src/backend/WebApi/Program.cs) ja jaettu toiminnallisiin ryhmiin kansiossa `src/backend/WebApi/Endpoints/`. Ylläpitäjän päätepisteet tarkistavat kutsujan oikeudet `X-User-Id`-otsakkeesta.
 
-### 4.1 Autentikointi ja käyttäjähallinta ([`AuthEndpoints.cs`](../src/WebApi/Endpoints/AuthEndpoints.cs))
+### 4.1 Autentikointi ja käyttäjähallinta ([`AuthEndpoints.cs`](../src/backend/WebApi/Endpoints/AuthEndpoints.cs))
 
 | HTTP ja reitti | Suojaus ja Rate Limit | Request DTO | Response DTO | Palvelu ja metodi (`IUserService`) | Kutsutut `api.*`-metodit ja UI-komponentit |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -200,7 +200,7 @@ Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../s
 | `PUT /api/users/{id:guid}/role` | `X-User-Id` (`SuperAdmin`) | `UpdateUserRoleRequest` | `UserResponse` | `UpdateUserRoleAsync` | `api.updateUserRole`, `AdminPanel` (Käyttäjät-välilehti) |
 | `PUT /api/users/{id:guid}/ban` | `X-User-Id` (`Admin` ja `SuperAdmin`) | `BanUserRequest` | `UserResponse` | `UpdateUserBanAsync` | `api.updateUserBan`, `AdminPanel` (Bannaus ja keston valinta) |
 
-### 4.2 Pelipisteet ja laitetila ([`StationEndpoints.cs`](../src/WebApi/Endpoints/StationEndpoints.cs))
+### 4.2 Pelipisteet ja laitetila ([`StationEndpoints.cs`](../src/backend/WebApi/Endpoints/StationEndpoints.cs))
 
 | HTTP ja reitti | Suojaus | Request tai kysely | Response DTO | Palvelu ja metodi (`IGamingStationService`) | Kutsutut `api.*`-metodit ja UI-komponentit |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -209,7 +209,7 @@ Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../s
 | `GET /api/stations/available` | Julkinen | `?startUtc=...&endUtc=...` | `IReadOnlyList<GamingStationResponse>` | `GetAvailableStationsAsync` | `api.getAvailableStations`, `StationList`, `ReservationForm`, `FloorPlanModal` (`['available-stations']`, `['available-now']`) |
 | `PUT /api/stations/{id:guid}/status` | `X-User-Id` (`Admin` ja `SuperAdmin`) | `UpdateGamingStationStatusRequest` | `GamingStationResponse` | `UpdateStationStatusAsync` | `api.updateStationStatus`, `AdminPanel` (Laitekohtainen huoltotila) |
 
-### 4.3 Varaukset ja pääkäyttäjän jyräys ([`ReservationEndpoints.cs`](../src/WebApi/Endpoints/ReservationEndpoints.cs))
+### 4.3 Varaukset ja pääkäyttäjän jyräys ([`ReservationEndpoints.cs`](../src/backend/WebApi/Endpoints/ReservationEndpoints.cs))
 
 | HTTP ja reitti | Suojaus ja Rate Limit | Request tai kysely | Response DTO | Palvelu ja metodi (`IReservationService`) | Kutsutut `api.*`-metodit ja UI-komponentit |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -220,7 +220,7 @@ Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../s
 | `GET /api/reservations` | Julkinen | `?startUtc=...&endUtc=...&stationId=...` | `IReadOnlyList<ReservationResponse>` | `GetActiveReservationsAsync` | `api.getActiveReservations`, `ReservationCalendar`, `StationList`, `AdminPanel` (`['reservations']`, `['reservations-day']`, `['admin-reservations']`) |
 | `GET /api/users/{userId:guid}/reservations` | Kirjautunut käyttäjä | `?page=1&pageSize=20` | `PagedResult<ReservationResponse>` | `GetUserReservationsAsync` | `api.getUserReservations`, `MyReservations` (`['user-reservations']`) |
 
-### 4.4 Pelivalikoima ja toivelista ([`GameEndpoints.cs`](../src/WebApi/Endpoints/GameEndpoints.cs))
+### 4.4 Pelivalikoima ja toivelista ([`GameEndpoints.cs`](../src/backend/WebApi/Endpoints/GameEndpoints.cs))
 
 | HTTP ja reitti | Suojaus | Request tai kysely | Response DTO | Palvelu ja metodi (`IGameService`) | Kutsutut `api.*`-metodit ja UI-komponentit |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -231,7 +231,7 @@ Kaikki backendin päätepisteet on rekisteröity tiedostossa [`Program.cs`](../s
 | `PUT /api/games/{id:guid}/toggle-wishlist` | `X-User-Id` (`Admin` ja `SuperAdmin`) | Ei runkoa | `GameResponse` | `ToggleWishlistStatusAsync` | `api.toggleWishlistStatus`, `AdminPanel` (Hyväksy valikoimaan) |
 | `DELETE /api/games/{id:guid}` | `X-User-Id` (`Admin` ja `SuperAdmin`) | Ei runkoa | `204 No Content` | `DeleteGameAsync` | `api.deleteGame`, `AdminPanel` |
 
-### 4.5 Uutiset ja tiedotteet ([`NewsEndpoints.cs`](../src/WebApi/Endpoints/NewsEndpoints.cs))
+### 4.5 Uutiset ja tiedotteet ([`NewsEndpoints.cs`](../src/backend/WebApi/Endpoints/NewsEndpoints.cs))
 
 | HTTP ja reitti | Suojaus | Request DTO | Response DTO | Palvelu ja metodi (`INewsService`) | Kutsutut `api.*`-metodit ja UI-komponentit |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -302,7 +302,7 @@ flowchart LR
 
 ## 6. Tietokantakaavio ja domain-entiteetit (ER-kartta)
 
-Kaikki entiteetit tallennetaan `ApplicationDbContext`-luokan kautta (PostgreSQL-tauluihin tai kehitysympäristön muistitietokantaan) ja jokaisella taululla on oma EF Core -konfiguraationsa kansiossa `src/Infrastructure/Persistence/Configurations/`. Lisäksi järjestelmän dynaamiset aukiolo- ja kiintiösäännöt tallennetaan tiedostoon `site-settings.json`.
+Kaikki entiteetit tallennetaan `ApplicationDbContext`-luokan kautta (PostgreSQL-tauluihin tai kehitysympäristön muistitietokantaan) ja jokaisella taululla on oma EF Core -konfiguraationsa kansiossa `src/backend/Infrastructure/Persistence/Configurations/`. Lisäksi järjestelmän dynaamiset aukiolo- ja kiintiösäännöt tallennetaan tiedostoon `site-settings.json`.
 
 ```mermaid
 erDiagram
@@ -399,7 +399,7 @@ erDiagram
 
 ---
 
-## 7. Käyttöliittymän komponentti-, reititys- ja välimuistikartta (`src/Client`)
+## 7. Käyttöliittymän komponentti-, reititys- ja välimuistikartta (`src/frontend`)
 
 Käyttöliittymä rakentuu kolmen kontekstintarjoajan (`LanguageProvider`, `AuthProvider`, `RouterProvider`) ja viiden päävälilehden (`NavTab`) ympärille:
 
@@ -455,8 +455,8 @@ flowchart LR
 ## 8. Automaattinen virhe- ja kaatumishälytysjärjestelmä ylläpidolle
 
 Järjestelmä valvoo taustalla kaikkia HTTP-pyyntöjä ja prosessitason suoritusta:
-1. HTTP 500 -palvelinvirheet: [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs) kutsuu skopatusti [`IErrorNotificationService.SendErrorAlertAsync`](../src/Application/Notifications/IErrorNotificationService.cs) -palvelua. Toimintasäännöistä johtuvat `DomainException`-virheet eivät laukaise hälytyksiä.
-2. Prosessitason kaatumiset: [`src/WebApi/Program.cs`](../src/WebApi/Program.cs) ottaa kiinni `AppDomain.CurrentDomain.UnhandledException`-tapahtuman ja lähettää hätähälytyksen ennen prosessin alasajoa.
+1. HTTP 500 -palvelinvirheet: [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs) kutsuu skopatusti [`IErrorNotificationService.SendErrorAlertAsync`](../src/backend/Application/Notifications/IErrorNotificationService.cs) -palvelua. Toimintasäännöistä johtuvat `DomainException`-virheet eivät laukaise hälytyksiä.
+2. Prosessitason kaatumiset: [`src/backend/WebApi/Program.cs`](../src/backend/WebApi/Program.cs) ottaa kiinni `AppDomain.CurrentDomain.UnhandledException`-tapahtuman ja lähettää hätähälytyksen ennen prosessin alasajoa.
 3. Vastaanottajien dynaaminen haku: osoitteet haetaan tietokannasta kaikille aktiivisille `Admin`- ja `SuperAdmin`-käyttäjille. Jos tietokantayhteys katkeaa kaatumisen yhteydessä, käytetään konfiguroitua varasähköpostia (`Alerts:AdminEmail` tai `Smtp:AdminEmail`).
 4. Spämmisuojaus ja cooldown: 60 sekunnin `AlertCooldown` identtisille poikkeuksille estää sähköpostitulvan.
-5. SMTP ja simulaatio: [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää HTML-raportin (sisältäen virheviestin, HTTP-polun, Trace ID:n, isäntäkoneen ja pinojäljen). Kehitysympäristössä ilman SMTP-palvelinta lähetys simuloidaan sovelluslokiin.
+5. SMTP ja simulaatio: [`SmtpEmailSender`](../src/backend/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää HTML-raportin (sisältäen virheviestin, HTTP-polun, Trace ID:n, isäntäkoneen ja pinojäljen). Kehitysympäristössä ilman SMTP-palvelinta lähetys simuloidaan sovelluslokiin.

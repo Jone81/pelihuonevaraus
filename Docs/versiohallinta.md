@@ -1,4 +1,4 @@
-# Versiohallinta, pelihuoneen varausjärjestelmä
+﻿# Versiohallinta, pelihuoneen varausjärjestelmä
 
 Tämä tiedosto määrittelee, miten repo rakentuu, miten haarat ja commitit elävät ja miten agentin sessio päättyy. Roolit on kuvattu tiedostossa `Docs/agentit.md`. Tässä sanotaan, kuka saa tehdä minkäkin git-toimen.
 
@@ -31,7 +31,7 @@ Tämä tiedosto määrittelee, miten repo rakentuu, miten haarat ja commitit el�
 1. Johtaja varmistaa aktiivisen feature-haaran.
 2. Johtaja antaa yhden specin **Tehtävät**-askeleen yhdelle kerroskohtaiselle työntekijälle. Yksi askel on yksi commit.
 3. Katselmoija lukee diffin ennen committia `Docs/domain.md`:n `Paikka`-saraketta, `Docs/arkkitehtuuri.md`:n kieltoja ja specin kriteerejä vasten. Löydöt korjataan ennen committia.
-4. Komennot `dotnet build --nologo`, `dotnet test --nologo` (sekä UI-askeleissa `npm --prefix src/Client run build && npm --prefix src/Client run lint`) ovat vihreitä ennen committia. Punaista testiä tai varoitusta ei commitoida.
+4. Komennot `dotnet build --nologo`, `dotnet test --nologo` (sekä UI-askeleissa `npm --prefix src/frontend run build && npm --prefix src/frontend run lint`) ovat vihreitä ennen committia. Punaista testiä tai varoitusta ei commitoida.
 5. Johtaja commitoi feature-haaraan.
 6. Kun specin kaikki askeleet ovat valmiit ja hyväksymiskriteerit ajettu, johtaja avaa pull requestin `development`-haaraan.
 
@@ -65,7 +65,7 @@ dotnet test: Passed 42, Failed 0.
 
 `.gitignore` vartioi näitä, mutta sääntö pätee, vaikka tiedosto yritettäisiin lisätä:
 
-- Tietokannat ja käännöstulokset: `*.db`, `bin/`, `obj/`, `.vs/`, `TestResults/`, `src/Client/dist/`, `node_modules/`.
+- Tietokannat ja käännöstulokset: `*.db`, `bin/`, `obj/`, `.vs/`, `TestResults/`, `src/frontend/dist/`, `node_modules/`.
 - Tokenit, salasanat, konekohtaiset asetukset (`appsettings.*.local.json`, `.env`).
 - Koodia, joka ei käänny, sisältää varoituksia tai jonka testi on punainen.
 

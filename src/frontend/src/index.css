@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-bg-base: #121417;
+  --color-bg-panel: #1C1F24;
+  --color-bg-contrast: #FFFFFF;
+  --color-text-base: #F4F4F5;
+  --color-text-muted: #9CA3AF;
+  --color-text-dark: #09090B;
+  --color-accent-yellow: #FACC15;
+  --color-accent-blue: #3B82F6;
+  --color-status-success: #22C55E;
+  --color-status-danger: #EF4444;
+  --color-border-strong: #000000;
+  --color-border-panel: #3F444E;
+
+  --radius-none: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --shadow-brutal-sm: 3px 3px 0px #000000;
+  --shadow-brutal: 4px 4px 0px #000000;
+  --shadow-brutal-yellow: 5px 5px 0px #FACC15;
+  --shadow-brutal-lg: 6px 6px 0px #000000;
+  --shadow-brutal-lg-yellow: 6px 6px 0px #FACC15;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    --background: #121417;
+    --foreground: #F4F4F5;
+
+    --card: #1C1F24;
+    --card-foreground: #F4F4F5;
+
+    --popover: #1C1F24;
+    --popover-foreground: #F4F4F5;
+
+    --primary: #FACC15;
+    --primary-foreground: #09090B;
+
+    --secondary: #3B82F6;
+    --secondary-foreground: #FFFFFF;
+
+    --muted: #1C1F24;
+    --muted-foreground: #9CA3AF;
+
+    --accent: #FACC15;
+    --accent-foreground: #09090B;
+
+    --destructive: #EF4444;
+    --destructive-foreground: #F4F4F5;
+
+    --border: #3F444E;
+    --input: #3F444E;
+    --ring: #FACC15;
+
+    --radius: 0px;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  input[type="date"],
+  input[type="time"] {
+    color-scheme: light;
+  }
+
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #FACC15 #121417;
+  }
+
+  html,
+  body {
+    background-color: #121417;
+    color: #F4F4F5;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #FACC15;
+    outline-offset: 2px;
+  }
+}
+
+::selection {
+  background-color: #FACC15;
+  color: #09090B;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121417;
+  border-left: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3F444E;
+  border: 2px solid #000000;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FACC15;
+}
+
+.mobile-menu-lock {
+  overflow: hidden !important;
+}
+
+.matrix-slot-td {
+  touch-action: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
