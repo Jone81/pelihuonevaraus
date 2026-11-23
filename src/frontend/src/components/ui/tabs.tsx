@@ -20,7 +20,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'grid grid-cols-3 rounded-none bg-[#1C1F24] border-2 border-black p-0 overflow-hidden',
+      'grid grid-flow-col auto-cols-[minmax(auto,1fr)] rounded-none bg-[#1C1F24] border-2 border-black p-0 overflow-x-auto',
       className
     )}
     {...props}
