@@ -139,8 +139,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           className="inline-flex items-center gap-2.5 text-left min-w-0 shrink-0 cursor-pointer bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
-          onClick={() => handleTabClick('book')}
-          aria-label="Pelihuonevaraus etusivu"
+          onClick={() => handleTabClick('news')}
+          aria-label="Uutiset ja tiedotteet"
         >
           <img
             src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
@@ -263,7 +263,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {user && (
         <div className="hidden lg:block w-full bg-[#1C1F24] border-t-2 border-black">
           <nav
-            className="max-w-[1440px] mx-auto px-3 sm:px-5 py-1.5 flex flex-wrap items-center gap-1.5"
+            className="max-w-[1440px] mx-auto px-3 sm:px-5 py-1.5 flex flex-wrap items-center justify-center gap-1.5"
             aria-label="Päävalikko"
           >
             <button

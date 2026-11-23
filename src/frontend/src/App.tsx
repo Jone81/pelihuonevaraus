@@ -4,7 +4,7 @@
  * Käärii sovelluksen virherajaan (ErrorBoundary), React Query -välimuistiin,
  * kielikontekstiin, autentikaatiokontekstiin sekä reitittimeen.
  */
-import React, { useState, useEffect, Component, type ReactNode } from 'react';
+import React, { useState, Component, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
@@ -17,6 +17,7 @@ import { MyReservations } from './components/MyReservations';
 import { AdminPanel } from './components/AdminPanel';
 import { SuperAdminPanel } from './components/SuperAdminPanel';
 import { NewsBanner } from './components/NewsBanner';
+import { NewsFeedPage } from './components/NewsFeedPage';
 import { LoginModal } from './components/LoginModal';
 import { FloorPlanModal } from './components/FloorPlanModal';
 import { RulesAndGuide } from './components/RulesAndGuide';
@@ -93,20 +94,12 @@ export const AppContent: React.FC = () => {
   const { user } = useAuth();
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
-  const { pathname, activeTab, setActiveTab, navigate } = useRouter();
+  const { activeTab, setActiveTab } = useRouter();
 
   // Modaali-ikkunoiden aukiolotilat
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-
-  // Sync root '/' to '/book' when authenticated so every view has an explicit path
-  // Ohjataan juuripolku '/' automaattisesti '/book'-reitille kirjautuneilla käyttäjillä
-  useEffect(() => {
-    if (user && (pathname === '/' || pathname === '')) {
-      navigate('/book', { replace: true });
-    }
-  }, [user, pathname, navigate]);
 
   // Käyttäjän näyttönimi ja rooli alatunnistetta varten
   const displayName = user?.displayName || 'Matti Meikäläinen';
@@ -164,6 +157,8 @@ export const AppContent: React.FC = () => {
       {/* Pääsisältöalue, joka renderöidään aktiivisen välilehden (activeTab) perusteella */}
       <main className="flex-1 bg-[#121417] text-[#F4F4F5] py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {activeTab === 'news' && <NewsFeedPage />}
+
           {activeTab === 'book' && (
             <BookingCalendar
               onRequireLogin={() => setIsLoginOpen(true)}

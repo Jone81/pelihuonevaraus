@@ -6,7 +6,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Zap, Lock, Shield, Ban } from 'lucide-react';
+import { Zap, Shield, Ban, ChevronDown, UserCheck } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -24,6 +24,14 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -57,6 +65,8 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
   const queryClient = useQueryClient();
 
   const [userSearch, setUserSearch] = useState('');
+  const [selectedRoleUser, setSelectedRoleUser] = useState<User | null>(null);
+  const [selectedRoleValue, setSelectedRoleValue] = useState<string>('User');
   const [selectedBanUser, setSelectedBanUser] = useState<User | null>(null);
   const [banDuration, setBanDuration] = useState<string>('24');
   const [banReason, setBanReason] = useState<string>('');
@@ -78,6 +88,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           : `Käyttäjän "${updatedUser.displayName}" rooli päivitetty: ${updatedUser.role}.`
       );
       onError(null);
+      setSelectedRoleUser(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (err: unknown) => {
@@ -151,6 +162,20 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         u.role.toLowerCase().includes(q)
     );
   }, [allUsers, userSearch]);
+
+  const handleOpenRoleModal = (targetUser: User) => {
+    setSelectedRoleUser(targetUser);
+    setSelectedRoleValue(targetUser.role === 'Admin' ? 'Admin' : 'User');
+  };
+
+  const handleApplyRole = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRoleUser) return;
+    updateUserRoleMutation.mutate({
+      userId: selectedRoleUser.id,
+      role: selectedRoleValue,
+    });
+  };
 
   const handleOpenBanModal = (targetUser: User) => {
     setSelectedBanUser(targetUser);
@@ -242,8 +267,7 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
               <TableHead>{isEn ? 'User and status' : 'Käyttäjä ja tila'}</TableHead>
               <TableHead>{isEn ? 'Email' : 'Sähköposti'}</TableHead>
               <TableHead>{isEn ? 'Current role' : 'Nykyinen rooli'}</TableHead>
-              <TableHead>{isEn ? 'Change role' : 'Muuta käyttöoikeutta'}</TableHead>
-              <TableHead>{isEn ? 'Ban controls' : 'Käyttöesto'}</TableHead>
+              <TableHead>{isEn ? 'Actions' : 'Toiminnot'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -291,41 +315,65 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
                       <Zap className="w-3.5 h-3.5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
                       <span>{isEn ? 'Primary SuperAdmin, locked' : 'Pääkäyttäjä, pysyvä oikeus'}</span>
                     </span>
-                  ) : !isSuperAdmin ? (
-                    <span className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
-                      <Lock className="w-3.5 h-3.5 shrink-0 text-[#9CA3AF]" strokeWidth={2.5} aria-hidden="true" />
-                      <span>{isEn ? 'SuperAdmin required' : 'Vaatii SuperAdmin-oikeuden'}</span>
-                    </span>
                   ) : (
-                    <NativeSelect
-                      wrapperClassName="max-w-[200px] min-h-[36px]"
-                      value={u.role}
-                      onChange={(e) =>
-                        updateUserRoleMutation.mutate({ userId: u.id, role: e.target.value })
-                      }
-                      disabled={updateUserRoleMutation.isPending}
-                    >
-                      <option value="User">User ({isEn ? 'Student or staff' : 'Käyttäjä'})</option>
-                      <option value="Admin">Admin ({isEn ? 'Administrator' : 'Ylläpitäjä'})</option>
-                    </NativeSelect>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {u.role === 'SuperAdmin' ? (
-                    <span className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
-                      <span>{isEn ? 'Cannot be banned' : 'Pääkäyttäjää ei voi estää'}</span>
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={u.isBanned ? 'destructive' : 'secondary'}
-                      onClick={() => handleOpenBanModal(u)}
-                    >
-                      <Ban className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                      <span>{isEn ? 'Manage ban' : 'Hallinnoi estoa'}</span>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1.5 min-h-[34px] px-3 py-1.5 rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[2px_2px_0px_#000000] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer"
+                        >
+                          <span>{isEn ? 'Actions' : 'Toiminnot'}</span>
+                          <ChevronDown className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-black shadow-[6px_6px_0px_#FACC15] min-w-[240px] p-1">
+                        <DropdownMenuLabel>
+                          {isEn ? 'User actions' : 'Käyttäjän toiminnot'}
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          disabled={!isSuperAdmin}
+                          onClick={() => handleOpenRoleModal(u)}
+                        >
+                          <Shield className="w-4 h-4 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
+                          <span>
+                            {isEn ? 'Change role...' : 'Muuta käyttöoikeutta...'}
+                          </span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenBanModal(u)}>
+                          <Ban className="w-4 h-4 shrink-0 text-[#EF4444]" strokeWidth={2.5} aria-hidden="true" />
+                          <span>
+                            {u.isBanned
+                              ? isEn
+                                ? 'Manage ban...'
+                                : 'Hallinnoi käyttöestoa...'
+                              : isEn
+                              ? 'Apply ban...'
+                              : 'Aseta käyttöesto...'}
+                          </span>
+                        </DropdownMenuItem>
+                        {u.isBanned && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateUserBanMutation.mutate({
+                                  userId: u.id,
+                                  request: {
+                                    durationHours: 0,
+                                    reason: null,
+                                    isPermanent: false,
+                                  },
+                                })
+                              }
+                            >
+                              <UserCheck className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
+                              <span>{isEn ? 'Remove ban' : 'Poista käyttöesto'}</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </TableCell>
               </TableRow>
@@ -334,7 +382,99 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
         </Table>
       </Card>
 
-      {/* Käyttöeston hallintamodaali */}
+      {/* Käyttöoikeuden muokkausmodaali (07 Admin User Role Modal) */}
+      <Dialog
+        open={selectedRoleUser !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedRoleUser(null);
+        }}
+      >
+        <DialogContent>
+          {selectedRoleUser && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black"
+                    aria-hidden="true"
+                  >
+                    <Shield className="w-5 h-5 shrink-0" strokeWidth={2.5} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <DialogTitle>
+                      {isEn ? 'User role & permissions' : 'Käyttöoikeus'}
+                    </DialogTitle>
+                    <div className="w-12 h-1 bg-[#FACC15]" />
+                    <DialogDescription>
+                      {isEn
+                        ? 'Change user role in the system (requires SuperAdmin privileges).'
+                        : 'Muuta käyttäjän roolia järjestelmässä (vaatii SuperAdmin-oikeuden).'}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black font-mono text-xs font-extrabold shrink-0">
+                    {selectedRoleUser.displayName.charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm text-[#F4F4F5] truncate">
+                      {selectedRoleUser.displayName}
+                    </div>
+                    <div className="font-mono text-xs text-[#9CA3AF] truncate">
+                      {selectedRoleUser.email}
+                    </div>
+                  </div>
+                </div>
+                <Badge variant="status">{selectedRoleUser.role.toUpperCase()}</Badge>
+              </div>
+
+              <form onSubmit={handleApplyRole} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="modal-user-role">
+                    {isEn ? 'User role *' : 'Käyttäjärooli *'}
+                  </Label>
+                  <NativeSelect
+                    id="modal-user-role"
+                    value={selectedRoleValue}
+                    onChange={(e) => setSelectedRoleValue(e.target.value)}
+                    disabled={updateUserRoleMutation.isPending}
+                  >
+                    <option value="User">
+                      USER — {isEn ? 'Student or staff' : 'Opiskelija tai henkilökunta'}
+                    </option>
+                    <option value="Admin">
+                      ADMIN — {isEn ? 'Administrator' : 'Ylläpitäjä'}
+                    </option>
+                  </NativeSelect>
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setSelectedRoleUser(null)}
+                    disabled={updateUserRoleMutation.isPending}
+                  >
+                    {isEn ? 'Cancel' : 'Peruuta'}
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="pill"
+                    disabled={updateUserRoleMutation.isPending}
+                  >
+                    {isEn ? 'Save permissions' : 'Tallenna käyttöoikeus'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Käyttöeston hallintamodaali (08 Admin User Ban Modal) */}
       <Dialog
         open={selectedBanUser !== null}
         onOpenChange={(open) => {
@@ -345,14 +485,49 @@ export const AdminUsersView: React.FC<AdminUsersViewProps> = ({
           {selectedBanUser && (
             <>
               <DialogHeader>
-                <DialogTitle>
-                  {isEn ? 'Manage user ban' : 'Hallinnoi käyttäjän estoa'}
-                </DialogTitle>
-                <div className="w-12 h-1 bg-[#EF4444]" />
-                <DialogDescription>
-                  {selectedBanUser.displayName} ({selectedBanUser.email})
-                </DialogDescription>
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-none bg-[#EF4444] text-white border-2 border-black"
+                    aria-hidden="true"
+                  >
+                    <Ban className="w-5 h-5 shrink-0" strokeWidth={2.5} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <DialogTitle>
+                      {isEn ? 'User ban' : 'Käyttöesto'}
+                    </DialogTitle>
+                    <div className="w-12 h-1 bg-[#EF4444]" />
+                    <DialogDescription>
+                      {isEn
+                        ? 'Apply a temporary or permanent ban for the user.'
+                        : 'Aseta käyttäjälle määräaikainen tai pysyvä käyttöesto.'}
+                    </DialogDescription>
+                  </div>
+                </div>
               </DialogHeader>
+
+              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black font-mono text-xs font-extrabold shrink-0">
+                    {selectedBanUser.displayName.charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm text-[#F4F4F5] truncate">
+                      {selectedBanUser.displayName}
+                    </div>
+                    <div className="font-mono text-xs text-[#9CA3AF] truncate">
+                      {selectedBanUser.email}
+                    </div>
+                  </div>
+                </div>
+                <Badge variant={selectedBanUser.isBanned ? 'wishlist' : 'status'}>
+                  {selectedBanUser.isBanned
+                    ? isEn
+                      ? 'BANNED'
+                      : 'ESTETTY'
+                    : selectedBanUser.role.toUpperCase()}
+                </Badge>
+              </div>
 
               {selectedBanUser.isBanned && (
                 <div className="px-3.5 py-3 rounded-none bg-[#EF4444]/15 border-2 border-[#EF4444] text-xs leading-snug space-y-1">

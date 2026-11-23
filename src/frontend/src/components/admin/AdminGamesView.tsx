@@ -6,10 +6,11 @@
  */
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Monitor, Gamepad2, CheckCircle2, Plus } from 'lucide-react';
+import { Monitor, Gamepad2, CheckCircle2, Plus, ChevronLeft, ChevronDown, ArrowRightLeft } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useRouter } from '../../router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +28,14 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -34,7 +43,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import type { CreateGameRequest } from '../../types';
+import type { CreateGameRequest, Game } from '../../types';
 
 /**
  * AdminGamesView-komponentin ominaisuudet.
@@ -55,10 +64,12 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
 }) => {
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
+  const { pathname, navigate } = useRouter();
   const isEn = lang === 'en';
   const queryClient = useQueryClient();
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const isNewGameRoute = pathname.replace(/\/+$/, '') === '/admin/games/new';
+  const [selectedActionGame, setSelectedActionGame] = useState<Game | null>(null);
   const [newGameName, setNewGameName] = useState('');
   const [newGamePlatform, setNewGamePlatform] = useState('PC');
   const [newGameDesc, setNewGameDesc] = useState('');
@@ -84,9 +95,9 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
       setNewGameName('');
       setNewGameDesc('');
       setNewGamePlatform('PC');
-      setIsAddModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['games'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
+      navigate('/admin/games');
     },
     onError: (err: unknown) => {
       onStatus(null);
@@ -112,6 +123,7 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
             }.`
       );
       onError(null);
+      setSelectedActionGame(null);
       queryClient.invalidateQueries({ queryKey: ['games'] });
       queryClient.invalidateQueries({ queryKey: ['statistics'] });
     },
@@ -159,6 +171,117 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
     });
   };
 
+  if (isNewGameRoute) {
+    return (
+      <Card>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <CardTitle>
+              {isEn ? 'Add new game to catalog' : 'Lisää uusi peli suoraan valikoimaan'}
+            </CardTitle>
+            <div className="w-12 h-1 bg-[#FACC15] mt-1.5 mb-2" />
+            <CardDescription>
+              {isEn
+                ? 'Games added here are immediately marked as installed in the Xamk Game Room catalog.'
+                : 'Tästä lisätyt pelit merkitään suoraan asennetuiksi Xamk Game Roomin pelivalikoimaan.'}
+            </CardDescription>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="shrink-0"
+            onClick={() => navigate('/admin/games')}
+          >
+            <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span>{isEn ? 'Back to game list' : 'Takaisin pelilistaukseen'}</span>
+          </Button>
+        </div>
+
+        <form onSubmit={handleAddGame} className="flex flex-col gap-4 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="new-game-name">
+                {isEn ? 'Game title *' : 'Pelin nimi *'}
+              </Label>
+              <Input
+                id="new-game-name"
+                type="text"
+                placeholder={
+                  isEn
+                    ? 'For example Helldivers 2 or Counter-Strike 2'
+                    : 'Esimerkiksi Helldivers 2 tai Counter-Strike 2'
+                }
+                value={newGameName}
+                onChange={(e) => setNewGameName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="new-game-platform">
+                {isEn ? 'Hardware platform *' : 'Alusta *'}
+              </Label>
+              <NativeSelect
+                id="new-game-platform"
+                value={newGamePlatform}
+                onChange={(e) => setNewGamePlatform(e.target.value)}
+              >
+                <option value="PC">PC</option>
+                <option value="PlayStation5">PlayStation 5</option>
+                <option value="NintendoSwitch">Nintendo Switch</option>
+              </NativeSelect>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="new-game-desc">
+              {isEn ? 'Short description' : 'Lyhyt kuvaus'}
+            </Label>
+            <Textarea
+              id="new-game-desc"
+              rows={3}
+              placeholder={
+                isEn
+                  ? 'Genre, multiplayer info, or notes...'
+                  : 'Lyhyt kuvaus pelistä tai pelimuodoista...'
+              }
+              value={newGameDesc}
+              onChange={(e) => setNewGameDesc(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate('/admin/games')}
+              disabled={addGameMutation.isPending}
+            >
+              {isEn ? 'Cancel' : 'Peruuta'}
+            </Button>
+            <Button
+              type="submit"
+              variant="pill"
+              disabled={addGameMutation.isPending}
+            >
+              <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+              <span>
+                {addGameMutation.isPending
+                  ? isEn
+                    ? 'Saving...'
+                    : 'Tallennetaan...'
+                  : isEn
+                  ? 'Add game to catalog'
+                  : 'Lisää peli valikoimaan'}
+              </span>
+            </Button>
+          </div>
+        </form>
+      </Card>
+    );
+  }
+
   return (
     <>
       <Card>
@@ -179,10 +302,10 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
             <Button
               type="button"
               variant="pill"
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => navigate('/admin/games/new')}
             >
               <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-              <span>{isEn ? 'Add game' : 'Lisää peli'}</span>
+              <span>{isEn ? 'Add new game' : 'Lisää uusi peli'}</span>
             </Button>
           </div>
         </div>
@@ -225,7 +348,7 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
               <TableHead>{isEn ? 'Platform' : 'Alusta'}</TableHead>
               <TableHead>{isEn ? 'Votes' : 'Äänet'}</TableHead>
               <TableHead>{isEn ? 'Status' : 'Tila'}</TableHead>
-              <TableHead>{isEn ? 'Action' : 'Toimenpide'}</TableHead>
+              <TableHead>{isEn ? 'Actions' : 'Toiminnot'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -280,27 +403,39 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <button
-                    type="button"
-                    className={
-                      game.isWishlist
-                        ? 'inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase tracking-wider cursor-pointer transition-transform duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#000000] disabled:opacity-50'
-                        : 'inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#3F444E] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors hover:border-[#FACC15] hover:bg-[#252930] disabled:opacity-50'
-                    }
-                    onClick={() => toggleWishlistMutation.mutate(game.id)}
-                    disabled={toggleWishlistMutation.isPending}
-                  >
-                    {game.isWishlist ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                        <span>{isEn ? 'Approve to catalog' : 'Hyväksy valikoimaan'}</span>
-                      </>
-                    ) : isEn ? (
-                      'Move to wishlist'
-                    ) : (
-                      'Siirrä toivelistalle'
-                    )}
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 min-h-[34px] px-3 py-1.5 rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[2px_2px_0px_#000000] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer"
+                      >
+                        <span>{isEn ? 'Actions' : 'Toiminnot'}</span>
+                        <ChevronDown className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-black shadow-[6px_6px_0px_#FACC15] min-w-[220px] p-1">
+                      <DropdownMenuLabel>
+                        {isEn ? 'Game actions' : 'Pelin toiminnot'}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setSelectedActionGame(game)}>
+                        {game.isWishlist ? (
+                          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#22C55E]" strokeWidth={2.5} aria-hidden="true" />
+                        ) : (
+                          <ArrowRightLeft className="w-4 h-4 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
+                        )}
+                        <span>
+                          {game.isWishlist
+                            ? isEn
+                              ? 'Approve to catalog...'
+                              : 'Hyväksy valikoimaan...'
+                            : isEn
+                            ? 'Move to wishlist...'
+                            : 'Siirrä toivelistalle...'}
+                        </span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -308,98 +443,86 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
         </Table>
       </Card>
 
-      {/* Lisää peli -modaali */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+      {/* Hallinnoi peliä -modaali */}
+      <Dialog
+        open={selectedActionGame !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedActionGame(null);
+        }}
+      >
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {isEn ? 'Add new game to catalog' : 'Lisää uusi peli suoraan valikoimaan'}
-            </DialogTitle>
-            <div className="w-12 h-1 bg-[#FACC15]" />
-            <DialogDescription>
-              {isEn
-                ? 'Games added here are immediately marked as installed in the Xamk Game Room catalog.'
-                : 'Tästä lisätyt pelit merkitään suoraan asennetuiksi Xamk Game Roomin pelivalikoimaan.'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleAddGame} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="modal-game-name">
-                {isEn ? 'Game title *' : 'Pelin nimi *'}
-              </Label>
-              <Input
-                id="modal-game-name"
-                type="text"
-                placeholder={
-                  isEn
-                    ? 'For example Helldivers 2 or Counter-Strike 2'
-                    : 'Esimerkiksi Helldivers 2 tai Counter-Strike 2'
-                }
-                value={newGameName}
-                onChange={(e) => setNewGameName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="modal-game-platform">
-                {isEn ? 'Hardware platform *' : 'Alusta *'}
-              </Label>
-              <NativeSelect
-                id="modal-game-platform"
-                value={newGamePlatform}
-                onChange={(e) => setNewGamePlatform(e.target.value)}
-              >
-                <option value="PC">PC</option>
-                <option value="PlayStation5">PlayStation 5</option>
-                <option value="NintendoSwitch">Nintendo Switch</option>
-              </NativeSelect>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="modal-game-desc">
-                {isEn ? 'Short description' : 'Lyhyt kuvaus'}
-              </Label>
-              <Textarea
-                id="modal-game-desc"
-                rows={3}
-                placeholder={
-                  isEn
-                    ? 'Genre, multiplayer info, or notes...'
-                    : 'Lyhyt kuvaus pelistä tai pelimuodoista...'
-                }
-                value={newGameDesc}
-                onChange={(e) => setNewGameDesc(e.target.value)}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsAddModalOpen(false)}
-                disabled={addGameMutation.isPending}
-              >
-                {isEn ? 'Cancel' : 'Peruuta'}
-              </Button>
-              <Button
-                type="submit"
-                variant="pill"
-                disabled={addGameMutation.isPending}
-              >
-                <span>
-                  {addGameMutation.isPending
+          {selectedActionGame && (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  {isEn
+                    ? `Manage game: ${selectedActionGame.name}`
+                    : `Hallinnoi peliä: ${selectedActionGame.name}`}
+                </DialogTitle>
+                <div className="w-12 h-1 bg-[#FACC15]" />
+                <DialogDescription>
+                  {selectedActionGame.isWishlist
                     ? isEn
-                      ? 'Saving...'
-                      : 'Tallennetaan...'
+                      ? 'Approve this student wishlist title as installed in the catalog.'
+                      : 'Hyväksy opiskelijatoive asennetuksi pelivalikoimaan.'
                     : isEn
-                    ? 'Add game to catalog'
-                    : 'Lisää peli valikoimaan'}
+                    ? 'Move this installed catalog game back to the student wishlist.'
+                    : 'Siirrä asennettu peli takaisin opiskelijoiden toivelistalle.'}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <strong className="font-bold text-[#F4F4F5]">{selectedActionGame.name}</strong>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="status">{selectedActionGame.platform}</Badge>
+                    {selectedActionGame.isWishlist && (
+                      <Badge variant="wishlist">
+                        {selectedActionGame.votesCount ?? 0} {isEn ? 'votes' : 'ääntä'}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                {selectedActionGame.description && (
+                  <p className="text-xs text-[#9CA3AF] m-0">{selectedActionGame.description}</p>
+                )}
+              </div>
+
+              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase text-[#9CA3AF]">
+                  {isEn ? 'Action *' : 'Toimenpide *'}
                 </span>
-              </Button>
-            </DialogFooter>
-          </form>
+                <span className="font-mono text-xs font-extrabold text-[#FACC15]">
+                  {selectedActionGame.isWishlist
+                    ? isEn
+                      ? 'Approve as installed'
+                      : 'Hyväksy asennetuksi valikoimaan'
+                    : isEn
+                    ? 'Move to wishlist'
+                    : 'Siirrä toivelistalle'}
+                </span>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setSelectedActionGame(null)}
+                  disabled={toggleWishlistMutation.isPending}
+                >
+                  {isEn ? 'Cancel' : 'Peruuta'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="pill"
+                  disabled={toggleWishlistMutation.isPending}
+                  onClick={() => toggleWishlistMutation.mutate(selectedActionGame.id)}
+                >
+                  {isEn ? 'Confirm action' : 'Vahvista toimenpide'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </>

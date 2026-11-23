@@ -270,6 +270,18 @@ export interface CreateNewsRequest {
 }
 
 /**
+ * Admin-pyyntö olemassa olevan tiedotteen muokkaamiseksi.
+ */
+export interface UpdateNewsRequest {
+  /** Tiedotteen päivitetty otsikko */
+  title: string;
+  /** Tiedotteen päivitetty leipäteksti */
+  content: string;
+  /** Kiinnitetäänkö tiedote listan kärkeen */
+  isPinned: boolean;
+}
+
+/**
  * RFC 7807 -standardin mukainen virhekuvausobjekti taustajärjestelmältä.
  */
 export interface ProblemDetails {

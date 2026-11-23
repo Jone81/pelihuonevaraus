@@ -119,7 +119,7 @@ const PAGE_META: Record<AdminSubTab, AdminPageMeta> = {
 export const AdminPanel: React.FC = () => {
   const { isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { adminSubTab, navigate } = useRouter();
+  const { adminSubTab, pathname, navigate } = useRouter();
   const isEn = lang === 'en';
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -149,6 +149,31 @@ export const AdminPanel: React.FC = () => {
   }
 
   const meta = PAGE_META[adminSubTab] ?? PAGE_META.overview;
+  const cleanPath = pathname.replace(/\/+$/, '');
+  const resolvedTitle =
+    cleanPath === '/admin/games/new'
+      ? isEn
+        ? 'Add new game'
+        : 'Lisää uusi peli'
+      : cleanPath === '/admin/news/new'
+      ? isEn
+        ? 'Publish new announcement'
+        : 'Julkaise uusi tiedote'
+      : cleanPath.startsWith('/admin/news/edit')
+      ? isEn
+        ? 'Edit announcement'
+        : 'Muokkaa tiedotetta'
+      : isEn
+      ? meta.titleEn
+      : meta.titleFi;
+  const resolvedSubtitle =
+    cleanPath.startsWith('/admin/news/edit')
+      ? isEn
+        ? 'Edit the headline, body text, or pinned status of a published announcement.'
+        : 'Muokkaa julkaistun tiedotteen otsikkoa, sisältöä tai kiinnitystä yläbanneriin.'
+      : isEn
+      ? meta.subtitleEn
+      : meta.subtitleFi;
 
   const handleClearMessages = () => {
     setStatusMessage(null);
@@ -158,8 +183,8 @@ export const AdminPanel: React.FC = () => {
   return (
     <AdminLayout
       activeSection={adminSubTab}
-      pageTitle={isEn ? meta.titleEn : meta.titleFi}
-      pageSubtitle={isEn ? meta.subtitleEn : meta.subtitleFi}
+      pageTitle={resolvedTitle}
+      pageSubtitle={resolvedSubtitle}
       statusMessage={statusMessage}
       errorMessage={errorMessage}
       onSectionChange={handleClearMessages}

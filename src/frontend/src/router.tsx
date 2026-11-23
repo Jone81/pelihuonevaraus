@@ -9,7 +9,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 /**
  * Sovelluksen päävälilehtien tunnisteet.
  */
-export type AppTab = 'book' | 'status' | 'games' | 'rules' | 'my-bookings' | 'admin' | 'superadmin';
+export type AppTab = 'news' | 'book' | 'status' | 'games' | 'rules' | 'my-bookings' | 'admin' | 'superadmin';
 
 /**
  * Ylläpitopaneelin (AdminPanel) alavälilehtien tunnisteet.
@@ -54,6 +54,8 @@ const VALID_ADMIN_SUBTABS: AdminSubTab[] = [
  */
 function tabToPath(tab: AppTab, adminSubTab?: AdminSubTab): string {
   switch (tab) {
+    case 'news':
+      return '/';
     case 'book':
       return '/book';
     case 'status':
@@ -87,7 +89,10 @@ function pathToRoute(pathname: string): {
   // Poistetaan mahdolliset lopun kauttaviivat
   const clean = pathname.replace(/\/+$/, '') || '/';
 
-  if (clean === '/' || clean === '/book' || clean === '/varaa') {
+  if (clean === '/' || clean === '/uutiset' || clean === '/news') {
+    return { tab: 'news', adminSubTab: 'overview' };
+  }
+  if (clean === '/book' || clean === '/varaa') {
     return { tab: 'book', adminSubTab: 'overview' };
   }
   if (clean === '/status' || clean === '/tilanne') {
