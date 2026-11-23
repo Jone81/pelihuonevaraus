@@ -1,0 +1,214 @@
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Pelihuone.Application.Common;
+using Pelihuone.Application.Features.Users.Commands;
+using Pelihuone.Application.Features.Users.Queries;
+using Pelihuone.Contracts.Users;
+using Pelihuone.Domain.Enums;
+using Pelihuone.WebApi.Abstractions;
+using Pelihuone.WebApi.Extensions;
+
+namespace Pelihuone.WebApi.Endpoints;
+
+/// <summary>
+/// Sisältää autentikaatioon, kaksivaiheiseen sähköpostivarmistukseen (OTP) sekä käyttäjähallintaan liittyvät HTTP-päätepisteet.
+/// </summary>
+public static class AuthEndpoints
+{
+    /// <summary>
+    /// Rekisteröi kirjautumis- ja käyttäjähallintapäätepisteet reititykseen.
+    /// </summary>
+    /// <param name="app">Sovelluksen päätepisteiden reititysrakentaja.</param>
+    /// <returns>Päivitetty reititysrakentaja ketjutusta varten.</returns>
+    public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
+    {
+        // Luodaan yhteinen reittiryhmä autentikoinnille ja käyttäjille
+        RouteGroupBuilder group = app.MapGroup("/api")
+            .WithTags("Authentication & Users");
+
+        // Perinteinen nopea kirjautuminen (tai taaksepäinyhteensopivuus)
+        group.MapPost("/auth/login", async (
+            [FromBody] LoginRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Tunnistetaan olemassa oleva käyttäjä tai luodaan uusi oppilaitossähköpostin perusteella
+            Result<UserResponse> result = await sender.Send(
+                new DevLoginCommand(request.Email, request.DisplayName ?? string.Empty),
+                cancellationToken);
+
+            // Muunnetaan palvelukerroksen tulos RFC 9457 -yhteensopivaksi HTTP-vastaukseksi
+            return result.ToHttpResult(httpContext);
+        })
+        .RequireRateLimiting(RateLimitPolicies.Auth)
+        .WithName("Login")
+        .WithSummary("Kirjaudu koulun sähköpostitunnuksilla (@edu.xamk.fi / @xamk.fi)");
+
+        // 1. Lähetä 6-numeroinen vahvistuskoodi (OTP)
+        group.MapPost("/auth/send-code", async (
+            [FromBody] SendVerificationCodeRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Generoidaan ja lähetetään kertakäyttöinen vahvistuskoodi käyttäjän sähköpostiin
+            Result<string> result = await sender.Send(
+                new SendLoginCodeCommand(request.Email),
+                cancellationToken);
+
+            // Palautetaan onnistumisviesti sekä kehitysympäristöä varten generoitu koodi
+            return result.ToHttpResult(httpContext, code =>
+                Results.Ok(new { message = "Vahvistuskoodi lähetetty sähköpostiin.", devCode = code }));
+        })
+        .RequireRateLimiting(RateLimitPolicies.Auth)
+        .WithName("SendVerificationCode")
+        .WithSummary("Lähetä 6-numeroinen varmistuskoodi koulun sähköpostiin");
+
+        // 2. Vahvista koodi ja kirjaudu
+        group.MapPost("/auth/verify-code", async (
+            [FromBody] VerifyCodeRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Tarkistetaan vahvistuskoodin oikeellisuus ja voimassaolo sekä kirjataan käyttäjä sisään
+            Result<UserResponse> result = await sender.Send(
+                new VerifyLoginCodeCommand(request.Email, request.Code, request.DisplayName),
+                cancellationToken);
+
+            return result.ToHttpResult(httpContext);
+        })
+        .RequireRateLimiting(RateLimitPolicies.Auth)
+        .WithName("VerifyCodeAndLogin")
+        .WithSummary("Vahvista koodi ja kirjaudu sisään");
+
+        // Kaikki käyttäjät (Admin)
+        group.MapGet("/users", async (
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Varmistetaan, että kutsujan käyttäjätunniste on mukana otsikkotiedoissa
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            // Tarkistetaan, että kutsujalla on ylläpitäjän (Admin tai SuperAdmin) oikeudet
+            Result<UserResponse> userResult = await sender.Send(
+                new GetUserByIdQuery(headerUserId.Value),
+                cancellationToken);
+            if (!userResult.IsSuccess || (userResult.Value.Role != "Admin" && userResult.Value.Role != "SuperAdmin"))
+            {
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
+            }
+
+            // Haetaan ja palautetaan kaikki järjestelmän käyttäjät
+            Result<IReadOnlyList<UserResponse>> result = await sender.Send(
+                new GetAllUsersQuery(),
+                cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("GetAllUsers")
+        .WithSummary("Hae kaikki järjestelmän käyttäjät (Admin)");
+
+        // Käyttäjän haku ID:llä
+        group.MapGet("/users/{id:guid}", async (
+            Guid id,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Haetaan yksittäisen käyttäjän profiilitiedot tunnisteen perusteella
+            Result<UserResponse> result = await sender.Send(
+                new GetUserByIdQuery(id),
+                cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("GetUserById")
+        .WithSummary("Hae käyttäjän profiilitiedot");
+
+        // Käyttäjän roolin päivitys (SuperAdmin)
+        group.MapPut("/users/{id:guid}/role", async (
+            Guid id,
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
+            [FromBody] UpdateUserRoleRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Varmistetaan, että pyynnön tekijä on tunnistautunut
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            // Vain SuperAdmin-roolissa oleva käyttäjä saa muuttaa muiden käyttäjien rooleja
+            Result<UserResponse> authUserResult = await sender.Send(
+                new GetUserByIdQuery(headerUserId.Value),
+                cancellationToken);
+            if (!authUserResult.IsSuccess || authUserResult.Value.Role != "SuperAdmin")
+            {
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
+            }
+
+            // Jäsennetään ja validoidaan pyydetty uusi käyttäjärooli
+            if (!Enum.TryParse<UserRole>(request.Role, true, out UserRole newRole))
+            {
+                return Results.BadRequest(new { error = "Tuntematon rooli. Sallitut: User, Admin, SuperAdmin." });
+            }
+
+            // Päivitetään kohdekäyttäjän rooli tietokantaan
+            Result<UserResponse> result = await sender.Send(
+                new UpdateUserRoleCommand(id, newRole),
+                cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("UpdateUserRole")
+        .WithSummary("Päivitä käyttäjän järjestelmärooli (Admin)");
+
+        // Käyttäjän käyttöeston / bannin asettaminen tai poistaminen (Admin / SuperAdmin)
+        group.MapPut("/users/{id:guid}/ban", async (
+            Guid id,
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
+            [FromBody] BanUserRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            // Varmistetaan, että pyynnön tekijä on tunnistautunut
+            if (!headerUserId.HasValue)
+            {
+                return Results.Unauthorized();
+            }
+
+            // Tarkistetaan, että kutsujalla on ylläpitäjän (Admin tai SuperAdmin) oikeudet
+            Result<UserResponse> authUserResult = await sender.Send(
+                new GetUserByIdQuery(headerUserId.Value),
+                cancellationToken);
+            if (!authUserResult.IsSuccess || (authUserResult.Value.Role != "Admin" && authUserResult.Value.Role != "SuperAdmin"))
+            {
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
+            }
+
+            // Asetetaan tai poistetaan kohdekäyttäjän käyttöesto (banni)
+            Result<UserResponse> result = await sender.Send(
+                new UpdateUserBanCommand(id, request),
+                cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("UpdateUserBan")
+        .WithSummary("Aseta tai poista käyttäjän määräaikainen tai pysyvä käyttöesto / banni (Admin)");
+
+        return app;
+    }
+}
+
+/// <summary>
+/// Pyynnön tietomalli perinteiselle sähköpostipohjaiselle kirjautumiselle.
+/// </summary>
+/// <param name="Email">Käyttäjän oppilaitossähköpostiosoite (@edu.xamk.fi tai @xamk.fi).</param>
+/// <param name="DisplayName">Valinnainen näyttönimi uutta käyttäjää luotaessa.</param>
+public sealed record LoginRequest(string Email, string? DisplayName = null);
