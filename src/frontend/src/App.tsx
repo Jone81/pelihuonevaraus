@@ -4,11 +4,11 @@
  * Käärii sovelluksen virherajaan (ErrorBoundary), React Query -välimuistiin,
  * kielikontekstiin, autentikaatiokontekstiin sekä reitittimeen.
  */
-import React, { useState, Component, type ReactNode } from 'react';
+import React, { useState, useEffect, Component, type ReactNode } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
-import { RouterProvider, useRouter } from './router';
 import { Navbar } from './components/Navbar';
 import { BookingCalendar } from './components/BookingCalendar';
 import { RealtimeStatus } from './components/RealtimeStatus';
@@ -85,68 +85,53 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryS
 }
 
 /**
- * Sovelluksen varsinainen sisältökomponentti, joka päättää näytetäänkö
- * kirjautumattoman käyttäjän laskeutumissivu (LandingPage) vai kirjautuneen
- * käyttäjän päänäkymä välilehtineen, modaaleineen ja alatunnisteineen.
+ * Rullaa ikkunan sulavasti ylös reitin vaihtuessa React Routerissa.
  */
-export const AppContent: React.FC = () => {
-  useGameRoomRealtime();
-  const { user } = useAuth();
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+
+  return null;
+};
+
+/**
+ * Opiskelijanäkymien jaettu kehys (ylänavigaatio, uutisbanneri, reititettävä sisältö ja alatunniste).
+ */
+interface StudentShellLayoutProps {
+  /** Käyttäjän näyttönimi */
+  displayName: string;
+  /** Käyttäjän rooli */
+  displayRole: string;
+  /** Kirjautumismodaalin avausfunktio */
+  onOpenLogin: () => void;
+  /** Pohjakuvamodaalin avausfunktio */
+  onOpenFloorPlan: () => void;
+  /** Vikailmoitusmodaalin avausfunktio */
+  onOpenIssueModal: () => void;
+}
+
+/**
+ * Kirjautuneen käyttäjän opiskelijakehys, joka renderöi aktiivisen alireitin `<Outlet />`-komponenttiin.
+ */
+const StudentShellLayout: React.FC<StudentShellLayoutProps> = ({
+  displayName,
+  displayRole,
+  onOpenLogin,
+  onOpenFloorPlan,
+  onOpenIssueModal,
+}) => {
   const { lang, t } = useLanguage();
   const isEn = lang === 'en';
-  const { activeTab, setActiveTab } = useRouter();
 
-  // Modaali-ikkunoiden aukiolotilat
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
-  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-
-  // Käyttäjän näyttönimi ja rooli alatunnistetta varten
-  const displayName = user?.displayName || 'Matti Meikäläinen';
-  const displayRole = user?.role ? user.role.toUpperCase() : 'USER';
-
-  // Kirjautumattomalle käyttäjälle näytetään julkinen laskeutumissivu ja tarvittavat modaalit
-  if (!user) {
-    return (
-      <>
-        <LandingPage
-          onOpenLogin={() => setIsLoginOpen(true)}
-          onOpenIssueModal={() => setIsIssueModalOpen(true)}
-          onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-        />
-
-        <FloorPlanModal
-          isOpen={isFloorPlanOpen}
-          onClose={() => setIsFloorPlanOpen(false)}
-        />
-
-        <IssueReportModal
-          isOpen={isIssueModalOpen}
-          onClose={() => setIsIssueModalOpen(false)}
-        />
-
-        <LoginModal
-          isOpen={isLoginOpen}
-          onClose={() => setIsLoginOpen(false)}
-        />
-      </>
-    );
-  }
-
-  // Dedikoitu Admin Shell: ei julkista Navbaria, NewsBanneria tai 4-sarakkeista footeria
-  if (activeTab === 'admin' || activeTab === 'superadmin') {
-    return activeTab === 'superadmin' ? <SuperAdminPanel /> : <AdminPanel />;
-  }
-
-  // Kirjautuneen käyttäjän sovelluskehikko: navigaatio, tiedotebanneri, aktiivinen välilehti ja alatunniste
   return (
     <div className="min-h-screen flex flex-col bg-[#121417] text-[#F4F4F5]">
       <Navbar
-        onOpenLogin={() => setIsLoginOpen(true)}
-        onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-        onOpenIssueModal={() => setIsIssueModalOpen(true)}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        onOpenLogin={onOpenLogin}
+        onOpenFloorPlan={onOpenFloorPlan}
+        onOpenIssueModal={onOpenIssueModal}
       />
 
       {/* Hero Banner directly below Navbar */}
@@ -154,34 +139,10 @@ export const AppContent: React.FC = () => {
       <NewsBanner />
 
       {/* Main Content Surface */}
-      {/* Pääsisältöalue, joka renderöidään aktiivisen välilehden (activeTab) perusteella */}
+      {/* Pääsisältöalue, joka renderöidään aktiivisen React Router -reitin perusteella */}
       <main className="flex-1 bg-[#121417] text-[#F4F4F5] py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {activeTab === 'news' && <NewsFeedPage />}
-
-          {activeTab === 'book' && (
-            <BookingCalendar
-              onRequireLogin={() => setIsLoginOpen(true)}
-              onSuccessBooking={() => setActiveTab('my-bookings')}
-              onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-              onNavigateMyBookings={() => setActiveTab('my-bookings')}
-            />
-          )}
-
-          {activeTab === 'status' && (
-            <RealtimeStatus
-              onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
-              onNavigateToBooking={() => setActiveTab('book')}
-            />
-          )}
-
-          {activeTab === 'games' && <GamesCatalog />}
-
-          {activeTab === 'rules' && (
-            <RulesAndGuide onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
-          )}
-
-          {activeTab === 'my-bookings' && <MyReservations />}
+          <Outlet />
         </div>
       </main>
 
@@ -198,24 +159,24 @@ export const AppContent: React.FC = () => {
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('book')}>
+                <Link to="/book" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 no-underline">
                   {isEn ? 'Book station' : 'Varaa laite'}
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('status')}>
+                <Link to="/status" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 no-underline">
                   {isEn ? 'Live status' : 'Tilan tilanne'}
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('games')}>
+                <Link to="/games" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 no-underline">
                   {isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('my-bookings')}>
+                <Link to="/my-bookings" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 no-underline">
                   {isEn ? 'My bookings' : 'Omat varaukset'}
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -227,12 +188,12 @@ export const AppContent: React.FC = () => {
             </h3>
             <ul className="flex flex-col gap-2 text-sm text-[#D4D4D8] list-none p-0 m-0">
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setActiveTab('rules')}>
+                <Link to="/rules" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 no-underline">
                   {isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setIsFloorPlanOpen(true)}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={onOpenFloorPlan}>
                   {isEn ? 'Floor plan' : 'Tilan pohjakuva'}
                 </button>
               </li>
@@ -252,7 +213,7 @@ export const AppContent: React.FC = () => {
                 </a>
               </li>
               <li>
-                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={() => setIsIssueModalOpen(true)}>
+                <button type="button" className="font-mono font-bold text-left text-[#F4F4F5] hover:text-[#FACC15] hover:underline underline-offset-4 cursor-pointer bg-transparent border-0 p-0" onClick={onOpenIssueModal}>
                   {isEn ? 'Report issue' : 'Ilmoita viasta'}
                 </button>
               </li>
@@ -299,6 +260,135 @@ export const AppContent: React.FC = () => {
           </span>
         </div>
       </footer>
+    </div>
+  );
+};
+
+/**
+ * Sovelluksen varsinainen sisältökomponentti, joka päättää näytetäänkö
+ * kirjautumattoman käyttäjän laskeutumissivu (LandingPage) vai kirjautuneen
+ * käyttäjän React Router -reititetyt päänäkymät, modaalit ja alatunniste.
+ */
+export const AppContent: React.FC = () => {
+  useGameRoomRealtime();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Modaali-ikkunoiden aukiolotilat
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
+
+  // Käyttäjän näyttönimi ja rooli alatunnistetta varten
+  const displayName = user?.displayName || 'Matti Meikäläinen';
+  const displayRole = user?.role ? user.role.toUpperCase() : 'USER';
+
+  // Kirjautumattomalle käyttäjälle näytetään julkinen laskeutumissivu ja tarvittavat modaalit
+  if (!user) {
+    return (
+      <>
+        <LandingPage
+          onOpenLogin={() => setIsLoginOpen(true)}
+          onOpenIssueModal={() => setIsIssueModalOpen(true)}
+          onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+        />
+
+        <FloorPlanModal
+          isOpen={isFloorPlanOpen}
+          onClose={() => setIsFloorPlanOpen(false)}
+        />
+
+        <IssueReportModal
+          isOpen={isIssueModalOpen}
+          onClose={() => setIsIssueModalOpen(false)}
+        />
+
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={() => setIsLoginOpen(false)}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Routes>
+        {/* Dedikoitu Admin Shell: ei julkista Navbaria, NewsBanneria tai 4-sarakkeista footeria */}
+        <Route path="/superadmin" element={<SuperAdminPanel />} />
+        <Route path="/admin/override" element={<SuperAdminPanel />} />
+        <Route path="/admin/*" element={<AdminPanel />} />
+
+        {/* Kirjautuneen käyttäjän sovelluskehikko ja opiskelijanäkymät */}
+        <Route
+          element={
+            <StudentShellLayout
+              displayName={displayName}
+              displayRole={displayRole}
+              onOpenLogin={() => setIsLoginOpen(true)}
+              onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+              onOpenIssueModal={() => setIsIssueModalOpen(true)}
+            />
+          }
+        >
+          <Route index element={<NewsFeedPage />} />
+          <Route path="/news" element={<NewsFeedPage />} />
+          <Route path="/uutiset" element={<NewsFeedPage />} />
+          <Route
+            path="/book"
+            element={
+              <BookingCalendar
+                onRequireLogin={() => setIsLoginOpen(true)}
+                onSuccessBooking={() => navigate('/my-bookings')}
+                onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+                onNavigateMyBookings={() => navigate('/my-bookings')}
+              />
+            }
+          />
+          <Route
+            path="/varaa"
+            element={
+              <BookingCalendar
+                onRequireLogin={() => setIsLoginOpen(true)}
+                onSuccessBooking={() => navigate('/my-bookings')}
+                onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+                onNavigateMyBookings={() => navigate('/my-bookings')}
+              />
+            }
+          />
+          <Route
+            path="/status"
+            element={
+              <RealtimeStatus
+                onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+                onNavigateToBooking={() => navigate('/book')}
+              />
+            }
+          />
+          <Route
+            path="/tilanne"
+            element={
+              <RealtimeStatus
+                onOpenFloorPlan={() => setIsFloorPlanOpen(true)}
+                onNavigateToBooking={() => navigate('/book')}
+              />
+            }
+          />
+          <Route path="/games" element={<GamesCatalog />} />
+          <Route path="/pelit" element={<GamesCatalog />} />
+          <Route
+            path="/rules"
+            element={<RulesAndGuide onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />}
+          />
+          <Route
+            path="/saannot"
+            element={<RulesAndGuide onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />}
+          />
+          <Route path="/my-bookings" element={<MyReservations />} />
+          <Route path="/omat-varaukset" element={<MyReservations />} />
+          <Route path="*" element={<Navigate to="/book" replace />} />
+        </Route>
+      </Routes>
 
       {/* Globaalit modaali-ikkunat kirjautumiselle, pohjakuvalle ja vikailmoituksille */}
       <LoginModal
@@ -315,13 +405,13 @@ export const AppContent: React.FC = () => {
         isOpen={isIssueModalOpen}
         onClose={() => setIsIssueModalOpen(false)}
       />
-    </div>
+    </>
   );
 };
 
 /**
- * Sovelluksen pääkomponentti, joka yhdistää kaikki kontekstitarjoajat (Provider)
- * ja virherajan yhtenäiseksi kokonaisuudeksi.
+ * Sovelluksen pääkomponentti, joka yhdistää kaikki kontekstitarjoajat (Provider),
+ * React Routerin ja virherajan yhtenäiseksi kokonaisuudeksi.
  */
 export const App: React.FC = () => {
   return (
@@ -329,9 +419,10 @@ export const App: React.FC = () => {
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
           <AuthProvider>
-            <RouterProvider>
+            <BrowserRouter>
+              <ScrollToTop />
               <AppContent />
-            </RouterProvider>
+            </BrowserRouter>
           </AuthProvider>
         </LanguageProvider>
       </QueryClientProvider>

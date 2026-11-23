@@ -15,10 +15,10 @@ import {
   Clock,
   ArrowLeft,
 } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useRouter } from '../router';
 import { AdminLayout } from './admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +43,7 @@ export const SuperAdminPanel: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
   const isEn = lang === 'en';
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const formInstanceId = useId();
 

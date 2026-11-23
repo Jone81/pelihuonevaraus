@@ -5,12 +5,12 @@
  * uuden pelin lisäämiseen.
  */
 import React, { useState, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Monitor, Gamepad2, CheckCircle2, Plus, ChevronLeft, ChevronDown, ArrowRightLeft } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter } from '../../router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,6 +49,8 @@ import type { CreateGameRequest, Game } from '../../types';
  * AdminGamesView-komponentin ominaisuudet.
  */
 export interface AdminGamesViewProps {
+  /** Näkymän tila (`list` tai `new`) */
+  mode?: 'list' | 'new';
   /** Callback onnistumisviestin näyttämiseen */
   onStatus: (msg: string | null) => void;
   /** Callback virheviestin näyttämiseen */
@@ -59,16 +61,18 @@ export interface AdminGamesViewProps {
  * Pelien ja toivelistan hallintanäkymä ylläpitopaneelissa.
  */
 export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
+  mode,
   onStatus,
   onError,
 }) => {
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { pathname, navigate } = useRouter();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isEn = lang === 'en';
   const queryClient = useQueryClient();
 
-  const isNewGameRoute = pathname.replace(/\/+$/, '') === '/admin/games/new';
+  const isNewGameRoute = mode === 'new' || location.pathname.replace(/\/+$/, '') === '/admin/games/new';
   const [selectedActionGame, setSelectedActionGame] = useState<Game | null>(null);
   const [newGameName, setNewGameName] = useState('');
   const [newGamePlatform, setNewGamePlatform] = useState('PC');

@@ -6,12 +6,13 @@
  * sivun otsikkorivin ja yhtenäiset tilaviestit.
  */
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Menu, ArrowLeft, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { adminSectionToPath, type AdminSection } from '../../router';
 import { AdminSidebar } from './AdminSidebar';
 
 /** LocalStorage-avain sivupalkin kokoon taitetun tilan tallentamiseen */
@@ -54,7 +55,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 }) => {
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { setAdminSubTab, setActiveTab } = useRouter();
+  const navigate = useNavigate();
   const isEn = lang === 'en';
 
   // Työpöydän sivupalkin leveys (tallennetaan localStorageen)
@@ -96,11 +97,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   const handleNavigateSection = (section: AdminSection) => {
     onSectionChange?.();
-    if (section === 'superadmin') {
-      setActiveTab('superadmin');
-    } else {
-      setAdminSubTab(section);
-    }
+    navigate(adminSectionToPath(section));
   };
 
   return (

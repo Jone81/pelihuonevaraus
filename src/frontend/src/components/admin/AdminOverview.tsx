@@ -20,10 +20,11 @@ import {
   ArrowRight,
   Wrench,
 } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { adminSectionToPath, type AdminSection } from '../../router';
 
 /**
  * Yksittäisen yleiskatsauskortin tietomalli.
@@ -65,7 +66,7 @@ interface OverviewGroup {
 export const AdminOverview: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { setAdminSubTab, setActiveTab } = useRouter();
+  const navigate = useNavigate();
   const isEn = lang === 'en';
 
   // Haetaan yleiskatsauksen tunnusluvut
@@ -139,11 +140,7 @@ export const AdminOverview: React.FC = () => {
   );
 
   const handleOpenSection = (section: AdminSection) => {
-    if (section === 'superadmin') {
-      setActiveTab('superadmin');
-    } else {
-      setAdminSubTab(section);
-    }
+    navigate(adminSectionToPath(section));
   };
 
   const gameRoomCards: OverviewActionCard[] = [

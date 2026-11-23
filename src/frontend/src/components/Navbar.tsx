@@ -5,6 +5,7 @@
  * käyttäjävalikon sekä mobiililaitteiden sivuvalikon (Drawer).
  */
 import React, { useState, useEffect } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import {
   Calendar,
   Gamepad2,
@@ -27,7 +28,14 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { useRouter, type AppTab, type AdminSubTab } from '../router';
+import {
+  adminSectionToPath,
+  pathnameToAdminSubTab,
+  pathnameToAppTab,
+  tabToPath,
+  type AdminSubTab,
+  type AppTab,
+} from '../router';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -50,10 +58,17 @@ interface NavbarProps {
   onOpenFloorPlan: () => void;
   /** Valinnainen funktio vikailmoitusmodaalin avaamiseen */
   onOpenIssueModal?: () => void;
-  /** Nykyinen aktiivinen päävälilehti */
-  activeTab: AppTab;
-  /** Funktio päävälilehden vaihtamiseen */
-  setActiveTab: (tab: AppTab) => void;
+}
+
+/**
+ * Palauttaa työpöydän navigaatiolinkille aktiivisen tai perusmuotoilun CSS-luokat.
+ */
+function desktopNavLinkClass(isTabActive: boolean): string {
+  return `inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${
+    isTabActive
+      ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
+      : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
+  }`;
 }
 
 /**
@@ -63,12 +78,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLogin,
   onOpenFloorPlan,
   onOpenIssueModal,
-  activeTab,
-  setActiveTab,
 }) => {
   const { user, logout, isSuperAdmin, isAdmin } = useAuth();
   const { lang, t } = useLanguage();
-  const { adminSubTab, setAdminSubTab } = useRouter();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = pathnameToAppTab(location.pathname);
+  const adminSubTab = pathnameToAdminSubTab(location.pathname);
   const isEn = lang === 'en';
 
   // Mobiilivalikon (hampurilaisvalikko) aukiolotila
@@ -97,15 +113,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
   }, [isMobileMenuOpen]);
 
-  // Vaihtaa päävälilehteä ja sulkee mobiilivalikon
+  // Vaihtaa päävälilehteä React Routerin kautta ja sulkee mobiilivalikon
   const handleTabClick = (tab: AppTab) => {
-    setActiveTab(tab);
+    navigate(tabToPath(tab));
     setIsMobileMenuOpen(false);
   };
 
-  // Vaihtaa ylläpitopaneelin alavälilehteä ja sulkee mobiilivalikon
+  // Vaihtaa ylläpitopaneelin alavälilehteä React Routerin kautta ja sulkee mobiilivalikon
   const handleAdminSubTabClick = (subTab: AdminSubTab) => {
-    setAdminSubTab(subTab);
+    navigate(adminSectionToPath(subTab));
     setIsMobileMenuOpen(false);
   };
 
@@ -136,10 +152,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-[1440px] mx-auto px-3 sm:px-5 min-h-[56px] py-2 flex items-center justify-between gap-3">
         {/* Left: Xamk Brand Logo & Title */}
         {/* Vasen reuna: Xamk-brändilogo ja sovelluksen otsikko */}
-        <button
-          type="button"
-          className="inline-flex items-center gap-2.5 text-left min-w-0 shrink-0 cursor-pointer bg-transparent border-0 p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
-          onClick={() => handleTabClick('news')}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2.5 text-left min-w-0 shrink-0 cursor-pointer no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
+          onClick={() => setIsMobileMenuOpen(false)}
           aria-label="Uutiset ja tiedotteet"
         >
           <img
@@ -155,7 +171,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               XAMK GAME ROOM
             </span>
           </div>
-        </button>
+        </Link>
 
         {/* Right: Report Issue + Language Switcher + User Profile */}
         {/* Oikea reuna: Vikailmoituslinkki, kielivalitsin ja käyttäjäprofiilin valikko */}
@@ -265,52 +281,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="max-w-[1440px] mx-auto px-3 sm:px-5 py-1.5 flex flex-wrap items-center justify-center gap-1.5"
             aria-label="Päävalikko"
           >
-            <button
-              type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'book'
-                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                }`}
-              onClick={() => setActiveTab('book')}
+            <NavLink
+              to="/book"
+              className={({ isActive }) => desktopNavLinkClass(isActive || activeTab === 'book')}
             >
               <Calendar className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Book station' : 'Varaa laite'}</span>
-            </button>
+            </NavLink>
 
-            <button
-              type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'status'
-                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                }`}
-              onClick={() => setActiveTab('status')}
+            <NavLink
+              to="/status"
+              className={({ isActive }) => desktopNavLinkClass(isActive || activeTab === 'status')}
             >
               <span>{isEn ? 'Live status' : 'Tilan tilanne'}</span>
-            </button>
+            </NavLink>
 
-            <button
-              type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'games'
-                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                }`}
-              onClick={() => setActiveTab('games')}
+            <NavLink
+              to="/games"
+              className={({ isActive }) => desktopNavLinkClass(isActive || activeTab === 'games')}
             >
               <Gamepad2 className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}</span>
-            </button>
+            </NavLink>
 
-            <button
-              type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'rules'
-                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                }`}
-              onClick={() => setActiveTab('rules')}
+            <NavLink
+              to="/rules"
+              className={({ isActive }) => desktopNavLinkClass(isActive || activeTab === 'rules')}
             >
               <BookOpen className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'Rules and guide' : 'Säännöt ja ohjeet'}</span>
-            </button>
+            </NavLink>
 
             <button
               type="button"
@@ -332,17 +332,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Discord</span>
             </a>
 
-            <button
-              type="button"
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'my-bookings'
-                ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
-                : 'bg-transparent text-[#D4D4D8] border-transparent hover:bg-[#121417] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                }`}
-              onClick={() => setActiveTab('my-bookings')}
+            <NavLink
+              to="/my-bookings"
+              className={({ isActive }) => desktopNavLinkClass(isActive || activeTab === 'my-bookings')}
             >
               <ClipboardList className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
               <span>{isEn ? 'My bookings' : 'Omat varaukset'}</span>
-            </button>
+            </NavLink>
 
             {/* Admin-pudotusvalikko ylläpitäjille ja pääkäyttäjille */}
             {isAdmin && (
@@ -354,7 +350,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
                       : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
                       }`}
-                    onClick={() => setActiveTab('admin')}
+                    onClick={() => navigate('/admin')}
                   >
                     <Settings className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                     <span>Admin</span>

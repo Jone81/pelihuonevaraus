@@ -23,9 +23,10 @@ import {
   PanelLeftOpen,
   X,
 } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { type AdminSection } from '../../router';
 
 /**
  * Yksittäisen sivupalkin navigaatiokohteen määritys.
@@ -89,7 +90,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const { user, logout, isSuperAdmin } = useAuth();
   const { lang, setLang } = useLanguage();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const isEn = lang === 'en';
 
   // Suljetaan mobiilidrawer Escape-näppäimellä

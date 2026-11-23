@@ -5,12 +5,12 @@
  * uuden tiedotteen kirjoittamiseen muotoilupainikkeineen, esikatseluineen ja kiinnityksineen.
  */
 import React, { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Link, Eye, EyeOff, Pin, Pencil, Save, ChevronLeft } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter } from '../../router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +23,8 @@ import type { CreateNewsRequest, NewsItem, UpdateNewsRequest } from '../../types
  * AdminNewsView-komponentin ominaisuudet.
  */
 export interface AdminNewsViewProps {
+  /** Näkymän tila (`list`, `new` tai `edit`) */
+  mode?: 'list' | 'new' | 'edit';
   /** Callback onnistumisviestin näyttämiseen */
   onStatus: (msg: string | null) => void;
   /** Callback virheviestin näyttämiseen */
@@ -289,21 +291,24 @@ const NewsFormCard: React.FC<NewsFormCardProps> = ({
  * Tiedotteiden hallintanäkymä ylläpitopaneelissa.
  */
 export const AdminNewsView: React.FC<AdminNewsViewProps> = ({
+  mode,
   onStatus,
   onError,
 }) => {
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { pathname, navigate } = useRouter();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { newsId } = useParams<{ newsId?: string }>();
   const isEn = lang === 'en';
   const queryClient = useQueryClient();
 
-  const cleanPath = pathname.replace(/\/+$/, '');
-  const isCreateRoute = cleanPath === '/admin/news/new';
-  const isEditRoute = cleanPath === '/admin/news/edit' || cleanPath.startsWith('/admin/news/edit/');
-  const editIdParam = cleanPath.startsWith('/admin/news/edit/')
+  const cleanPath = location.pathname.replace(/\/+$/, '');
+  const isCreateRoute = mode === 'new' || cleanPath === '/admin/news/new';
+  const isEditRoute = mode === 'edit' || cleanPath === '/admin/news/edit' || Boolean(newsId);
+  const editIdParam = newsId ?? (cleanPath.startsWith('/admin/news/edit/')
     ? cleanPath.slice('/admin/news/edit/'.length)
-    : null;
+    : null);
 
   const { data: allNews } = useQuery({
     queryKey: ['news'],
