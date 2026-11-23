@@ -15,7 +15,7 @@ import {
   Clock,
   ArrowLeft,
 } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -43,7 +43,6 @@ export const SuperAdminPanel: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
   const isEn = lang === 'en';
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const formInstanceId = useId();
 
@@ -120,14 +119,13 @@ export const SuperAdminPanel: React.FC = () => {
               ? 'Only SuperAdmin accounts have access to this panel.'
               : 'Vain pääkäyttäjällä, SuperAdmin, on pääsy tähän paneeliin.'}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/book')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer"
+          <Link
+            to="/book"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer no-underline"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen'}</span>
-          </button>
+          </Link>
         </div>
       </div>
     );

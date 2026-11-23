@@ -5,7 +5,7 @@
  * uuden pelin lisäämiseen.
  */
 import React, { useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Monitor, Gamepad2, CheckCircle2, Plus, ChevronLeft, ChevronDown, ArrowRightLeft } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
@@ -192,13 +192,14 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
           </div>
 
           <Button
-            type="button"
+            asChild
             variant="outline"
-            className="shrink-0"
-            onClick={() => navigate('/admin/games')}
+            className="shrink-0 no-underline"
           >
-            <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-            <span>{isEn ? 'Back to game list' : 'Takaisin pelilistaukseen'}</span>
+            <Link to="/admin/games">
+              <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+              <span>{isEn ? 'Back to game list' : 'Takaisin pelilistaukseen'}</span>
+            </Link>
           </Button>
         </div>
 
@@ -257,12 +258,13 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
-              type="button"
+              asChild
               variant="secondary"
-              onClick={() => navigate('/admin/games')}
-              disabled={addGameMutation.isPending}
+              className="no-underline"
             >
-              {isEn ? 'Cancel' : 'Peruuta'}
+              <Link to="/admin/games">
+                {isEn ? 'Cancel' : 'Peruuta'}
+              </Link>
             </Button>
             <Button
               type="submit"
@@ -304,12 +306,14 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <Button
-              type="button"
+              asChild
               variant="pill"
-              onClick={() => navigate('/admin/games/new')}
+              className="no-underline"
             >
-              <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-              <span>{isEn ? 'Add new game' : 'Lisää uusi peli'}</span>
+              <Link to="/admin/games/new">
+                <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                <span>{isEn ? 'Add new game' : 'Lisää uusi peli'}</span>
+              </Link>
             </Button>
           </div>
         </div>

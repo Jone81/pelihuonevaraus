@@ -5,7 +5,7 @@
  * käyttäjävalikon sekä mobiililaitteiden sivuvalikon (Drawer).
  */
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router';
+import { Link, NavLink, useLocation } from 'react-router';
 import {
   Calendar,
   Gamepad2,
@@ -32,8 +32,6 @@ import {
   adminSectionToPath,
   pathnameToAdminSubTab,
   pathnameToAppTab,
-  tabToPath,
-  type AdminSubTab,
   type AppTab,
 } from '../router';
 import {
@@ -82,7 +80,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { user, logout, isSuperAdmin, isAdmin } = useAuth();
   const { lang, t } = useLanguage();
   const location = useLocation();
-  const navigate = useNavigate();
   const activeTab = pathnameToAppTab(location.pathname);
   const adminSubTab = pathnameToAdminSubTab(location.pathname);
   const isEn = lang === 'en';
@@ -112,18 +109,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       document.body.classList.remove('mobile-menu-lock');
     };
   }, [isMobileMenuOpen]);
-
-  // Vaihtaa päävälilehteä React Routerin kautta ja sulkee mobiilivalikon
-  const handleTabClick = (tab: AppTab) => {
-    navigate(tabToPath(tab));
-    setIsMobileMenuOpen(false);
-  };
-
-  // Vaihtaa ylläpitopaneelin alavälilehteä React Routerin kautta ja sulkee mobiilivalikon
-  const handleAdminSubTabClick = (subTab: AdminSubTab) => {
-    navigate(adminSectionToPath(subTab));
-    setIsMobileMenuOpen(false);
-  };
 
   // Avaa pohjakuvamodaalin ja sulkee mobiilivalikon
   const handleFloorPlanClick = () => {
@@ -210,9 +195,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleTabClick('my-bookings')}>
-                  <ClipboardList className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                  <span>{isEn ? 'My bookings' : 'Omat varaukset'}</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/my-bookings" className="no-underline">
+                    <ClipboardList className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                    <span>{isEn ? 'My bookings' : 'Omat varaukset'}</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onOpenLogin}>
                   <User className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -344,17 +331,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isAdmin && (
               <DropdownMenu>
                 <div className="inline-flex items-stretch">
-                  <button
-                    type="button"
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'admin' || activeTab === 'superadmin'
+                  <NavLink
+                    to="/admin"
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[34px] text-xs font-mono font-bold uppercase tracking-tight rounded-none border transition-colors cursor-pointer whitespace-nowrap no-underline ${activeTab === 'admin' || activeTab === 'superadmin'
                       ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[2px_2px_0px_#000000]'
                       : 'bg-[#121417] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
                       }`}
-                    onClick={() => navigate('/admin')}
                   >
                     <Settings className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                     <span>Admin</span>
-                  </button>
+                  </NavLink>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
@@ -374,97 +360,117 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'overview' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('overview')}
                   >
-                    <LayoutDashboard className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Overview' : 'Yleiskatsaus'}</span>
+                    <Link to={adminSectionToPath('overview')} className="no-underline">
+                      <LayoutDashboard className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Overview' : 'Yleiskatsaus'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'reservations' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('reservations')}
                   >
-                    <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Reservations' : 'Varaukset'}</span>
+                    <Link to={adminSectionToPath('reservations')} className="no-underline">
+                      <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Reservations' : 'Varaukset'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'stations' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('stations')}
                   >
-                    <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Stations and maintenance' : 'Pelipisteet ja huolto'}</span>
+                    <Link to={adminSectionToPath('stations')} className="no-underline">
+                      <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Stations and maintenance' : 'Pelipisteet ja huolto'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'issues' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('issues')}
                   >
-                    <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Issue reports' : 'Vikailmoitukset'}</span>
+                    <Link to={adminSectionToPath('issues')} className="no-underline">
+                      <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Issue reports' : 'Vikailmoitukset'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'games' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('games')}
                   >
-                    <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}</span>
+                    <Link to={adminSectionToPath('games')} className="no-underline">
+                      <Gamepad2 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Games and wishlist' : 'Pelit ja toivelista'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'news' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('news')}
                   >
-                    <Newspaper className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Announcements' : 'Tiedotteet'}</span>
+                    <Link to={adminSectionToPath('news')} className="no-underline">
+                      <Newspaper className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Announcements' : 'Tiedotteet'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'users' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('users')}
                   >
-                    <Users className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Users and bans' : 'Käyttäjät ja estot'}</span>
+                    <Link to={adminSectionToPath('users')} className="no-underline">
+                      <Users className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Users and bans' : 'Käyttäjät ja estot'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'statistics' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('statistics')}
                   >
-                    <BarChart3 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Statistics and usage' : 'Tilastot ja käyttöaste'}</span>
+                    <Link to={adminSectionToPath('statistics')} className="no-underline">
+                      <BarChart3 className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Statistics and usage' : 'Tilastot ja käyttöaste'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    asChild
                     className={
                       activeTab === 'admin' && adminSubTab === 'settings' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''
                     }
-                    onClick={() => handleAdminSubTabClick('settings')}
                   >
-                    <Settings className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Site settings' : 'Sivuston asetukset'}</span>
+                    <Link to={adminSectionToPath('settings')} className="no-underline">
+                      <Settings className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Site settings' : 'Sivuston asetukset'}</span>
+                    </Link>
                   </DropdownMenuItem>
                   {isSuperAdmin && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
+                        asChild
                         className={activeTab === 'superadmin' ? 'bg-[#FACC15] text-[#09090B] font-extrabold' : ''}
-                        onClick={() => handleTabClick('superadmin')}
                       >
-                        <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                        <span>{t('nav.superadmin')}</span>
+                        <Link to="/superadmin" className="no-underline">
+                          <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                          <span>{t('nav.superadmin')}</span>
+                        </Link>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -532,46 +538,46 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <nav className="flex flex-col p-4 gap-2 flex-1" aria-label="Mobiilin päävalikko">
-              <button
-                type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'book'
+              <NavLink
+                to="/book"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'book'
                   ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                   : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
                   }`}
-                onClick={() => handleTabClick('book')}
               >
                 <span>{t('nav.book')}</span>
-              </button>
-              <button
-                type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'status'
+              </NavLink>
+              <NavLink
+                to="/status"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'status'
                   ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                   : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
                   }`}
-                onClick={() => handleTabClick('status')}
               >
                 <span>{t('nav.status')}</span>
-              </button>
-              <button
-                type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'games'
+              </NavLink>
+              <NavLink
+                to="/games"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'games'
                   ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                   : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
                   }`}
-                onClick={() => handleTabClick('games')}
               >
                 <span>{t('nav.games')}</span>
-              </button>
-              <button
-                type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'rules'
+              </NavLink>
+              <NavLink
+                to="/rules"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'rules'
                   ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                   : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
                   }`}
-                onClick={() => handleTabClick('rules')}
               >
                 <span>{t('nav.rules')}</span>
-              </button>
+              </NavLink>
               <button
                 type="button"
                 className="w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]"
@@ -579,39 +585,39 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <span>{t('nav.floorplan')}</span>
               </button>
-              <button
-                type="button"
-                className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'my-bookings'
+              <NavLink
+                to="/my-bookings"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'my-bookings'
                   ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                   : 'bg-[#1C1F24] text-[#F4F4F5] border-[#3F444E] hover:border-[#FACC15]'
                   }`}
-                onClick={() => handleTabClick('my-bookings')}
               >
                 <span>{t('nav.myBookings')}</span>
-              </button>
+              </NavLink>
               {isAdmin && (
-                <button
-                  type="button"
-                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'admin'
+                <NavLink
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'admin'
                     ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                     : 'bg-[#1C1F24] text-[#3B82F6] border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white'
                     }`}
-                  onClick={() => handleTabClick('admin')}
                 >
                   <span>{t('nav.admin')}</span>
-                </button>
+                </NavLink>
               )}
               {isSuperAdmin && (
-                <button
-                  type="button"
-                  className={`w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors ${activeTab === 'superadmin'
+                <NavLink
+                  to="/superadmin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block w-full text-left px-3 py-3 rounded-none font-mono font-bold text-sm uppercase border cursor-pointer transition-colors no-underline ${activeTab === 'superadmin'
                     ? 'bg-[#FACC15] text-[#09090B] border-black shadow-[3px_3px_0px_#000000]'
                     : 'bg-[#1C1F24] text-[#FACC15] border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B]'
                     }`}
-                  onClick={() => handleTabClick('superadmin')}
                 >
                   <span>{t('nav.superadmin')}</span>
-                </button>
+                </NavLink>
               )}
             </nav>
 

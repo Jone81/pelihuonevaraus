@@ -6,7 +6,7 @@
  * `AdminStatisticsView` ja `AdminSettingsView`) dedikoituun `AdminLayout`-kehykseen.
  */
 import React, { useState } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -121,7 +121,6 @@ export const AdminPanel: React.FC = () => {
   const { isAdmin } = useAuth();
   const { lang } = useLanguage();
   const location = useLocation();
-  const navigate = useNavigate();
   const adminSubTab = pathnameToAdminSubTab(location.pathname);
   const isEn = lang === 'en';
 
@@ -138,14 +137,13 @@ export const AdminPanel: React.FC = () => {
               ? 'Only administrators have access to this control panel.'
               : 'Vain ylläpitäjillä on pääsy tähän paneeliin.'}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/book')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer"
+          <Link
+            to="/book"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer no-underline"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen'}</span>
-          </button>
+          </Link>
         </div>
       </div>
     );

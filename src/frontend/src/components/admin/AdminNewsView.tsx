@@ -5,7 +5,7 @@
  * uuden tiedotteen kirjoittamiseen muotoilupainikkeineen, esikatseluineen ja kiinnityksineen.
  */
 import React, { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { Link as RouterLink, useLocation, useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Link, Eye, EyeOff, Pin, Pencil, Save, ChevronLeft } from 'lucide-react';
 import { api, ApiError } from '../../api/client';
@@ -43,8 +43,8 @@ interface NewsFormCardProps {
   initialNews?: NewsItem;
   /** Tallennuksen keskeneräisyystila */
   isPending: boolean;
-  /** Peruutus- tai paluutoiminto listaukseen */
-  onCancel: () => void;
+  /** Peruutus- tai paluupolku listaukseen */
+  backTo: string;
   /** Lomakkeen lähetystoiminto */
   onSubmit: (title: string, content: string, isPinned: boolean) => void;
 }
@@ -57,7 +57,7 @@ const NewsFormCard: React.FC<NewsFormCardProps> = ({
   isEn,
   initialNews,
   isPending,
-  onCancel,
+  backTo,
   onSubmit,
 }) => {
   const [newsTitle, setNewsTitle] = useState(initialNews?.title ?? '');
@@ -97,13 +97,14 @@ const NewsFormCard: React.FC<NewsFormCardProps> = ({
         </div>
 
         <Button
-          type="button"
+          asChild
           variant="outline"
-          className="shrink-0"
-          onClick={onCancel}
+          className="shrink-0 no-underline"
         >
-          <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-          <span>{isEn ? 'Back to announcements' : 'Takaisin tiedotteisiin'}</span>
+          <RouterLink to={backTo}>
+            <ChevronLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span>{isEn ? 'Back to announcements' : 'Takaisin tiedotteisiin'}</span>
+          </RouterLink>
         </Button>
       </div>
 
@@ -254,12 +255,13 @@ const NewsFormCard: React.FC<NewsFormCardProps> = ({
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <Button
-            type="button"
+            asChild
             variant="secondary"
-            onClick={onCancel}
-            disabled={isPending}
+            className="no-underline"
           >
-            {isEn ? 'Cancel' : 'Peruuta'}
+            <RouterLink to={backTo}>
+              {isEn ? 'Cancel' : 'Peruuta'}
+            </RouterLink>
           </Button>
           <Button type="submit" variant="pill" disabled={isPending}>
             {isEdit ? (
@@ -391,7 +393,7 @@ export const AdminNewsView: React.FC<AdminNewsViewProps> = ({
         isEn={isEn}
         initialNews={editingNews}
         isPending={createNewsMutation.isPending || updateNewsMutation.isPending}
-        onCancel={() => navigate('/admin/news')}
+        backTo="/admin/news"
         onSubmit={(title, content, isPinned) => {
           if (isEditRoute && editingNews) {
             updateNewsMutation.mutate({
@@ -427,13 +429,14 @@ export const AdminNewsView: React.FC<AdminNewsViewProps> = ({
         </div>
 
         <Button
-          type="button"
+          asChild
           variant="pill"
-          className="shrink-0"
-          onClick={() => navigate('/admin/news/new')}
+          className="shrink-0 no-underline"
         >
-          <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-          <span>{isEn ? 'Publish new announcement' : 'Julkaise uusi tiedote'}</span>
+          <RouterLink to="/admin/news/new">
+            <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span>{isEn ? 'Publish new announcement' : 'Julkaise uusi tiedote'}</span>
+          </RouterLink>
         </Button>
       </div>
 
@@ -467,13 +470,15 @@ export const AdminNewsView: React.FC<AdminNewsViewProps> = ({
                     {new Date(news.createdAtUtc).toLocaleDateString('fi-FI')}
                   </time>
                   <Button
-                    type="button"
+                    asChild
                     variant="secondary"
                     size="sm"
-                    onClick={() => navigate(`/admin/news/edit/${news.id}`)}
+                    className="no-underline"
                   >
-                    <Pencil className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                    <span>{isEn ? 'Edit' : 'Muokkaa'}</span>
+                    <RouterLink to={`/admin/news/edit/${news.id}`}>
+                      <Pencil className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+                      <span>{isEn ? 'Edit' : 'Muokkaa'}</span>
+                    </RouterLink>
                   </Button>
                   <Button
                     type="button"
