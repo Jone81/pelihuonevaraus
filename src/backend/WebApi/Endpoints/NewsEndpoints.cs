@@ -57,6 +57,24 @@ public static class NewsEndpoints
         .WithName("CreateNews")
         .WithSummary("Julkaise uusi tiedote tai uutinen (Vain Admin)");
 
+        // Päivitä olemassa oleva tiedote (Admin)
+        group.MapPut("/{id:guid}", async (
+            Guid id,
+            [FromHeader(Name = "X-User-Id")] Guid? headerUserId,
+            [FromBody] UpdateNewsRequest request,
+            ISender sender,
+            HttpContext httpContext,
+            CancellationToken cancellationToken) =>
+        {
+            Guid userId = headerUserId ?? Guid.Empty;
+            Result<NewsResponse> result = await sender.Send(
+                new UpdateNewsCommand(id, request, userId),
+                cancellationToken);
+            return result.ToHttpResult(httpContext);
+        })
+        .WithName("UpdateNews")
+        .WithSummary("Päivitä olemassa oleva tiedote (Vain Admin)");
+
         // Poista tiedote (Admin)
         group.MapDelete("/{id:guid}", async (
             Guid id,
