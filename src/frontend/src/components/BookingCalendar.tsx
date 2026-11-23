@@ -352,9 +352,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
   /**
    * Validoi varauslomakkeen tiedot (aukioloajat, arkipäivät, kestorajat) ja lähettää varauksen.
+   * Kutsutaan sekä työpöydän varauslomakkeelta että mobiilin kiinteästä alavahvistuspalkista.
    */
-  const handleBooking = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitBooking = (): void => {
     setConflictMessage(null);
     setGeneralError(null);
 
@@ -451,6 +451,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
     };
 
     reservationMutation.mutate(request);
+  };
+
+  /**
+   * Käsittelee varauslomakkeen lähetyksen.
+   */
+  const handleBooking = (e: React.FormEvent): void => {
+    e.preventDefault();
+    submitBooking();
   };
 
   /**
@@ -650,9 +658,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const endMinutes = useMemo(() => parseTimeToMinutes(endHour), [endHour]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {/* LEFT COLUMN: Tee uusi varaus */}
-      <section className="lg:col-span-5 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-5 sm:p-6 space-y-5" aria-labelledby="heading-new-booking">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-24 lg:pb-0">
+      {/* LEFT COLUMN (desktop) / SECOND SECTION (mobile): Tee uusi varaus */}
+      <section className="order-2 lg:order-1 lg:col-span-5 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-5 sm:p-6 space-y-5" aria-labelledby="heading-new-booking">
         <div className="space-y-2">
           <h2 id="heading-new-booking" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#09090B]">{t('booking.title')}</h2>
           <div className="h-1 w-16 bg-[#FACC15] border border-black" />
@@ -803,11 +811,75 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         </form>
       </section>
 
-      {/* RIGHT COLUMN: Päivän varaukset ja aikataulu */}
-      <section className="lg:col-span-7 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6 space-y-5" aria-labelledby="heading-day-schedule">
+      {/* RIGHT COLUMN (desktop) / FIRST SECTION (mobile): Päivän varaukset ja aikataulu */}
+      <section className="order-1 lg:order-2 lg:col-span-7 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6 space-y-5" aria-labelledby="heading-day-schedule">
         <div className="space-y-2">
           <h2 id="heading-day-schedule" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.title')}</h2>
           <div className="h-1 w-16 bg-[#FACC15] border border-black" />
+        </div>
+
+        {/* Kompaktit mobiilikontrollit aikataulumatriisin yläpuolella */}
+        <div className="lg:hidden space-y-3">
+          {conflictMessage && (
+            <div className="p-3 rounded-none bg-[#EF4444] text-white border-2 border-black font-mono font-bold text-xs shadow-[3px_3px_0px_#000000]" role="alert">
+              {conflictMessage}
+            </div>
+          )}
+
+          {generalError && (
+            <div className="p-3 rounded-none bg-[#EF4444] text-white border-2 border-black font-mono font-bold text-xs shadow-[3px_3px_0px_#000000]" role="alert">
+              {generalError}
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label className="text-[#A1A1AA] font-mono font-bold text-xs uppercase tracking-wider">
+              {t('booking.typeLabel')}
+            </Label>
+            <Tabs
+              value={String(reservationType)}
+              onValueChange={(val) => {
+                if (val === 'my-bookings') {
+                  onNavigateMyBookings?.();
+                  return;
+                }
+                setReservationType(Number(val) as ReservationType);
+              }}
+            >
+              <TabsList aria-label={t('booking.typeLabel')}>
+                <TabsTrigger value="1">
+                  {isEn ? 'Single station' : 'Yksittäinen laite'}
+                </TabsTrigger>
+                <TabsTrigger value="2">
+                  {isEn ? 'Whole room' : 'Koko tila'}
+                </TabsTrigger>
+                {isAdmin ? (
+                  <TabsTrigger value="3">
+                    {isEn ? 'Event, Admin' : 'Tapahtuma'}
+                  </TabsTrigger>
+                ) : (
+                  <TabsTrigger value="my-bookings">
+                    {isEn ? 'My bookings' : 'Omat varaukset'}
+                  </TabsTrigger>
+                )}
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="mobile-date" className="text-[#A1A1AA] font-mono font-bold text-xs uppercase tracking-wider">
+              {t('booking.date')}
+            </Label>
+            <input
+              id="mobile-date"
+              type="date"
+              className="w-full min-h-[44px] px-3 py-2 rounded-none bg-white text-[#09090B] font-mono font-bold text-sm border-2 border-black focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#FACC15]"
+              min={dateBounds.today}
+              max={dateBounds.maxDateStr}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -944,6 +1016,47 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
           </table>
         </div>
       </section>
+
+      {/* Kiinteä alavahvistuspalkki mobiilinäkymässä */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#121417]/95 backdrop-blur-sm border-t-2 border-[#FACC15] shadow-[0_-4px_16px_rgba(0,0,0,0.65)] px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <div className="flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm text-[#F4F4F5] truncate">
+              {reservationType === 1 ? (
+                <>
+                  {activeStation && (
+                    <StationIcon type={activeStation.type} name={activeStation.name} />
+                  )}
+                  <span className="truncate">
+                    {activeStation?.name || t('booking.selectStation')}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Building2 className="w-4 h-4 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
+                  <span className="truncate">
+                    {reservationType === 2 ? t('booking.type.room') : t('booking.type.event')}
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="font-mono font-extrabold text-xs text-[#FACC15] truncate">
+              {`${startHour}-${endHour}`}
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="xamk"
+            className="min-h-[44px] px-4 shrink-0"
+            onClick={submitBooking}
+            disabled={reservationMutation.isPending || (reservationType === 1 && !effectiveStationId)}
+          >
+            {reservationMutation.isPending
+              ? t('booking.processing')
+              : t('booking.submit')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
