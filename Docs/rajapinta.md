@@ -57,6 +57,7 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 |----------------|-----------|------|
 | GET `/api/news` | Listaa tiedotteet (kiinnitetyt ensin, sitten uusimmat) | Kaikki |
 | POST `/api/news` | Luo uuden tiedotteen | Admin ja SuperAdmin |
+| PUT `/api/news/{id}` | Päivittää olemassa olevan tiedotteen otsikon, sisällön ja kiinnitystilan | Admin ja SuperAdmin |
 | DELETE `/api/news/{id}` | Poistaa tiedotteen | Admin ja SuperAdmin |
 
 ### Vikailmoitukset (`/api/issues`)
@@ -82,7 +83,7 @@ Palvelin lähettää SignalR-hubin (`GameRoomHub`, polku `/hubs/gameroom`) kautt
 - `StationStatusChanged` (pelipisteen huoltotilan muutos)
 - `SettingsChanged` (sivuston asetusten tai huoneen huoltotilan muutos)
 - `IssueReportChanged` (uusi vikailmoitus tai kuittaus)
-- `NewsChanged` (tiedotteen julkaisu tai poisto)
+- `NewsChanged` (tiedotteen julkaisu, muokkaus tai poisto)
 - `GamesChanged` (pelin lisäys, toivelistaehdotus, tilanvaihto tai äänestys)
 
 ---
