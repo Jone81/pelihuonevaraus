@@ -6,7 +6,7 @@ Oppilaitoksen (Xamk) pelitilan ja pelipisteiden ajanvarausjärjestelmä.
 - Backend toteutettu .NET 10 Web API -ratkaisuna (Clean Architecture, Result-malli, FluentValidation).
 - Tietokantana toimii PostgreSQL (EF Core) sekä InMemory-tietokanta paikalliseen kehitykseen.
 - Testit sisältävät 37 yksikkö- ja integraatiotestiä xUnit-kehyksellä.
-- Kaikki arkkitehtuuri-, domain- ja käyttöliittymädokumentit löytyvät kansiosta [`Docs/`](./Docs/README.md).
+- Kaikki arkkitehtuuri-, domain- ja käyttöliittymädokumentit löytyvät kansiosta [`Docs/`](./Docs/) ja lukujärjestys tiedostosta [`AGENTS.md`](./AGENTS.md).
 
 ---
 
