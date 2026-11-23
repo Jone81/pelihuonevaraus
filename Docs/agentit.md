@@ -1,4 +1,4 @@
-# Agenttien roolit, pelihuoneen varausjärjestelmä
+﻿# Agenttien roolit, pelihuoneen varausjärjestelmä
 
 Tiedosto `AGENTS.md` koskee jokaista agenttia. Tämä tiedosto määrittelee, mitä kukin rooli lukee, mitä se saa muuttaa, mitä se ei saa tehdä ja mitä se palauttaa. Rooleja on seitsemän: johtaja, viisi kerroskohtaista työntekijää (`Domain`, `Application`, `Infrastructure`, `API`, `UI`) ja katselmoija.
 
@@ -33,7 +33,7 @@ Spec: 001-varaa-pelipiste, askel 3
 Rooli: Application-työntekijä
 Säännöt ja Paikat: 6 (laitepäällekkäisyys), 7 (tilavaraus), 8 (SharedTV), ReservationService
 Kriteerit: K1, K7, K8 use case -testinä
-Saat kirjoittaa: src/Application/** ja tests/Application.Tests/**
+Saat kirjoittaa: src/backend/Application/** ja tests/Application.Tests/**
 Tallennuksen rajapinnat, joita käytät: IReservationRepository, IGamingStationRepository
 Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 ```
@@ -44,10 +44,10 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 
 - Tehtävä: käsitteet, arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`, vahvasti tyypitetyt ID:t), entiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja niiden sisäiset säännöt (#1, #4, #5, #9, #11).
 - Lukee: `Docs/domain.md`, `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, `Docs/adr/`, spec ja sen askel.
-- Saa muuttaa: `src/Domain/**`, `src/Contracts/**`, `src/Application/Abstractions/**`, `tests/Application.Tests/**`.
+- Saa muuttaa: `src/backend/Domain/**`, `src/backend/Contracts/**`, `src/backend/Application/Abstractions/**`, `tests/Application.Tests/**`.
 - Ei saa: viitata ulkoiseen NuGet-pakettiin, tietokantaan tai HTTP-kirjastoon; kutsua järjestelmän kelloa suoraan (`DateTimeOffset.UtcNow`); käyttää `var`-avainsanaa.
 - Palauttaa johtajalle: muutetut tiedostot, testien tuloste, lista säännöistä ja niiden testeistä, kysymykset.
-- Valmis kun: askeleen Domain-kriteerit ovat vihreitä eikä `src/Domain` viittaa ulkoiseen kirjastoon.
+- Valmis kun: askeleen Domain-kriteerit ovat vihreitä eikä `src/backend/Domain` viittaa ulkoiseen kirjastoon.
 
 ---
 
@@ -55,8 +55,8 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 
 - Tehtävä: käyttötapauspalvelut (`ReservationService`, `GamingStationService`, `UserService`, `GameService`, `NewsService`, `SettingsService`, `StatisticsService`, `IssueReportService`), syötevalidaattorit ja hakua vaativat säännöt (#2, #3, #6, #7, #8, #10, #11) sekä "vapaana nyt" -laskenta.
 - Lukee: `Docs/domain.md`, `Docs/arkkitehtuuri.md`, `Docs/rajapinta.md`, `Docs/testaus.md`, spec ja sen askel, Domainin ja Contractsin julkiset tyypit.
-- Saa muuttaa: `src/Application/**` (pl. `Abstractions/`), `tests/Application.Tests/**`.
-- Ei saa: muuttaa `src/Domain/**`; viitata EF Coreen tai ASP.NET Coreen; heittää liiketoimintavirheitä poikkeuksina (`Result<T>`-pakko); lokittaa henkilötietoja.
+- Saa muuttaa: `src/backend/Application/**` (pl. `Abstractions/`), `tests/Application.Tests/**`.
+- Ei saa: muuttaa `src/backend/Domain/**`; viitata EF Coreen tai ASP.NET Coreen; heittää liiketoimintavirheitä poikkeuksina (`Result<T>`-pakko); lokittaa henkilötietoja.
 - Palauttaa johtajalle: muutetut tiedostot, use case -testien tuloste, kriteeri- ja testilista, kysymykset.
 - Valmis kun: askeleen kriteerit menevät läpi use case -testinä ja jokainen sääntöhylkäys palauttaa `Result.Failure(...)`.
 
@@ -65,9 +65,9 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 ## Infrastructure-työntekijä (`@TIETOKANTA`)
 
 - Tehtävä: repositorioiden toteutus EF Corella (`ApplicationDbContext`, PostgreSQL ja InMemory fallback), Fluent API -konfiguraatiot, `OutboxInterceptor`, `SystemDateTimeProvider` ja `DatabaseSeeder`.
-- Lukee: `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, `src/Application/Abstractions/**`, `src/Domain/**`, spec ja sen askel.
-- Saa muuttaa: `src/Infrastructure/**`, `tests/Infrastructure.Tests/**`, `tests/Integration.Tests/**`.
-- Ei saa: tarkistaa liiketoimintasääntöjä repositoriossa; muuttaa `src/Domain/**` tai `src/Application/**`; tallentaa tietokantatiedostoja repoon.
+- Lukee: `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, `src/backend/Application/Abstractions/**`, `src/backend/Domain/**`, spec ja sen askel.
+- Saa muuttaa: `src/backend/Infrastructure/**`, `tests/Infrastructure.Tests/**`, `tests/Integration.Tests/**`.
+- Ei saa: tarkistaa liiketoimintasääntöjä repositoriossa; muuttaa `src/backend/Domain/**` tai `src/backend/Application/**`; tallentaa tietokantatiedostoja repoon.
 - Palauttaa johtajalle: muutetut tiedostot, testien tuloste, kysymykset.
 - Valmis kun: repositoriot ja `OutboxInterceptor` toimivat sekä PostgreSQL-konttia että muistitietokantaa vasten.
 
@@ -75,9 +75,9 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 
 ## API-työntekijä (`@API`)
 
-- Tehtävä: Minimal API -päätepisteet (`src/WebApi/Endpoints/`), RFC 9457 `ProblemDetails` -muunnokset (`ResultExtensions`, `GlobalExceptionHandler`), Rate Limiting ja päätepistetestit.
-- Lukee: `Docs/rajapinta.md`, `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, spec ja sen askel, `src/Contracts/**`.
-- Saa muuttaa: `src/WebApi/**`, `tests/WebApi.Tests/**`.
+- Tehtävä: Minimal API -päätepisteet (`src/backend/WebApi/Endpoints/`), RFC 9457 `ProblemDetails` -muunnokset (`ResultExtensions`, `GlobalExceptionHandler`), Rate Limiting ja päätepistetestit.
+- Lukee: `Docs/rajapinta.md`, `Docs/arkkitehtuuri.md`, `Docs/testaus.md`, spec ja sen askel, `src/backend/Contracts/**`.
+- Saa muuttaa: `src/backend/WebApi/**`, `tests/WebApi.Tests/**`.
 - Ei saa: tarkistaa liiketoimintasääntöjä endpointissa; kutsua repositorioita ohi käyttötapauspalvelun; palauttaa Domain-entiteettejä suoraan HTTP-vastauksessa.
 - Palauttaa johtajalle: muutetut tiedostot, API-testien tuloste kriteerinumeroin, kysymykset.
 - Valmis kun: askeleen HTTP-kriteerit menevät läpi oikeilla statuskoodeilla (`200`, `201`, `204`, `400`, `403`, `404`, `409`).
@@ -86,11 +86,11 @@ Palauta: muutetut tiedostot, dotnet test -tuloste, kysymykset
 
 ## UI-työntekijä (`@UI`)
 
-- Tehtävä: React ja TypeScript -käyttöliittymä (`src/Client/**`), Xamk-brändiohjeiston mukainen ulkoasu, `shadcn/ui`-komponentit, URL-reititys (`router.tsx`), kaikkien 8 laitteen aikataulumatriisi (`Drag-to-Select`) ja kaksikielisyys (`fi` ja `en`).
+- Tehtävä: React ja TypeScript -käyttöliittymä (`src/frontend/**`), Xamk-brändiohjeiston mukainen ulkoasu, `shadcn/ui`-komponentit, URL-reititys (`router.tsx`), kaikkien 8 laitteen aikataulumatriisi (`Drag-to-Select`) ja kaksikielisyys (`fi` ja `en`).
 - Lukee: `Docs/UI_SPEC.md`, `Docs/rajapinta.md`, `specs/003-*.md` (tai kyseinen spec).
-- Saa muuttaa: `src/Client/**`.
+- Saa muuttaa: `src/frontend/**`.
 - Ei saa: muokata backend-projekteja; käyttää `any`-tyyppiä tai `var`-avainsanaa; jättää kääntäjä- tai ESLint-varoituksia.
-- Palauttaa johtajalle: muutetut tiedostot, `npm --prefix src/Client run build && npm --prefix src/Client run lint` -tuloste, kysymykset.
+- Palauttaa johtajalle: muutetut tiedostot, `npm --prefix src/frontend run build && npm --prefix src/frontend run lint` -tuloste, kysymykset.
 - Valmis kun: UI kääntyy ja läpäisee ESLintin nollalla varoituksella ja täyttää `Docs/UI_SPEC.md`:n invariantit `UI-1`-`UI-6`.
 
 ---

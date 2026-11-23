@@ -1,6 +1,6 @@
 # Rajapinta, pelihuoneen varausjärjestelmä
 
-Tämä tiedosto kuvaa julkisen HTTP-rajapinnan lupaukset sanoina. Yksityiskohtaiset C#-tietosopimukset (`src/Contracts/`) ja päätepisteiden tarkat DTO-mallit löytyvät tiedostosta [`Docs/rajapinnat.md`](./rajapinnat.md).
+Tämä tiedosto kuvaa julkisen HTTP-rajapinnan lupaukset sanoina. Yksityiskohtaiset C#-tietosopimukset (`src/backend/Contracts/`) ja päätepisteiden tarkat DTO-mallit löytyvät tiedostosta [`Docs/rajapinnat.md`](./rajapinnat.md).
 
 ## Versio
 
@@ -75,11 +75,21 @@ Kaikki reitit ovat polun `/api` alla. Rikkova muutos (kentän poistaminen tai ni
 | PUT `/api/settings` | Päivittää aukioloaikoja, kiintiöitä, huoltotilaa tai Discord-webhookia | Admin ja SuperAdmin |
 | GET `/api/statistics` | Hakee varausmäärien ja suosituimpien pelipisteiden tilastot | Admin ja SuperAdmin |
 
+### Reaaliaikaiset ilmoitukset (SignalR `/hubs/gameroom`)
+
+Palvelin lähettää SignalR-hubin (`GameRoomHub`, polku `/hubs/gameroom`) kautta reaaliaikaiset tapahtumat yhdistetyille selaimille onnistuneiden kirjoituskomentojen jälkeen:
+- `ReservationChanged` (varauksen luonti, peruutus, kesken lopetus tai tapahtumavaraus)
+- `StationStatusChanged` (pelipisteen huoltotilan muutos)
+- `SettingsChanged` (sivuston asetusten tai huoneen huoltotilan muutos)
+- `IssueReportChanged` (uusi vikailmoitus tai kuittaus)
+- `NewsChanged` (tiedotteen julkaisu tai poisto)
+- `GamesChanged` (pelin lisäys, toivelistaehdotus, tilanvaihto tai äänestys)
+
 ---
 
 ## Kentät sanoina
 
-Vastauksessa palautetaan vain DTO-sopimuksen (`src/Contracts/`) kentät. Domain-entiteettejä ei koskaan palauteta suoraan rajapinnasta.
+Vastauksessa palautetaan vain DTO-sopimuksen (`src/backend/Contracts/`) kentät. Domain-entiteettejä ei koskaan palauteta suoraan rajapinnasta.
 
 | Reitti | Sisään | Ulos |
 |--------|--------|------|

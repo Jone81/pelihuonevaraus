@@ -1,4 +1,4 @@
-# Testaus, pelihuoneen varausjärjestelmä
+﻿# Testaus, pelihuoneen varausjärjestelmä
 
 Tiedosto `Docs/arkkitehtuuri.md` määrittelee kerrokset ja kiellot. `specs/`-tiedostot määrittelevät hyväksymiskriteerit Given-When-Then-muodossa. Tämä tiedosto määrittelee yhteisen testiaineiston, kiinteän kellon käytön, hyväksymiskriteerien ajotavan, sääntöjen kattavuusmatriisin sekä sen, kuka ajaa testit missäkin vaiheessa.
 
@@ -47,7 +47,7 @@ dotnet test tests/Integration.Tests/Pelihuone.Integration.Tests.csproj --nologo 
 Käyttöliittymän kääntäminen ja lint-tarkistukset ajetaan komennolla:
 
 ```bash
-npm --prefix src/Client run build && npm --prefix src/Client run lint
+npm --prefix src/frontend run build && npm --prefix src/frontend run lint
 ```
 
 ## Kattavuusmatriisi

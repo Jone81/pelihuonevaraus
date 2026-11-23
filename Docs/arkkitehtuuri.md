@@ -1,4 +1,4 @@
-# Järjestelmäarkkitehtuuri (arkkitehtuuri.md)
+﻿# Järjestelmäarkkitehtuuri (arkkitehtuuri.md)
 
 Tämä dokumentti kuvaa Pelihuonevaraus (Xamk Game Room) -järjestelmän ohjelmistoarkkitehtuurin, kerrosjaon, suunnittelumallit, tietokantatason rinnakkaisuudenhallinnan, virheenkäsittelyn, tietoturvan sekä käännösaikaiset laatupalomuurit.
 
@@ -10,10 +10,10 @@ Järjestelmä on toteutettu Clean Architecture- ja taktisen Domain-Driven Design
 
 1. Riippuvuuksien kääntäminen (Dependency Inversion Principle). Sisemmät kerrokset (`Domain`, `Application`) määrittelevät abstraktiot (`IReservationRepository`, `IUnitOfWork`, `IDateTimeProvider`), ja ulompi `Infrastructure`-kerros toteuttaa ne. `Domain`-kerroksella on 0 ulkoista NuGet- tai kehysriippuvuutta.
 2. Kerroskohtainen DI-eristys (Dependency Injection Isolation). Jokainen kerros rekisteröi omat palvelunsa omaan laajennusmetodiinsa:
-   - [`src/Application/DependencyInjection.cs`](../src/Application/DependencyInjection.cs) tarjoaa metodin `services.AddApplication()`
-   - [`src/Infrastructure/DependencyInjection.cs`](../src/Infrastructure/DependencyInjection.cs) tarjoaa metodin `services.AddInfrastructure(configuration)`
-   Esityskerros ([`src/WebApi/Program.cs`](../src/WebApi/Program.cs)) kutsuu näitä laajennusmetodeja ja kytkee HTTP-putken.
-3. Poikkeukseton ohjausrakenne (`Result<T>`-malli). Liiketoimintavirheitä (validointi, päällekkäinen varaus, käyttöesto, puuttuva resurssi) ei käsitellä poikkeuksilla, vaan tyyppiturvallisella [`Result<T>`](../src/Application/Common/Result.cs)- ja [`Error`](../src/Application/Common/Error.cs)-rakenteella.
+   - [`src/backend/Application/DependencyInjection.cs`](../src/backend/Application/DependencyInjection.cs) tarjoaa metodin `services.AddApplication()`
+   - [`src/backend/Infrastructure/DependencyInjection.cs`](../src/backend/Infrastructure/DependencyInjection.cs) tarjoaa metodin `services.AddInfrastructure(configuration)`
+   Esityskerros ([`src/backend/WebApi/Program.cs`](../src/backend/WebApi/Program.cs)) kutsuu näitä laajennusmetodeja ja kytkee HTTP-putken.
+3. Poikkeukseton ohjausrakenne (`Result<T>`-malli). Liiketoimintavirheitä (validointi, päällekkäinen varaus, käyttöesto, puuttuva resurssi) ei käsitellä poikkeuksilla, vaan tyyppiturvallisella [`Result<T>`](../src/backend/Application/Common/Result.cs)- ja [`Error`](../src/backend/Application/Common/Error.cs)-rakenteella.
 
 ---
 
@@ -22,21 +22,21 @@ Järjestelmä on toteutettu Clean Architecture- ja taktisen Domain-Driven Design
 ```mermaid
 flowchart TB
     subgraph Presentation ["1. Esityskerros ja käyttöliittymä"]
-        Client["src/Client\n(React 19 + TypeScript + Vite + TanStack Query)"]
-        WebApi["src/WebApi\n(ASP.NET Core 10 Minimal APIs, RateLimiter,\nGlobalExceptionHandler, ResultExtensions)"]
+        Client["src/frontend\n(React 19 + TypeScript + Vite + TanStack Query)"]
+        WebApi["src/backend/WebApi\n(ASP.NET Core 10 Minimal APIs, RateLimiter,\nGlobalExceptionHandler, ResultExtensions)"]
     end
 
     subgraph SharedContracts ["2. Jaetut tietosopimukset"]
-        Contracts["src/Contracts\n(Muuttumattomat C# record -DTO:t:\nRequest, Response, PagedResult<T>)"]
+        Contracts["src/backend/Contracts\n(Muuttumattomat C# record -DTO:t:\nRequest, Response, PagedResult<T>)"]
     end
 
     subgraph Core ["3. Sovellus- ja toimialueydin (Core)"]
-        Application["src/Application\n(Käyttötapauspalvelut, FluentValidation,\nResult<T>, Repository- ja Time-abstraktiot)"]
-        Domain["src/Domain\n(Aggregaatit, Entiteetit, Value Objectit,\nDomain Events, Domain Exceptions)"]
+        Application["src/backend/Application\n(Käyttötapauspalvelut, FluentValidation,\nResult<T>, Repository- ja Time-abstraktiot)"]
+        Domain["src/backend/Domain\n(Aggregaatit, Entiteetit, Value Objectit,\nDomain Events, Domain Exceptions)"]
     end
 
     subgraph Infra ["4. Infrastruktuurikerros"]
-        Infrastructure["src/Infrastructure\n(EF Core ApplicationDbContext, PostgreSQL / InMemory,\nOutboxInterceptor, Repositoriot, DatabaseSeeder)"]
+        Infrastructure["src/backend/Infrastructure\n(EF Core ApplicationDbContext, PostgreSQL / InMemory,\nOutboxInterceptor, Repositoriot, DatabaseSeeder)"]
     end
 
     Client == "REST / JSON\n(HTTP)" ==> WebApi
@@ -53,43 +53,43 @@ flowchart TB
 
 | Projekti / Kansio | Sijainti | Sallitut riippuvuudet | Keskeinen vastuu |
 | :--- | :--- | :--- | :--- |
-| **`Pelihuone.Domain`** | `src/Domain/` | *Ei yhtään* | Liiketoimintainvariantit, vahvasti tyypitetyt ID:t (`UserId`, `ReservationId`, `GamingStationId`, `GameRoomId`), arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`), juurientiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja domain-tapahtumat (`IDomainEvent`). |
-| **`Pelihuone.Contracts`** | `src/Contracts/` | *Ei yhtään* | Julkisen REST-rajapinnan ja sovelluspalveluiden väliset syöte- ja vastaustietueet (`record`) sekä sivutusmalli [`PagedResult<T>`](../src/Contracts/Common/PagedResult.cs). |
-| **`Pelihuone.Application`** | `src/Application/` | `Domain`, `Contracts`, `FluentValidation` | Käyttötapauskohtainen orkestrointi (`ReservationService`, `UserService`, `GamingStationService`, `GameService`, `NewsService`, `SettingsService`, `StatisticsService`, `IssueReportService`, `DiscordNotificationService`), syötteiden validointi ja repositorioiden rajapinnat (`Abstractions/Repositories/`). |
-| **`Pelihuone.Infrastructure`** | `src/Infrastructure/` | `Application`, `Domain`, `EF Core`, `Npgsql` | Tietokantakonteksti ([`ApplicationDbContext`](../src/Infrastructure/Persistence/ApplicationDbContext.cs)), EF Core Fluent API -määritykset (`Configurations/`), `OutboxInterceptor`, repositoriototeutukset, `SystemDateTimeProvider` ja `DatabaseSeeder`. |
-| **`Pelihuone.WebApi`** | `src/WebApi/` | `Application`, `Infrastructure`, `Contracts` | HTTP-reititys (`Endpoints/`), Rate Limiting, CORS, globaali virheenkäsittely ([`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs)) ja `Result<T>`-tulosten muuntaminen RFC 9457 `ProblemDetails` -vastauksiksi. |
-| **`Client` (Frontend)** | `src/Client/` | React 19, TanStack Query, Tailwind, Radix UI | Mobiilioptimoitu yksisivuinen web-sovellus (SPA), interaktiivinen varauskalenteri (`Drag-to-Select`), reaaliaikainen tilanäkymä, pelikatalogi ja 6-välilehtinen Admin-hallintapaneeli. |
+| **`Pelihuone.Domain`** | `src/backend/Domain/` | *Ei yhtään* | Liiketoimintainvariantit, vahvasti tyypitetyt ID:t (`UserId`, `ReservationId`, `GamingStationId`, `GameRoomId`), arvo-objektit (`TimeWindow`, `OpeningHours`, `SchoolEmail`), juurientiteetit (`Reservation`, `User`, `GamingStation`, `GameRoom`, `Game`, `News`, `IssueReport`) ja domain-tapahtumat (`IDomainEvent`). |
+| **`Pelihuone.Contracts`** | `src/backend/Contracts/` | *Ei yhtään* | Julkisen REST-rajapinnan ja sovelluspalveluiden väliset syöte- ja vastaustietueet (`record`) sekä sivutusmalli [`PagedResult<T>`](../src/backend/Contracts/Common/PagedResult.cs). |
+| **`Pelihuone.Application`** | `src/backend/Application/` | `Domain`, `Contracts`, `FluentValidation`, `MediatR` | CQRS-komennot ja -kyselyt (`Features/`), MediatR pipeline-käyttäytymiset (`ValidationBehavior`, `LoggingBehavior`, `CachingBehavior`), käyttötapauspalvelut, syötteiden validointi sekä repositorio-, kello-, välimuisti- (`ICacheService`) ja reaaliaikaisuusabstraktiot (`IRealtimeNotifier`). |
+| **`Pelihuone.Infrastructure`** | `src/backend/Infrastructure/` | `Application`, `Domain`, `EF Core`, `Npgsql`, `HybridCache` | Tietokantakonteksti ([`ApplicationDbContext`](../src/backend/Infrastructure/Persistence/ApplicationDbContext.cs)), EF Core Fluent API -määritykset (`Configurations/`), `OutboxInterceptor`, `HybridCacheService`, repositoriototeutukset, `SystemDateTimeProvider` ja `DatabaseSeeder`. |
+| **`Pelihuone.WebApi`** | `src/backend/WebApi/` | `Application`, `Infrastructure`, `Contracts` | HTTP-reititys (`Endpoints/` via `ISender`), SignalR-hubi (`GameRoomHub` `/hubs/gameroom`), Rate Limiting, CORS, globaali virheenkäsittely ([`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs)) ja `Result<T>`-tulosten muuntaminen RFC 9457 `ProblemDetails` -vastauksiksi. |
+| **`Client` (Frontend)** | `src/frontend/` | React 19, TanStack Query, SignalR, Tailwind, Radix UI | Mobiilioptimoitu yksisivuinen web-sovellus (SPA), reaaliaikaiset SignalR-päivitykset, interaktiivinen varauskalenteri (`Drag-to-Select`), reaaliaikainen tilanäkymä, pelikatalogi ja sivupalkillinen Admin-hallintapaneeli. |
 
 ---
 
-## 3. Taktinen Domain-Driven Design (DDD) src/Domain-kerroksessa
+## 3. Taktinen Domain-Driven Design (DDD) src/backend/Domain-kerroksessa
 
 ### 3.1 Juurientiteetit (`AggregateRoot<TId>`) ja entiteetit (`Entity<TId>`)
-Kaikki entiteetit perivät [`Entity<TId>`](../src/Domain/Common/Entity.cs)-perusluokan ja aggregaattijuuret [`AggregateRoot<TId>`](../src/Domain/Common/AggregateRoot.cs)-luokan, joka ylläpitää listaa julkaisemattomista domain-tapahtumista (`IReadOnlyCollection<IDomainEvent> DomainEvents`).
+Kaikki entiteetit perivät [`Entity<TId>`](../src/backend/Domain/Common/Entity.cs)-perusluokan ja aggregaattijuuret [`AggregateRoot<TId>`](../src/backend/Domain/Common/AggregateRoot.cs)-luokan, joka ylläpitää listaa julkaisemattomista domain-tapahtumista (`IReadOnlyCollection<IDomainEvent> DomainEvents`).
 
-- **[`Reservation`](../src/Domain/Models/Reservation.cs):** Varausjärjestelmän keskeisin aggregaatti. Varmistaa luontihetkellä (`Reservation.Create`):
+- **[`Reservation`](../src/backend/Domain/Models/Reservation.cs):** Varausjärjestelmän keskeisin aggregaatti. Varmistaa luontihetkellä (`Reservation.Create`):
   - Yksittäisvarauksella (`ReservationType.Individual`) on oltava `GamingStationId` eikä `GameRoomId`:tä.
   - Koko tilan (`ReservationType.Room`) ja tapahtuman (`ReservationType.Event`) varauksella on oltava `GameRoomId` eikä yksittäistä `GamingStationId`:tä.
-  - Luonti nostaa automaattisesti [`ReservationCreatedDomainEvent`](../src/Domain/Events/ReservationCreatedDomainEvent.cs)-tapahtuman ja peruutus (`Cancel`) [`ReservationCancelledDomainEvent`](../src/Domain/Events/ReservationCancelledDomainEvent.cs)-tapahtuman.
-- **[`User`](../src/Domain/Models/User.cs):** Hallinnoi käyttäjän validoitua koulusähköpostia (`SchoolEmail`), roolia (`User`, `Admin`, `SuperAdmin`) sekä käyttöestoja (`BannedUntilUtc`, `BanReason`, `IsBanned(nowUtc)`, `Ban(...)`, `Unban()`). Estää `SuperAdmin`-käyttäjän bannaamisen domain-tasolla.
-- **[`GamingStation`](../src/Domain/Models/GamingStation.cs):** Edustaa fyysistä pelipistettä (PC 1-6, PS5, Switch), sen laitekoodia (`PC-01`..`SW-01`), jaetun television riippuvuutta (`UsesSharedTv`) ja huoltotilaa (`IsActive`, `Activate()`, `Deactivate()`).
+  - Luonti nostaa automaattisesti [`ReservationCreatedDomainEvent`](../src/backend/Domain/Events/ReservationCreatedDomainEvent.cs)-tapahtuman ja peruutus (`Cancel`) [`ReservationCancelledDomainEvent`](../src/backend/Domain/Events/ReservationCancelledDomainEvent.cs)-tapahtuman.
+- **[`User`](../src/backend/Domain/Models/User.cs):** Hallinnoi käyttäjän validoitua koulusähköpostia (`SchoolEmail`), roolia (`User`, `Admin`, `SuperAdmin`) sekä käyttöestoja (`BannedUntilUtc`, `BanReason`, `IsBanned(nowUtc)`, `Ban(...)`, `Unban()`). Estää `SuperAdmin`-käyttäjän bannaamisen domain-tasolla.
+- **[`GamingStation`](../src/backend/Domain/Models/GamingStation.cs):** Edustaa fyysistä pelipistettä (PC 1-6, PS5, Switch), sen laitekoodia (`PC-01`..`SW-01`), jaetun television riippuvuutta (`UsesSharedTv`) ja huoltotilaa (`IsActive`, `Activate()`, `Deactivate()`).
 
 ### 3.2 Arvo-objektit (`Value Objects`)
-- **[`TimeWindow`](../src/Domain/ValueObjects/TimeWindow.cs):** Muuttumaton aikaväli (`StartUtc`, `EndUtc`), joka pakottaa ehdon `EndUtc > StartUtc` ja tarjoaa metodin `OverlapsWith(TimeWindow other)`.
-- **[`SchoolEmail`](../src/Domain/ValueObjects/SchoolEmail.cs):** Sallii ainoastaan `@edu.xamk.fi`- ja `@xamk.fi`-päätteiset sähköpostiosoitteet ja normalisoi ne pieniksi kirjaimiksi.
-- **[`OpeningHours`](../src/Domain/ValueObjects/OpeningHours.cs):** Kapseloi Suomen aikavyöhykkeen (`Europe/Helsinki`) aukiolotarkistuksen, arkipäiväsäännön ja 15 minuutin joustovaran (`GracePeriod`).
+- **[`TimeWindow`](../src/backend/Domain/ValueObjects/TimeWindow.cs):** Muuttumaton aikaväli (`StartUtc`, `EndUtc`), joka pakottaa ehdon `EndUtc > StartUtc` ja tarjoaa metodin `OverlapsWith(TimeWindow other)`.
+- **[`SchoolEmail`](../src/backend/Domain/ValueObjects/SchoolEmail.cs):** Sallii ainoastaan `@edu.xamk.fi`- ja `@xamk.fi`-päätteiset sähköpostiosoitteet ja normalisoi ne pieniksi kirjaimiksi.
+- **[`OpeningHours`](../src/backend/Domain/ValueObjects/OpeningHours.cs):** Kapseloi Suomen aikavyöhykkeen (`Europe/Helsinki`) aukiolotarkistuksen, arkipäiväsäännön ja 15 minuutin joustovaran (`GracePeriod`).
 
 ---
 
 ## 4. Tietokanta, rinnakkaisuudenhallinta ja Transactional Outbox
 
 ### 4.1 Kaksoistietokantatuki (PostgreSQL ja InMemory fallback)
-[`DependencyInjection.AddInfrastructure`](../src/Infrastructure/DependencyInjection.cs) tarkistaa käynnistyksen yhteydessä PostgreSQL-yhteyden:
+[`DependencyInjection.AddInfrastructure`](../src/backend/Infrastructure/DependencyInjection.cs) tarkistaa käynnistyksen yhteydessä PostgreSQL-yhteyden:
 - **Tuotanto ja integraatiotestit (`Testcontainers`):** Käyttää PostgreSQL-kantaa (`UseNpgsql`), tallentaa kaikki aikaleimat `timestamptz`-sarakkeina ja ottaa käyttöön PostgreSQL:n järjestelmäsarakkeen `xmin` optimistiseen rivilukitukseen (`UseXminAsConcurrencyToken()`).
-- **Paikallinen kehitysympäristö ilman Dockeria:** Siirtyy automaattisesti käyttämään EF Coren muistitietokantaa (`UseInMemoryDatabase("PelihuoneDevDb")`) ja alustaa sen [`DatabaseSeeder`](../src/Infrastructure/Persistence/DatabaseSeeder.cs)-luokalla.
+- **Paikallinen kehitysympäristö ilman Dockeria:** Siirtyy automaattisesti käyttämään EF Coren muistitietokantaa (`UseInMemoryDatabase("PelihuoneDevDb")`) ja alustaa sen [`DatabaseSeeder`](../src/backend/Infrastructure/Persistence/DatabaseSeeder.cs)-luokalla.
 
 ### 4.2 Transactional Outbox -malli (`OutboxInterceptor`)
-Jotta yksikään varausilmoitus tai domain-tapahtuma ei katoa tietokantatransaktion ja ulkoisen viestinvälityksen välillä, [`OutboxInterceptor`](../src/Infrastructure/Outbox/OutboxInterceptor.cs) sieppaa `SaveChangesAsync`-kutsun:
+Jotta yksikään varausilmoitus tai domain-tapahtuma ei katoa tietokantatransaktion ja ulkoisen viestinvälityksen välillä, [`OutboxInterceptor`](../src/backend/Infrastructure/Outbox/OutboxInterceptor.cs) sieppaa `SaveChangesAsync`-kutsun:
 
 ```mermaid
 sequenceDiagram
@@ -111,7 +111,7 @@ sequenceDiagram
 
 ## 5. Dynaamiset tilasäännöt ja asetusarkkitehtuuri (`SettingsService`)
 
-Ylläpitäjän hallintapaneelissa määrittelemät tilasäännöt ja kiintiöt tallennetaan [`SettingsService`](../src/Application/Settings/SettingsService.cs)-palvelun kautta paikalliseen `site-settings.json`-tiedostoon ja luetaan jokaisen varauksen yhteydessä:
+Ylläpitäjän hallintapaneelissa määrittelemät tilasäännöt ja kiintiöt tallennetaan [`SettingsService`](../src/backend/Application/Settings/SettingsService.cs)-palvelun kautta paikalliseen `site-settings.json`-tiedostoon ja luetaan jokaisen varauksen yhteydessä:
 - Aukioloajat ja aukiolopäivät: `OpenTimeHour` (0-23), `CloseTimeHour` (1-24), `OnlyWeekdays` (Ma-Pe vs. Ma-Su).
 - Varauskiintiöt: `MaxAdvanceBookingMonths` (1-12 kk), `MaxIndividualHours` (1-12 h/vrk), `MaxStudentRoomHours` (1-12 h), `MinReservationMinutes` (15-120 min).
 - Laiteriippuvuudet ja huoltotila: `EnforceSharedTvLock` (PS5 ja Switch jaetun TV:n lukitus) sekä `IsMaintenanceMode` ja `MaintenanceMessage` (koko pelitilan tilapäinen sulku opiskelijoilta).
@@ -150,22 +150,22 @@ Järjestelmän valtuutusmalli (Authorization) on monikerroksinen: oikeudet tarki
 
 ## 7. Virheenkäsittely, hälytykset, tietoturva ja Rate Limiting
 
-1. RFC 9457 `ProblemDetails`. Kaikki palvelukerroksen `Result.Failure(Error)`-tulokset muunnetaan [`ResultExtensions.ToHttpResult`](../src/WebApi/Extensions/ResultExtensions.cs)-laajennusmetodilla vastaukseksi:
+1. RFC 9457 `ProblemDetails`. Kaikki palvelukerroksen `Result.Failure(Error)`-tulokset muunnetaan [`ResultExtensions.ToHttpResult`](../src/backend/WebApi/Extensions/ResultExtensions.cs)-laajennusmetodilla vastaukseksi:
    - `ErrorType.Validation` tuottaa `400 Bad Request`
    - `ErrorType.Unauthorized` tuottaa `401 Unauthorized`
    - `ErrorType.Forbidden` tuottaa `403 Forbidden` (esimerkiksi käyttöestossa oleva käyttäjä tai puuttuva rooli)
    - `ErrorType.NotFound` tuottaa `404 Not Found`
    - `ErrorType.Conflict` tuottaa `409 Conflict` (esimerkiksi laite varattu, SharedTV-ristiriita tai huoltotila)
-   Odottamattomat poikkeukset sieppaa [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs), joka lokittaa virheen palvelimella mutta palauttaa asiakkaalle turvallisen `500 Internal Server Error` -vastauksen ilman pinojälkiä.
+   Odottamattomat poikkeukset sieppaa [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs), joka lokittaa virheen palvelimella mutta palauttaa asiakkaalle turvallisen `500 Internal Server Error` -vastauksen ilman pinojälkiä.
 
 ### 7.1 Automaattinen virhe- ja kaatumishälytysjärjestelmä ylläpidolle
-Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationService`](../src/Application/Notifications/IErrorNotificationService.cs)), joka valvoo sekä HTTP-pyyntöjä että prosessitason poikkeuksia:
-- Käsittelemättömät HTTP 500 -poikkeukset: [`GlobalExceptionHandler`](../src/WebApi/Middleware/GlobalExceptionHandler.cs) laukaisee sähköpostihälytyksen palvelinvirheistä. Toimialuesäännöistä johtuvat `DomainException`-virheet rajataan pois hälytyksistä.
-- Prosessitason kaatumiset: [`src/WebApi/Program.cs`](../src/WebApi/Program.cs) kuuntelee `AppDomain.CurrentDomain.UnhandledException`-tapahtumaa. Jos taustasäie tai CLR-prosessi kaatuu fataliin virheeseen, järjestelmä lähettää hätähälytyksen ennen prosessin alasajoa.
+Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationService`](../src/backend/Application/Notifications/IErrorNotificationService.cs)), joka valvoo sekä HTTP-pyyntöjä että prosessitason poikkeuksia:
+- Käsittelemättömät HTTP 500 -poikkeukset: [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs) laukaisee sähköpostihälytyksen palvelinvirheistä. Toimialuesäännöistä johtuvat `DomainException`-virheet rajataan pois hälytyksistä.
+- Prosessitason kaatumiset: [`src/backend/WebApi/Program.cs`](../src/backend/WebApi/Program.cs) kuuntelee `AppDomain.CurrentDomain.UnhandledException`-tapahtumaa. Jos taustasäie tai CLR-prosessi kaatuu fataliin virheeseen, järjestelmä lähettää hätähälytyksen ennen prosessin alasajoa.
 - Vastaanottajien dynaaminen haku ja vikasietoisuus: palvelu hakee tietokannasta kaikkien aktiivisten `Admin`- ja `SuperAdmin`-käyttäjien sähköpostiosoitteet. Jos tietokanta ei vastaa, järjestelmä käyttää määritettyä varasähköpostia (`Alerts:AdminEmail` tai `Smtp:AdminEmail`).
 - Spämmisuojaus ja jäähdytysaika: identtisille virheille on toteutettu muistipohjainen 60 sekunnin `AlertCooldown`. Tämä estää sähköpostitulvan toistuvissa virhetiloissa.
 - Rakenteinen HTML-virheraportti: viesti sisältää värikoodatun kortin, UTC-aikaleiman, poikkeuksen täyden tyyppinimen, virheviestin, HTTP-polun, Trace ID:n palvelinlokeihin linkittämistä varten, palvelimen isäntäkoneen tiedot sekä pinojäljen.
-- SMTP ja kehitysympäristön simulaatio: [`SmtpEmailSender`](../src/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää viestit SMTP-palvelimella. Jos SMTP-isäntää ei ole konfiguroitu paikallisessa kehityksessä, lähetys simuloidaan sovelluslokiin.
+- SMTP ja kehitysympäristön simulaatio: [`SmtpEmailSender`](../src/backend/Infrastructure/Services/Email/SmtpEmailSender.cs) lähettää viestit SMTP-palvelimella. Jos SMTP-isäntää ei ole konfiguroitu paikallisessa kehityksessä, lähetys simuloidaan sovelluslokiin.
 
 2. Rate Limiting ja pyyntöjen rajoitus:
    - `AuthPolicy`: Enintään 5 pyyntöä minuutissa per IP kirjautumis- ja vahvistuskoodipäätepisteisiin.
@@ -178,7 +178,7 @@ Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationServ
 
 ## 8. Kääntäjäpalomuuri ja koodin laatuvaatimukset
 
-Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Build.props`](../Directory.Build.props) sekä frontendin [`tsconfig.app.json`](../src/Client/tsconfig.app.json) ja [`eslint.config.js`](../src/Client/eslint.config.js) muodostavat automaattisen laatupalomuurin:
+Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Build.props`](../Directory.Build.props) sekä frontendin [`tsconfig.app.json`](../src/frontend/tsconfig.app.json) ja [`eslint.config.js`](../src/frontend/eslint.config.js) muodostavat automaattisen laatupalomuurin:
 
 - Asetukset `TreatWarningsAsErrors=true` ja `EnforceCodeStyleInBuild=true` varmistavat, että kääntäjä- ja tyylivaroitukset tulkitaan virheiksi.
 - Eksplisiittisten tyyppien pakotus (`IDE0008 = error`, `no-var = error`) kieltää `var`-avainsanan käytön sekä C#- että TypeScript-koodissa.
@@ -191,11 +191,11 @@ Projektin juuressa olevat [`.editorconfig`](../.editorconfig) ja [`Directory.Bui
 ### Kiellot
 
 1. Älä tarkista päällekkäisyyttä, aukioloaikoja tai peruutusoikeutta HTTP-päätepisteessä (`Endpoints/`). Jokaisella säännöllä on oma `Paikka` tiedostossa `Docs/domain.md`.
-2. Älä vie EF Corea, Npgsql-kirjastoa tai HTTP-kirjastoja `src/Domain`-projektiin.
+2. Älä vie EF Corea, Npgsql-kirjastoa tai HTTP-kirjastoja `src/backend/Domain`-projektiin.
 3. Älä anna `WebApi`-päätepisteiden kutsua repositorioita ohi `Application`-palveluiden.
 4. Älä kutsu järjestelmän kelloa (`DateTime.Now` tai `DateTimeOffset.UtcNow`) suoraan `Domain`- tai `Application`-kerroksissa. Nykyhetki annetaan parametrina tai `IDateTimeProvider`-rajapinnan kautta.
 5. Älä tallenna "vapaana nyt" -tilaa tietokantaan. Se lasketaan aktiivisista varauksista, laitteiden tilasta ja `UsesSharedTv`-riippuvuudesta.
-6. Älä palauta Domain-entiteettejä suoraan HTTP-rajapinnasta. Käytä aina `src/Contracts`-projektin DTO-tietueita.
+6. Älä palauta Domain-entiteettejä suoraan HTTP-rajapinnasta. Käytä aina `src/backend/Contracts`-projektin DTO-tietueita.
 
 ### Elinkaari
 

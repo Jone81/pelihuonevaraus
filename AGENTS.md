@@ -1,4 +1,4 @@
-# AGENTS.md, pelihuoneen varausjärjestelmä
+﻿# AGENTS.md, pelihuoneen varausjärjestelmä
 
 Tämä repo on kuvaus ennen koodia. Tämä tiedosto koskee jokaista agenttia roolista riippumatta. Roolikohtaiset rajat ovat tiedostossa `Docs/agentit.md`.
 
@@ -31,7 +31,7 @@ flowchart TD
 ```
 
 - **Johtaja** on ainoa, joka puhuu ihmiselle, tekee git-toimia ja jakaa työtä. Johtaja ei kirjoita koodia itse.
-- **Työntekijä** saa yhden Tehtävät-askeleen ja kirjoittaa vain oman kerroksensa projektiin ja sen testiprojektiin (`src/Domain`, `src/Application`, `src/Infrastructure`, `src/WebApi` tai `src/Client`). Se palauttaa muutetut tiedostot, testien tulosteen ja kysymykset johtajalle.
+- **Työntekijä** saa yhden Tehtävät-askeleen ja kirjoittaa vain oman kerroksensa projektiin ja sen testiprojektiin (`src/backend/Domain`, `src/backend/Application`, `src/backend/Infrastructure`, `src/backend/WebApi` tai `src/frontend`). Se palauttaa muutetut tiedostot, testien tulosteen ja kysymykset johtajalle.
 - **Katselmoija** lukee diffin `Docs/domain.md`:n `Paikka`-saraketta, `Docs/arkkitehtuuri.md`:n kieltoja ja specin kriteerejä vasten. Se ei muuta tiedostoja, vaan palauttaa löytölistan. Tyhjä lista on hyväksyntä.
 - Samaan projektiin kirjoittaa kerrallaan yksi työntekijä. Askel, joka koskee kahta kerrosta, jaetaan kahdeksi peräkkäiseksi tehtäväksi.
 
@@ -71,7 +71,7 @@ Työntekijä kysyy johtajalta, johtaja ihmiseltä. Työntekijä ei arvaa eikä k
 
 - Backend-käännös ajetaan komennolla `dotnet build --nologo` repon juuressa tai kerroskohtaisesti parametrilla `/nr:false`. Tulos on 0 varoitusta ja 0 virhettä.
 - Backend-testit ajetaan komennolla `dotnet test --nologo`. Domain-testit eivät käynnistä web-palvelinta eivätkä avaa tietokantaa.
-- Frontend-käännös ja linttaus ajetaan komennolla `npm --prefix src/Client run build && npm --prefix src/Client run lint`. Tulos on 0 virhettä ja 0 varoitusta.
+- Frontend-käännös ja linttaus ajetaan komennolla `npm --prefix src/frontend run build && npm --prefix src/frontend run lint`. Tulos on 0 virhettä ja 0 varoitusta.
 - Hyväksymiskriteerit: specin Given-When-Then-rivit ajetaan HTTP-kutsuina käynnissä olevaa rajapintaa vasten `Docs/testaus.md`:n testiaineistolla ja kellolla. Ihminen ajaa ne. Valmis ilman ajoa ei kelpaa.
 
 ## Definition of done
