@@ -455,7 +455,7 @@ flowchart LR
 ## 8. Automaattinen virhe- ja kaatumishälytysjärjestelmä ylläpidolle
 
 Järjestelmä valvoo taustalla kaikkia HTTP-pyyntöjä ja prosessitason suoritusta:
-1. HTTP 500 -palvelinvirheet: [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs) kutsuu skopatusti [`IErrorNotificationService.SendErrorAlertAsync`](../src/backend/Application/Notifications/IErrorNotificationService.cs) -palvelua. Toimintasäännöistä johtuvat `DomainException`-virheet eivät laukaise hälytyksiä.
+1. HTTP 500 -palvelinvirheet: [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs) kutsuu skopatusti [`IErrorNotificationService.SendErrorAlertAsync`](../src/backend/Application/Abstractions/Services/IErrorNotificationService.cs) -palvelua. Toimintasäännöistä johtuvat `DomainException`-virheet eivät laukaise hälytyksiä.
 2. Prosessitason kaatumiset: [`src/backend/WebApi/Program.cs`](../src/backend/WebApi/Program.cs) ottaa kiinni `AppDomain.CurrentDomain.UnhandledException`-tapahtuman ja lähettää hätähälytyksen ennen prosessin alasajoa.
 3. Vastaanottajien dynaaminen haku: osoitteet haetaan tietokannasta kaikille aktiivisille `Admin`- ja `SuperAdmin`-käyttäjille. Jos tietokantayhteys katkeaa kaatumisen yhteydessä, käytetään konfiguroitua varasähköpostia (`Alerts:AdminEmail` tai `Smtp:AdminEmail`).
 4. Spämmisuojaus ja cooldown: 60 sekunnin `AlertCooldown` identtisille poikkeuksille estää sähköpostitulvan.
