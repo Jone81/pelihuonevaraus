@@ -1,11 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Pelihuone.Application.Abstractions.Data;
-using Pelihuone.Infrastructure.Outbox;
-using Pelihuone.Infrastructure.Persistence;
 
 namespace Pelihuone.Integration.Tests;
 
@@ -27,34 +21,20 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
     }
 
     /// <summary>
-    /// Mukauttaa web-palvelimen riippuvuudet korvaamalla oletustietokantakontekstin PostgreSQL-testiyhteydellä.
+    /// Mukauttaa web-palvelimen konfiguraation välittämällä PostgreSQL-testiyhteyden ennen palveluiden rekisteröintiä,
+    /// jotta sovellus rekisteröi suoraan vain yhden EF Core -tietokantatoimittajan (Npgsql).
     /// </summary>
     /// <param name="builder">Web-isännän rakentaja.</param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Jos yhteysmerkkijonoa ei ole annettu, ei muokata tietokantarekisteröintejä
+        // Jos yhteysmerkkijonoa ei ole annettu, ei muokata tietokantakonfiguraatiota
         if (string.IsNullOrEmpty(_connectionString))
         {
             return;
         }
 
-        builder.ConfigureServices(services =>
-        {
-            // Poistetaan oletusarvoiset tietokantarekisteröinnit
-            services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
-            services.RemoveAll<DbContextOptions>();
-            services.RemoveAll<ApplicationDbContext>();
-            services.RemoveAll<IUnitOfWork>();
-
-            // Rekisteröidään Npgsql-pohjainen tietokantakonteksti Outbox-siepparilla
-            services.AddDbContext<ApplicationDbContext>((sp, options) =>
-            {
-                OutboxInterceptor outboxInterceptor = sp.GetRequiredService<OutboxInterceptor>();
-                options.UseNpgsql(_connectionString)
-                    .AddInterceptors(outboxInterceptor);
-            });
-
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
-        });
+        // Välitetään Testcontainers-yhteysmerkkijono ja PostgreSQL-toimittaja konfiguraationa ennen AddInfrastructure-kutsua
+        builder.UseSetting("ConnectionStrings:Database", _connectionString);
+        builder.UseSetting("DatabaseProvider", "PostgreSQL");
     }
 }

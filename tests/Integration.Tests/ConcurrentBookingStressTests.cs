@@ -65,9 +65,19 @@ public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontaine
 
             HttpClient client = factory.CreateClient();
 
-            DateTimeOffset baseDate = new DateTimeOffset(2026, 11, 20, 8, 0, 0, TimeSpan.FromHours(2));
-            DateTimeOffset startUtc = baseDate.AddHours(2);
-            DateTimeOffset endUtc = baseDate.AddHours(4);
+            // Lasketaan seuraava tuleva arkipäivä (ma–pe) Europe/Helsinki-aikavyöhykkeessä klo 10:00–12:00
+            TimeZoneInfo helsinkiTimeZone = GetHelsinkiTimeZone();
+            DateTimeOffset nowHelsinki = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, helsinkiTimeZone);
+            DateOnly targetDate = DateOnly.FromDateTime(nowHelsinki.DateTime).AddDays(1);
+            while (targetDate.DayOfWeek == DayOfWeek.Saturday || targetDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                targetDate = targetDate.AddDays(1);
+            }
+
+            DateTime localStart = targetDate.ToDateTime(new TimeOnly(10, 0));
+            DateTime localEnd = targetDate.ToDateTime(new TimeOnly(12, 0));
+            DateTimeOffset startUtc = new DateTimeOffset(localStart, helsinkiTimeZone.GetUtcOffset(localStart)).ToUniversalTime();
+            DateTimeOffset endUtc = new DateTimeOffset(localEnd, helsinkiTimeZone.GetUtcOffset(localEnd)).ToUniversalTime();
 
             // Valmistellaan 10 rinnakkaista pyyntöä täsmälleen samaan aikaväliin eri IdempotencyKey-tunnisteilla
             List<CreateReservationRequest> requests = Enumerable.Range(1, 10).Select(i => new CreateReservationRequest(
@@ -88,6 +98,18 @@ public class ConcurrentBookingStressTests : IClassFixture<PostgreSqlTestcontaine
 
             Assert.Equal(1, createdCount);
             Assert.Equal(9, conflictCount);
+        }
+    }
+
+    private static TimeZoneInfo GetHelsinkiTimeZone()
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById("Europe/Helsinki");
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById("FLE Standard Time");
         }
     }
 }

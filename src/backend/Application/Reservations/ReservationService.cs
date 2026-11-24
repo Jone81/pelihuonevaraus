@@ -23,6 +23,9 @@ namespace Pelihuone.Application.Reservations;
 /// </summary>
 public sealed class ReservationService : IReservationService
 {
+    // Staattinen lukko varaus- ja jyräysoperaatioiden sarjallistamiseen rinnakkaisten kilpailutilanteiden estämiseksi
+    private static readonly SemaphoreSlim BookingLock = new SemaphoreSlim(1, 1);
+
     private readonly IReservationRepository _reservationRepository;
     private readonly IGamingStationRepository _gamingStationRepository;
     private readonly IUserRepository _userRepository;
@@ -218,109 +221,118 @@ public sealed class ReservationService : IReservationService
                 $"Opiskelijan tilavarauksen enimmäiskesto on {maxStudentRoomHours} tuntia. Pidemmät tilavaraukset ovat sallittuja vain henkilökunnalle/Admineille."));
         }
 
-        // Sääntö: Päiväkohtainen enimmäisaika opiskelijalle (yhteensä max N tuntia / päivä)
-        if (!user.IsAdmin)
+        // Suojataan kiintiötarkistus, päällekkäisyystarkistukset ja tallennus lukolla rinnakkaisten kilpailutilanteiden estämiseksi
+        await BookingLock.WaitAsync(cancellationToken);
+        try
         {
-            IReadOnlyList<Reservation> userReservations = await _reservationRepository.GetActiveReservationsForUserAsync(userId, cancellationToken);
-            TimeZoneInfo tz = OpeningHours.FinnishTimeZone;
-            DateTime targetDateLocal = TimeZoneInfo.ConvertTime(timeWindow.StartUtc, tz).Date;
-
-            TimeSpan existingDailyDuration = TimeSpan.Zero;
-            foreach (Reservation r in userReservations)
-            {
-                DateTime existingDateLocal = TimeZoneInfo.ConvertTime(r.TimeWindow.StartUtc, tz).Date;
-                if (existingDateLocal == targetDateLocal)
-                {
-                    existingDailyDuration += r.TimeWindow.Duration;
-                }
-            }
-
-            if (existingDailyDuration + timeWindow.Duration > TimeSpan.FromHours(maxIndividualHours))
-            {
-                return Result.Failure<ReservationResponse>(Error.Validation(
-                    "Reservation.DailyLimitExceeded",
-                    $"Päivittäinen varauskiintiö (enintään {maxIndividualHours} tuntia / päivä) ylittyy. Sinulla on jo {existingDailyDuration.TotalMinutes} minuuttia aktiivisia varauksia kyseiselle päivälle."));
-            }
-        }
-
-        // Käsitellään yksittäisen pelipisteen varaus
-        if (reservationType == ReservationType.Individual)
-        {
-            GamingStationId stationId = new GamingStationId(request.GamingStationId!.Value);
-            GamingStation? station = await _gamingStationRepository.GetByIdAsync(stationId, cancellationToken);
-            if (station is null || !station.IsActive)
-            {
-                return Result.Failure<ReservationResponse>(Error.NotFound("GamingStation.NotFound", "Pelipistettä ei löytynyt tai se on huoltotilassa."));
-            }
-
-            // Sääntö 6: Jos laite käyttää SharedTV:tä (PS5 / Switch) ja sääntö on päällä, kumpikaan ei saa olla varattuna
-            if (enforceSharedTv && station.UsesSharedTv)
-            {
-                bool sharedTvConflict = await _reservationRepository.HasSharedTvConflictAsync(timeWindow, null, cancellationToken);
-                if (sharedTvConflict)
-                {
-                    return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.SharedTvConflict", "Konsolien yhteinen näyttölaite (SharedTV) on jo varattu kyseiselle ajankohdalle."));
-                }
-            }
-
-            // Sääntö 1 & 4: Ei päällekkäisiä varauksia samalle pelipisteelle tai koko tilan ollessa varattu
-            bool conflict = await _reservationRepository.HasConflictForStationAsync(stationId, timeWindow, null, cancellationToken);
-            if (conflict)
-            {
-                return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.StationConflict", "Pelipiste on jo varattu valitulle aikavälille tai tilaan on tehty tilavaraus/tapahtuma."));
-            }
-
-            reservation = Reservation.CreateIndividual(
-                ReservationId.New(),
-                userId,
-                stationId,
-                timeWindow,
-                nowUtc);
-        }
-        else if (reservationType == ReservationType.Room)
-        {
-            // Sääntö 4: Tilavarauksen aikana ei saa olla muita varauksia
-            bool conflict = await _reservationRepository.HasRoomOrEventConflictAsync(timeWindow, null, cancellationToken);
-            if (conflict)
-            {
-                return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.RoomConflict", "Tilaan ei voi tehdä tilavarausta, koska ajankohdalle on jo olemassa varauksia."));
-            }
-
-            reservation = Reservation.CreateRoom(
-                ReservationId.New(),
-                userId,
-                timeWindow,
-                nowUtc);
-        }
-        else if (reservationType == ReservationType.Event)
-        {
-            // Vain ylläpitäjä saa luoda tapahtumavarauksia
+            // Sääntö: Päiväkohtainen enimmäisaika opiskelijalle (yhteensä max N tuntia / päivä)
             if (!user.IsAdmin)
             {
-                return Result.Failure<ReservationResponse>(Error.Forbidden("Reservation.Forbidden", "Vain ylläpitäjä voi luoda tapahtumavarauksia."));
+                IReadOnlyList<Reservation> userReservations = await _reservationRepository.GetActiveReservationsForUserAsync(userId, cancellationToken);
+                TimeZoneInfo tz = OpeningHours.FinnishTimeZone;
+                DateTime targetDateLocal = TimeZoneInfo.ConvertTime(timeWindow.StartUtc, tz).Date;
+
+                TimeSpan existingDailyDuration = TimeSpan.Zero;
+                foreach (Reservation r in userReservations)
+                {
+                    DateTime existingDateLocal = TimeZoneInfo.ConvertTime(r.TimeWindow.StartUtc, tz).Date;
+                    if (existingDateLocal == targetDateLocal)
+                    {
+                        existingDailyDuration += r.TimeWindow.Duration;
+                    }
+                }
+
+                if (existingDailyDuration + timeWindow.Duration > TimeSpan.FromHours(maxIndividualHours))
+                {
+                    return Result.Failure<ReservationResponse>(Error.Validation(
+                        "Reservation.DailyLimitExceeded",
+                        $"Päivittäinen varauskiintiö (enintään {maxIndividualHours} tuntia / päivä) ylittyy. Sinulla on jo {existingDailyDuration.TotalMinutes} minuuttia aktiivisia varauksia kyseiselle päivälle."));
+                }
             }
 
-            bool conflict = await _reservationRepository.HasRoomOrEventConflictAsync(timeWindow, null, cancellationToken);
-            if (conflict)
+            // Käsitellään yksittäisen pelipisteen varaus
+            if (reservationType == ReservationType.Individual)
             {
-                return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.EventConflict", "Tapahtumalle on päällekkäisiä varauksia. Käytä SuperAdmin-jyräystä tarvittaessa."));
+                GamingStationId stationId = new GamingStationId(request.GamingStationId!.Value);
+                GamingStation? station = await _gamingStationRepository.GetByIdAsync(stationId, cancellationToken);
+                if (station is null || !station.IsActive)
+                {
+                    return Result.Failure<ReservationResponse>(Error.NotFound("GamingStation.NotFound", "Pelipistettä ei löytynyt tai se on huoltotilassa."));
+                }
+
+                // Sääntö 6: Jos laite käyttää SharedTV:tä (PS5 / Switch) ja sääntö on päällä, kumpikaan ei saa olla varattuna
+                if (enforceSharedTv && station.UsesSharedTv)
+                {
+                    bool sharedTvConflict = await _reservationRepository.HasSharedTvConflictAsync(timeWindow, null, cancellationToken);
+                    if (sharedTvConflict)
+                    {
+                        return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.SharedTvConflict", "Konsolien yhteinen näyttölaite (SharedTV) on jo varattu kyseiselle ajankohdalle."));
+                    }
+                }
+
+                // Sääntö 1 & 4: Ei päällekkäisiä varauksia samalle pelipisteelle tai koko tilan ollessa varattu
+                bool conflict = await _reservationRepository.HasConflictForStationAsync(stationId, timeWindow, null, cancellationToken);
+                if (conflict)
+                {
+                    return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.StationConflict", "Pelipiste on jo varattu valitulle aikavälille tai tilaan on tehty tilavaraus/tapahtuma."));
+                }
+
+                reservation = Reservation.CreateIndividual(
+                    ReservationId.New(),
+                    userId,
+                    stationId,
+                    timeWindow,
+                    nowUtc);
+            }
+            else if (reservationType == ReservationType.Room)
+            {
+                // Sääntö 4: Tilavarauksen aikana ei saa olla muita varauksia
+                bool conflict = await _reservationRepository.HasRoomOrEventConflictAsync(timeWindow, null, cancellationToken);
+                if (conflict)
+                {
+                    return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.RoomConflict", "Tilaan ei voi tehdä tilavarausta, koska ajankohdalle on jo olemassa varauksia."));
+                }
+
+                reservation = Reservation.CreateRoom(
+                    ReservationId.New(),
+                    userId,
+                    timeWindow,
+                    nowUtc);
+            }
+            else if (reservationType == ReservationType.Event)
+            {
+                // Vain ylläpitäjä saa luoda tapahtumavarauksia
+                if (!user.IsAdmin)
+                {
+                    return Result.Failure<ReservationResponse>(Error.Forbidden("Reservation.Forbidden", "Vain ylläpitäjä voi luoda tapahtumavarauksia."));
+                }
+
+                bool conflict = await _reservationRepository.HasRoomOrEventConflictAsync(timeWindow, null, cancellationToken);
+                if (conflict)
+                {
+                    return Result.Failure<ReservationResponse>(Error.Conflict("Reservation.EventConflict", "Tapahtumalle on päällekkäisiä varauksia. Käytä SuperAdmin-jyräystä tarvittaessa."));
+                }
+
+                reservation = Reservation.CreateEvent(
+                    ReservationId.New(),
+                    userId,
+                    user.Role,
+                    timeWindow,
+                    nowUtc);
+            }
+            else
+            {
+                return Result.Failure<ReservationResponse>(Error.Validation("Reservation.InvalidType", "Tuntematon varaustyyppi."));
             }
 
-            reservation = Reservation.CreateEvent(
-                ReservationId.New(),
-                userId,
-                user.Role,
-                timeWindow,
-                nowUtc);
+            // Tallennetaan uusi varaus tietokantaan
+            await _reservationRepository.AddAsync(reservation, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        else
+        finally
         {
-            return Result.Failure<ReservationResponse>(Error.Validation("Reservation.InvalidType", "Tuntematon varaustyyppi."));
+            BookingLock.Release();
         }
-
-        // Tallennetaan uusi varaus tietokantaan
-        await _reservationRepository.AddAsync(reservation, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Lähetetään taustalla Discord-ilmoitus, jos kyseessä on tapahtumavaraus
         if (reservationType == ReservationType.Event && _discordNotificationService is not null)
@@ -453,24 +465,36 @@ public sealed class ReservationService : IReservationService
             return Result.Failure<ReservationResponse>(Error.Validation("Reservation.InvalidTime", ex.Message));
         }
 
-        // Haetaan kaikki aikavälille osuvat aktiiviset varaukset ja jyrätään ne
-        IReadOnlyList<Reservation> conflicts = await _reservationRepository.GetActiveReservationsInWindowAsync(timeWindow, cancellationToken);
-        foreach (Reservation conflict in conflicts)
+        IReadOnlyList<Reservation> conflicts;
+        Reservation eventReservation;
+
+        // Suojataan jyräys ja uuden tapahtuman tallennus lukolla, jotta tapahtumajyräys ja opiskelijavaraus eivät kilpaile keskenään
+        await BookingLock.WaitAsync(cancellationToken);
+        try
         {
-            conflict.OverrideAndCancelBySuperAdmin(nowUtc, userId, overrideReason);
-            await _reservationRepository.UpdateAsync(conflict, cancellationToken);
+            // Haetaan kaikki aikavälille osuvat aktiiviset varaukset ja jyrätään ne
+            conflicts = await _reservationRepository.GetActiveReservationsInWindowAsync(timeWindow, cancellationToken);
+            foreach (Reservation conflict in conflicts)
+            {
+                conflict.OverrideAndCancelBySuperAdmin(nowUtc, userId, overrideReason);
+                await _reservationRepository.UpdateAsync(conflict, cancellationToken);
+            }
+
+            // Luodaan uusi tapahtumavaraus jyrättyjen varausten tilalle
+            eventReservation = Reservation.CreateEvent(
+                ReservationId.New(),
+                userId,
+                user.Role,
+                timeWindow,
+                nowUtc);
+
+            await _reservationRepository.AddAsync(eventReservation, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
-
-        // Luodaan uusi tapahtumavaraus jyrättyjen varausten tilalle
-        Reservation eventReservation = Reservation.CreateEvent(
-            ReservationId.New(),
-            userId,
-            user.Role,
-            timeWindow,
-            nowUtc);
-
-        await _reservationRepository.AddAsync(eventReservation, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        finally
+        {
+            BookingLock.Release();
+        }
 
         // Lähetetään ilmoitus uudesta tapahtumasta Discordiin
         if (_discordNotificationService is not null)
