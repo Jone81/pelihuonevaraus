@@ -159,7 +159,7 @@ Järjestelmän valtuutusmalli (Authorization) on monikerroksinen: oikeudet tarki
    Odottamattomat poikkeukset sieppaa [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs), joka lokittaa virheen palvelimella mutta palauttaa asiakkaalle turvallisen `500 Internal Server Error` -vastauksen ilman pinojälkiä.
 
 ### 7.1 Automaattinen virhe- ja kaatumishälytysjärjestelmä ylläpidolle
-Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationService`](../src/backend/Application/Notifications/IErrorNotificationService.cs)), joka valvoo sekä HTTP-pyyntöjä että prosessitason poikkeuksia:
+Järjestelmä sisältää automaattisen hälytysputken ([`IErrorNotificationService`](../src/backend/Application/Abstractions/Services/IErrorNotificationService.cs)), joka valvoo sekä HTTP-pyyntöjä että prosessitason poikkeuksia:
 - Käsittelemättömät HTTP 500 -poikkeukset: [`GlobalExceptionHandler`](../src/backend/WebApi/Middleware/GlobalExceptionHandler.cs) laukaisee sähköpostihälytyksen palvelinvirheistä. Toimialuesäännöistä johtuvat `DomainException`-virheet rajataan pois hälytyksistä.
 - Prosessitason kaatumiset: [`src/backend/WebApi/Program.cs`](../src/backend/WebApi/Program.cs) kuuntelee `AppDomain.CurrentDomain.UnhandledException`-tapahtumaa. Jos taustasäie tai CLR-prosessi kaatuu fataliin virheeseen, järjestelmä lähettää hätähälytyksen ennen prosessin alasajoa.
 - Vastaanottajien dynaaminen haku ja vikasietoisuus: palvelu hakee tietokannasta kaikkien aktiivisten `Admin`- ja `SuperAdmin`-käyttäjien sähköpostiosoitteet. Jos tietokanta ei vastaa, järjestelmä käyttää määritettyä varasähköpostia (`Alerts:AdminEmail` tai `Smtp:AdminEmail`).
