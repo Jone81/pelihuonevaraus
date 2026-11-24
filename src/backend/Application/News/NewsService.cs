@@ -106,6 +106,55 @@ public sealed class NewsService : INewsService
     }
 
     /// <summary>
+    /// Päivittää olemassa olevan uutisen tai tiedotteen otsikon, sisällön ja kiinnitystilan.
+    /// </summary>
+    public async Task<Result<NewsResponse>> UpdateNewsAsync(
+        Guid newsId,
+        UpdateNewsRequest request,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        // Varmistetaan ylläpitäjäoikeudet
+        User? user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
+        if (user is null || !user.IsAdmin)
+        {
+            return Result.Failure<NewsResponse>(Error.Forbidden("News.Forbidden", "Vain ylläpitäjä (Admin) voi muokata tiedotteita."));
+        }
+
+        // Validoidaan otsikko ja sisältö
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            return Result.Failure<NewsResponse>(Error.Validation("News.InvalidTitle", "Uutisen otsikko on pakollinen."));
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            return Result.Failure<NewsResponse>(Error.Validation("News.InvalidContent", "Uutisen sisältö on pakollinen."));
+        }
+
+        NewsEntity? news = await _newsRepository.GetByIdAsync(new NewsId(newsId), cancellationToken);
+        if (news is null)
+        {
+            return Result.Failure<NewsResponse>(Error.NotFound("News.NotFound", "Tiedotetta ei löytynyt."));
+        }
+
+        try
+        {
+            news.Update(request.Title, request.Content, request.IsPinned);
+            await _newsRepository.UpdateAsync(news, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Tiedote {NewsId} päivitetty käyttäjän {UserId} toimesta.", news.Id.Value, user.Id.Value);
+
+            return Result.Success(MapToResponse(news));
+        }
+        catch (DomainException ex)
+        {
+            return Result.Failure<NewsResponse>(Error.Validation("News.DomainError", ex.Message));
+        }
+    }
+
+    /// <summary>
     /// Poistaa uutisen tai tiedotteen ylläpitäjän toimesta.
     /// </summary>
     public async Task<Result<bool>> DeleteNewsAsync(

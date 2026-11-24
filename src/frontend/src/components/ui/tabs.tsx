@@ -14,13 +14,13 @@ const Tabs = TabsPrimitive.Root
  * Välilehtipainikkeiden palkki (`xamk-segmented-bar`).
  */
 const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'grid grid-cols-3 rounded-none bg-[#1C1F24] border-2 border-black p-0 overflow-hidden',
+      'grid grid-flow-col auto-cols-[minmax(auto,1fr)] rounded-none bg-[#1C1F24] border-2 border-black p-0 overflow-x-auto',
       className
     )}
     {...props}
@@ -32,7 +32,7 @@ TabsList.displayName = TabsPrimitive.List.displayName
  * Yksittäinen välilehtipainike, joka korostuu aktiivisena (`data-[state=active]`).
  */
 const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
@@ -50,7 +50,7 @@ TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
  * Valitun välilehden sisältöpaneeli.
  */
 const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.Content

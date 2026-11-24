@@ -104,4 +104,95 @@ public class NewsServiceTests
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorType.Forbidden, result.Error.Type);
     }
+
+    /// <summary>
+    /// Varmistaa, että ylläpitäjä (Admin) pystyy päivittämään olemassa olevan tiedotteen tiedot.
+    /// </summary>
+    [Fact]
+    public async Task UpdateNews_WhenAdmin_Succeeds()
+    {
+        // Arrange: Luodaan Admin-käyttäjä ja olemassa oleva tiedote
+        Guid adminId = Guid.NewGuid();
+        User admin = User.Create(new UserId(adminId), SchoolEmail.Create("admin-edit@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
+        NewsEntity existing = NewsEntity.Create(NewsId.New(), "Vanha otsikko", "Vanha sisältö", new UserId(adminId), DateTimeOffset.UtcNow, false);
+
+        _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(admin);
+        _newsRepository.GetByIdAsync(existing.Id, Arg.Any<CancellationToken>()).Returns(existing);
+
+        UpdateNewsRequest request = new UpdateNewsRequest("Uusi otsikko", "Uusi sisältö", true);
+
+        // Act: Päivitetään tiedote Admin-tunnuksilla
+        Result<NewsResponse> result = await _service.UpdateNewsAsync(existing.Id.Value, request, adminId);
+
+        // Assert: Tarkistetaan, että kentät ja kiinnitys päivittyivät ja muutos tallennettiin
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Uusi otsikko", result.Value.Title);
+        Assert.Equal("Uusi sisältö", result.Value.Content);
+        Assert.True(result.Value.IsPinned);
+        await _newsRepository.Received(1).UpdateAsync(existing, Arg.Any<CancellationToken>());
+        await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Varmistaa, että tavallinen opiskelijakäyttäjä ei voi muokata tiedotteita.
+    /// </summary>
+    [Fact]
+    public async Task UpdateNews_WhenNormalUser_ReturnsForbidden()
+    {
+        // Arrange: Alustetaan tavallinen opiskelijakäyttäjä
+        Guid userId = Guid.NewGuid();
+        User normalUser = User.Create(new UserId(userId), SchoolEmail.Create("student-edit@edu.xamk.fi"), "Opiskelija", UserRole.User, DateTimeOffset.UtcNow);
+        _userRepository.GetByIdAsync(new UserId(userId), Arg.Any<CancellationToken>()).Returns(normalUser);
+
+        UpdateNewsRequest request = new UpdateNewsRequest("Otsikko", "Sisältö", false);
+
+        // Act: Yritetään päivittää tiedote ilman Admin-oikeuksia
+        Result<NewsResponse> result = await _service.UpdateNewsAsync(Guid.NewGuid(), request, userId);
+
+        // Assert: Operaatio estetään Forbidden-virheellä
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.Forbidden, result.Error.Type);
+    }
+
+    /// <summary>
+    /// Varmistaa, että olemattoman tiedotteen päivittäminen palauttaa NotFound-virheen.
+    /// </summary>
+    [Fact]
+    public async Task UpdateNews_WhenNotFound_ReturnsNotFound()
+    {
+        // Arrange: Luodaan Admin-käyttäjä ilman löytyvää tiedotetta
+        Guid adminId = Guid.NewGuid();
+        User admin = User.Create(new UserId(adminId), SchoolEmail.Create("admin-missing@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
+        _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(admin);
+
+        UpdateNewsRequest request = new UpdateNewsRequest("Otsikko", "Sisältö", false);
+
+        // Act: Päivitetään olematonta tiedotetta
+        Result<NewsResponse> result = await _service.UpdateNewsAsync(Guid.NewGuid(), request, adminId);
+
+        // Assert: Palautuu NotFound-virhe
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.NotFound, result.Error.Type);
+    }
+
+    /// <summary>
+    /// Varmistaa, että tyhjällä otsikolla tehty päivitys palauttaa Validation-virheen.
+    /// </summary>
+    [Fact]
+    public async Task UpdateNews_WhenTitleEmpty_ReturnsValidationError()
+    {
+        // Arrange: Luodaan Admin-käyttäjä
+        Guid adminId = Guid.NewGuid();
+        User admin = User.Create(new UserId(adminId), SchoolEmail.Create("admin-valid@xamk.fi"), "Admin", UserRole.Admin, DateTimeOffset.UtcNow);
+        _userRepository.GetByIdAsync(new UserId(adminId), Arg.Any<CancellationToken>()).Returns(admin);
+
+        UpdateNewsRequest request = new UpdateNewsRequest("   ", "Sisältö", false);
+
+        // Act: Yritetään päivittää tyhjällä otsikolla
+        Result<NewsResponse> result = await _service.UpdateNewsAsync(Guid.NewGuid(), request, adminId);
+
+        // Assert: Palautuu Validation-virhe
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.Validation, result.Error.Type);
+    }
 }

@@ -23,6 +23,7 @@ import type {
   SiteSettingsResponse,
   StatisticsResponse,
   UpdateGamingStationStatusRequest,
+  UpdateNewsRequest,
   UpdateSiteSettingsRequest,
   User,
   WishGameRequest,
@@ -292,6 +293,21 @@ export const api = {
   async createNews(request: CreateNewsRequest, adminUserId: string): Promise<NewsItem> {
     const res = await fetch('/api/news', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': adminUserId,
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<NewsItem>(res);
+  },
+
+  /**
+   * Admin-toiminto: päivittää olemassa olevan tiedotteen tai uutisen.
+   */
+  async updateNews(newsId: string, request: UpdateNewsRequest, adminUserId: string): Promise<NewsItem> {
+    const res = await fetch(`/api/news/${newsId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-User-Id': adminUserId,

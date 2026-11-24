@@ -19,6 +19,11 @@ public interface INewsService
     Task<Result<NewsResponse>> CreateNewsAsync(CreateNewsRequest request, Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Päivittää olemassa olevan uutisen tai tiedotteen (vaatii ylläpitäjän oikeudet).
+    /// </summary>
+    Task<Result<NewsResponse>> UpdateNewsAsync(Guid newsId, UpdateNewsRequest request, Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Poistaa olemassa olevan uutisen tai tiedotteen (vaatii ylläpitäjän oikeudet).
     /// </summary>
     Task<Result<bool>> DeleteNewsAsync(Guid newsId, Guid userId, CancellationToken cancellationToken = default);

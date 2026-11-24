@@ -5,12 +5,12 @@
  * varausten peruuttamisen.
  */
 import React, { useState } from 'react';
+import { Link } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gamepad2, Building2, Trophy, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useRouter } from '../router';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { CancelReservationRequest, EndReservationRequest, Reservation } from '../types';
@@ -21,7 +21,6 @@ import type { CancelReservationRequest, EndReservationRequest, Reservation } fro
 export const MyReservations: React.FC = () => {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
-  const { setActiveTab } = useRouter();
   const queryClient = useQueryClient();
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -154,13 +153,14 @@ export const MyReservations: React.FC = () => {
           </p>
         </div>
         <Button
-          type="button"
+          asChild
           variant="xamk"
-          className="min-h-[44px] w-full sm:w-auto shrink-0"
-          onClick={() => setActiveTab('book')}
+          className="min-h-[44px] w-full sm:w-auto shrink-0 no-underline"
         >
-          <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-          <span>{lang === 'en' ? 'Back to Book station' : 'Takaisin: Varaa laite'}</span>
+          <Link to="/book">
+            <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+            <span>{lang === 'en' ? 'Back to Book station' : 'Takaisin: Varaa laite'}</span>
+          </Link>
         </Button>
       </div>
 

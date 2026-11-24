@@ -24,7 +24,7 @@ const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
  * Pudotusvalikon avautuva sisältölaatikko.
  */
 const DropdownMenuContent = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 6, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
@@ -45,7 +45,7 @@ DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
  * Yksittäinen valittava rivi tai toiminto pudotusvalikossa.
  */
 const DropdownMenuItem = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     /** Lisää vasemman sisennyksen ikoneita varten */
     inset?: boolean
@@ -67,7 +67,7 @@ DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
  * Pudotusvalikon väliotsikko tai ryhmän nimi (ei klikattava).
  */
 const DropdownMenuLabel = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Label>,
+  React.ComponentRef<typeof DropdownMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
     /** Lisää vasemman sisennyksen */
     inset?: boolean
@@ -89,7 +89,7 @@ DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
  * Vaakasuora erotinviiva pudotusvalikon osioiden välillä.
  */
 const DropdownMenuSeparator = React.forwardRef<
-  React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
+  React.ComponentRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator

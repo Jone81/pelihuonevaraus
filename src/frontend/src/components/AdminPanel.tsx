@@ -6,10 +6,11 @@
  * `AdminStatisticsView` ja `AdminSettingsView`) dedikoituun `AdminLayout`-kehykseen.
  */
 import React, { useState } from 'react';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useRouter, type AdminSubTab } from '../router';
+import { pathnameToAdminSubTab, type AdminSubTab } from '../router';
 import { AdminLayout } from './admin/AdminLayout';
 import { AdminOverview } from './admin/AdminOverview';
 import { AdminReservationsView } from './admin/AdminReservationsView';
@@ -119,7 +120,8 @@ const PAGE_META: Record<AdminSubTab, AdminPageMeta> = {
 export const AdminPanel: React.FC = () => {
   const { isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { adminSubTab, navigate } = useRouter();
+  const location = useLocation();
+  const adminSubTab = pathnameToAdminSubTab(location.pathname);
   const isEn = lang === 'en';
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -135,20 +137,44 @@ export const AdminPanel: React.FC = () => {
               ? 'Only administrators have access to this control panel.'
               : 'Vain ylläpitäjillä on pääsy tähän paneeliin.'}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/book')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer"
+          <Link
+            to="/book"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer no-underline"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen'}</span>
-          </button>
+          </Link>
         </div>
       </div>
     );
   }
 
   const meta = PAGE_META[adminSubTab] ?? PAGE_META.overview;
+  const cleanPath = location.pathname.replace(/\/+$/, '');
+  const resolvedTitle =
+    cleanPath === '/admin/games/new'
+      ? isEn
+        ? 'Add new game'
+        : 'Lisää uusi peli'
+      : cleanPath === '/admin/news/new'
+      ? isEn
+        ? 'Publish new announcement'
+        : 'Julkaise uusi tiedote'
+      : cleanPath.startsWith('/admin/news/edit')
+      ? isEn
+        ? 'Edit announcement'
+        : 'Muokkaa tiedotetta'
+      : isEn
+      ? meta.titleEn
+      : meta.titleFi;
+  const resolvedSubtitle =
+    cleanPath.startsWith('/admin/news/edit')
+      ? isEn
+        ? 'Edit the headline, body text, or pinned status of a published announcement.'
+        : 'Muokkaa julkaistun tiedotteen otsikkoa, sisältöä tai kiinnitystä yläbanneriin.'
+      : isEn
+      ? meta.subtitleEn
+      : meta.subtitleFi;
 
   const handleClearMessages = () => {
     setStatusMessage(null);
@@ -158,43 +184,61 @@ export const AdminPanel: React.FC = () => {
   return (
     <AdminLayout
       activeSection={adminSubTab}
-      pageTitle={isEn ? meta.titleEn : meta.titleFi}
-      pageSubtitle={isEn ? meta.subtitleEn : meta.subtitleFi}
+      pageTitle={resolvedTitle}
+      pageSubtitle={resolvedSubtitle}
       statusMessage={statusMessage}
       errorMessage={errorMessage}
       onSectionChange={handleClearMessages}
     >
-      {adminSubTab === 'overview' && <AdminOverview />}
-
-      {adminSubTab === 'reservations' && (
-        <AdminReservationsView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'stations' && (
-        <AdminStationsView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'issues' && (
-        <AdminIssuesView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'games' && (
-        <AdminGamesView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'news' && (
-        <AdminNewsView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'users' && (
-        <AdminUsersView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
-
-      {adminSubTab === 'statistics' && <AdminStatisticsView />}
-
-      {adminSubTab === 'settings' && (
-        <AdminSettingsView onStatus={setStatusMessage} onError={setErrorMessage} />
-      )}
+      <Routes>
+        <Route index element={<AdminOverview />} />
+        <Route
+          path="reservations"
+          element={<AdminReservationsView onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="stations"
+          element={<AdminStationsView onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="issues"
+          element={<AdminIssuesView onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="games"
+          element={<AdminGamesView mode="list" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="games/new"
+          element={<AdminGamesView mode="new" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="news"
+          element={<AdminNewsView mode="list" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="news/new"
+          element={<AdminNewsView mode="new" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="news/edit"
+          element={<AdminNewsView mode="edit" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="news/edit/:newsId"
+          element={<AdminNewsView mode="edit" onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route
+          path="users"
+          element={<AdminUsersView onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route path="statistics" element={<AdminStatisticsView />} />
+        <Route
+          path="settings"
+          element={<AdminSettingsView onStatus={setStatusMessage} onError={setErrorMessage} />}
+        />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
     </AdminLayout>
   );
 };

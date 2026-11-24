@@ -23,9 +23,10 @@ import {
   PanelLeftOpen,
   X,
 } from 'lucide-react';
+import { Link, NavLink } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { adminSectionToPath, type AdminSection } from '../../router';
 
 /**
  * Yksittäisen sivupalkin navigaatiokohteen määritys.
@@ -89,7 +90,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 }) => {
   const { user, logout, isSuperAdmin } = useAuth();
   const { lang, setLang } = useLanguage();
-  const { navigate } = useRouter();
   const isEn = lang === 'en';
 
   // Suljetaan mobiilidrawer Escape-näppäimellä
@@ -205,11 +205,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     onCloseMobile();
   };
 
-  const handleBackToRoom = () => {
-    onCloseMobile();
-    navigate('/book');
-  };
-
   const handleLogout = () => {
     onCloseMobile();
     logout();
@@ -223,15 +218,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <div className="flex flex-col h-full bg-[#0E0F11] text-[#F4F4F5] select-none">
       {/* Ylätunniste: Brändi + collapse / sulkunappi */}
       <div
-        className={`flex items-center border-b-2 border-[#3F444E] bg-[#121417] min-h-[64px] shrink-0 ${
-          isCompact ? 'justify-center px-2' : 'justify-between px-4'
-        }`}
+        className={`flex items-center border-b-2 border-[#3F444E] bg-[#121417] min-h-[64px] shrink-0 ${isCompact ? 'justify-center px-2' : 'justify-between px-4'
+          }`}
       >
         {!isCompact && (
-          <button
-            type="button"
+          <Link
+            to="/admin"
             onClick={() => handleSelectSection('overview')}
-            className="inline-flex items-center gap-2.5 min-w-0 bg-transparent border-0 p-0 cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
+            className="inline-flex items-center gap-2.5 min-w-0 bg-transparent border-0 p-0 cursor-pointer text-left no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
           >
             <img
               src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
@@ -246,7 +240,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 ADMIN PANEL
               </span>
             </div>
-          </button>
+          </Link>
         )}
 
         {isMobileDrawer ? (
@@ -269,8 +263,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   ? 'Expand sidebar'
                   : 'Laajenna sivupalkki'
                 : isEn
-                ? 'Collapse sidebar'
-                : 'Pienennä sivupalkki'
+                  ? 'Collapse sidebar'
+                  : 'Pienennä sivupalkki'
             }
             title={
               isCompact
@@ -278,8 +272,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   ? 'Expand sidebar'
                   : 'Laajenna sivupalkki'
                 : isEn
-                ? 'Collapse sidebar'
-                : 'Pienennä sivupalkki'
+                  ? 'Collapse sidebar'
+                  : 'Pienennä sivupalkki'
             }
           >
             {isCompact ? (
@@ -298,22 +292,22 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       >
         {/* Ylin linkki: Yleiskatsaus */}
         <div>
-          <button
-            type="button"
+          <NavLink
+            to="/admin"
+            end
             onClick={() => handleSelectSection('overview')}
             title={isCompact ? (isEn ? 'Overview' : 'Yleiskatsaus') : undefined}
-            aria-current={activeSection === 'overview' ? 'page' : undefined}
-            className={`w-full flex items-center rounded-none font-mono text-xs uppercase tracking-wider border-2 transition-colors cursor-pointer ${
-              isCompact ? 'justify-center px-2 py-2.5' : 'justify-start gap-2.5 px-3 py-2.5'
-            } ${
-              activeSection === 'overview'
+            className={({ isActive }) =>
+              `w-full flex items-center rounded-none font-mono text-xs uppercase tracking-wider border-2 transition-colors cursor-pointer no-underline ${isCompact ? 'justify-center px-2 py-2.5' : 'justify-start gap-2.5 px-3 py-2.5'
+              } ${activeSection === 'overview' || isActive
                 ? 'bg-[#FACC15] text-[#09090B] border-black font-extrabold shadow-[3px_3px_0px_#000000]'
                 : 'bg-transparent text-[#D4D4D8] border-transparent font-bold hover:bg-[#1C1F24] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-            }`}
+              }`
+            }
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             {!isCompact && <span className="truncate">{isEn ? 'Overview' : 'Yleiskatsaus'}</span>}
-          </button>
+          </NavLink>
         </div>
 
         {/* Ryhmitellyt linkit */}
@@ -334,19 +328,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 const hasBadge = item.badge !== undefined && item.badge > 0;
 
                 return (
-                  <button
+                  <NavLink
                     key={item.id}
-                    type="button"
+                    to={adminSectionToPath(item.id)}
                     onClick={() => handleSelectSection(item.id)}
                     title={isCompact ? label : undefined}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`relative w-full flex items-center rounded-none font-mono text-xs uppercase tracking-wider border-2 transition-colors cursor-pointer ${
-                      isCompact ? 'justify-center px-2 py-2.5' : 'justify-between gap-2 px-3 py-2.5'
-                    } ${
-                      isActive
+                    className={`relative w-full flex items-center rounded-none font-mono text-xs uppercase tracking-wider border-2 transition-colors cursor-pointer no-underline ${isCompact ? 'justify-center px-2 py-2.5' : 'justify-between gap-2 px-3 py-2.5'
+                      } ${isActive
                         ? 'bg-[#FACC15] text-[#09090B] border-black font-extrabold shadow-[3px_3px_0px_#000000]'
                         : 'bg-transparent text-[#D4D4D8] border-transparent font-bold hover:bg-[#1C1F24] hover:text-[#F4F4F5] hover:border-[#3F444E]'
-                    }`}
+                      }`}
                   >
                     <span className="inline-flex items-center gap-2.5 min-w-0">
                       {item.icon}
@@ -367,7 +358,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         {item.badge}
                       </span>
                     )}
-                  </button>
+                  </NavLink>
                 );
               })}
             </div>
@@ -378,13 +369,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Alaosa: Paluu pelihuoneeseen, kielenvaihto ja käyttäjäkortti */}
       <div className="border-t-2 border-[#3F444E] bg-[#121417] p-2.5 space-y-2 shrink-0">
         {/* Takaisin pelihuoneeseen */}
-        <button
-          type="button"
-          onClick={handleBackToRoom}
+        <Link
+          to="/book"
+          onClick={onCloseMobile}
           title={isCompact ? (isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen') : undefined}
-          className={`w-full flex items-center rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-            isCompact ? 'justify-center px-2 py-2.5' : 'justify-start gap-2.5 px-3 py-2.5'
-          }`}
+          className={`w-full flex items-center rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer no-underline ${isCompact ? 'justify-center px-2 py-2.5' : 'justify-start gap-2.5 px-3 py-2.5'
+            }`}
         >
           <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           {!isCompact && (
@@ -392,7 +382,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               {isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen'}
             </span>
           )}
-        </button>
+        </Link>
 
         {/* Kielenvaihto (FI / EN) */}
         {isCompact ? (
@@ -414,11 +404,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               type="button"
               onClick={() => setLang('fi')}
               aria-pressed={lang === 'fi'}
-              className={`py-1.5 font-mono text-xs font-extrabold uppercase cursor-pointer transition-colors ${
-                lang === 'fi'
-                  ? 'bg-[#FACC15] text-[#09090B]'
-                  : 'bg-transparent text-[#A1A1AA] hover:text-[#F4F4F5]'
-              }`}
+              className={`py-1.5 font-mono text-xs font-extrabold uppercase cursor-pointer transition-colors ${lang === 'fi'
+                ? 'bg-[#FACC15] text-[#09090B]'
+                : 'bg-transparent text-[#A1A1AA] hover:text-[#F4F4F5]'
+                }`}
             >
               FI
             </button>
@@ -426,11 +415,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               type="button"
               onClick={() => setLang('en')}
               aria-pressed={lang === 'en'}
-              className={`py-1.5 font-mono text-xs font-extrabold uppercase border-l-2 border-[#3F444E] cursor-pointer transition-colors ${
-                lang === 'en'
-                  ? 'bg-[#FACC15] text-[#09090B]'
-                  : 'bg-transparent text-[#A1A1AA] hover:text-[#F4F4F5]'
-              }`}
+              className={`py-1.5 font-mono text-xs font-extrabold uppercase border-l-2 border-[#3F444E] cursor-pointer transition-colors ${lang === 'en'
+                ? 'bg-[#FACC15] text-[#09090B]'
+                : 'bg-transparent text-[#A1A1AA] hover:text-[#F4F4F5]'
+                }`}
             >
               EN
             </button>
@@ -490,9 +478,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <>
       {/* Työpöydän kiinteä vasen sivupalkki (lg+) */}
       <aside
-        className={`hidden lg:flex flex-col sticky top-0 h-screen shrink-0 border-r-2 border-[#3F444E] transition-[width] duration-150 ${
-          collapsed ? 'w-[72px]' : 'w-64'
-        }`}
+        className={`hidden lg:flex flex-col fixed top-0 h-screen shrink-0 border-r-2 border-[#3F444E] transition-[width] duration-150 ${collapsed ? 'w-[72px]' : 'w-70'
+          }`}
       >
         {renderSidebarBody(collapsed, false)}
       </aside>

@@ -20,10 +20,11 @@ import {
   ArrowRight,
   Wrench,
 } from 'lucide-react';
+import { Link } from 'react-router';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { adminSectionToPath, type AdminSection } from '../../router';
 
 /**
  * Yksittäisen yleiskatsauskortin tietomalli.
@@ -65,7 +66,6 @@ interface OverviewGroup {
 export const AdminOverview: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { setAdminSubTab, setActiveTab } = useRouter();
   const isEn = lang === 'en';
 
   // Haetaan yleiskatsauksen tunnusluvut
@@ -138,14 +138,6 @@ export const AdminOverview: React.FC = () => {
     [allUsers]
   );
 
-  const handleOpenSection = (section: AdminSection) => {
-    if (section === 'superadmin') {
-      setActiveTab('superadmin');
-    } else {
-      setAdminSubTab(section);
-    }
-  };
-
   const gameRoomCards: OverviewActionCard[] = [
     {
       section: 'reservations',
@@ -177,8 +169,8 @@ export const AdminOverview: React.FC = () => {
         openIssuesCount > 0
           ? `${openIssuesCount} ${isEn ? 'open' : 'avointa'}`
           : isEn
-          ? 'All clear'
-          : 'Kaikki kuitattu',
+            ? 'All clear'
+            : 'Kaikki kuitattu',
       badgeDanger: openIssuesCount > 0,
     },
   ];
@@ -212,9 +204,8 @@ export const AdminOverview: React.FC = () => {
           descFi: 'Lisää pelejä valikoimaan ja hyväksy opiskelijoiden äänestämiä toivepelejä.',
           descEn: 'Add games to the catalog and approve top-voted titles from the student wishlist.',
           icon: <Gamepad2 className="w-6 h-6 shrink-0" strokeWidth={2.5} aria-hidden="true" />,
-          badgeText: `${allGames?.length ?? 0} ${isEn ? 'total' : 'yht.'} • ${wishlistCount} ${
-            isEn ? 'wishes' : 'toivetta'
-          }`,
+          badgeText: `${allGames?.length ?? 0} ${isEn ? 'total' : 'yht.'} • ${wishlistCount} ${isEn ? 'wishes' : 'toivetta'
+            }`,
         },
         {
           section: 'news',
@@ -286,13 +277,12 @@ export const AdminOverview: React.FC = () => {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => handleOpenSection('stations')}
-            className="px-3 py-2 rounded-none bg-[#121417] text-[#FACC15] border-2 border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B] font-mono text-xs font-extrabold uppercase cursor-pointer shrink-0"
+          <Link
+            to="/admin/stations"
+            className="px-3 py-2 rounded-none bg-[#121417] text-[#FACC15] border-2 border-[#FACC15] hover:bg-[#FACC15] hover:text-[#09090B] font-mono text-xs font-extrabold uppercase cursor-pointer shrink-0 no-underline"
           >
             {isEn ? 'Manage status' : 'Hallinnoi tilaa'}
-          </button>
+          </Link>
         </div>
       )}
 
@@ -300,10 +290,9 @@ export const AdminOverview: React.FC = () => {
       <section aria-label={isEn ? 'Key metrics' : 'Tunnusluvut'}>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {/* KPI 1: Aktiiviset varaukset */}
-          <button
-            type="button"
-            onClick={() => handleOpenSection('reservations')}
-            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors"
+          <Link
+            to={adminSectionToPath('reservations')}
+            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors no-underline"
           >
             <div className="flex items-center justify-between gap-2 w-full">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">
@@ -319,26 +308,23 @@ export const AdminOverview: React.FC = () => {
             <div className="font-mono text-xs font-bold text-[#9CA3AF]">
               {isEn ? 'Upcoming and ongoing sessions' : 'Tulevat ja käynnissä olevat'}
             </div>
-          </button>
+          </Link>
 
           {/* KPI 2: Avoimet vikailmoitukset */}
-          <button
-            type="button"
-            onClick={() => handleOpenSection('issues')}
-            className={`rounded-none bg-[#1C1F24] border-2 shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors ${
-              openIssuesCount > 0
+          <Link
+            to={adminSectionToPath('issues')}
+            className={`rounded-none bg-[#1C1F24] border-2 shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors no-underline ${openIssuesCount > 0
                 ? 'border-[#EF4444] hover:border-[#FACC15]'
                 : 'border-[#3F444E] hover:border-[#FACC15]'
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between gap-2 w-full">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">
                 {isEn ? 'Open issue reports' : 'Avoimet vikailmoitukset'}
               </span>
               <span
-                className={`inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] border-2 border-[#3F444E] ${
-                  openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
-                }`}
+                className={`inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] border-2 border-[#3F444E] ${openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
+                  }`}
               >
                 {openIssuesCount > 0 ? (
                   <AlertTriangle className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -348,9 +334,8 @@ export const AdminOverview: React.FC = () => {
               </span>
             </div>
             <div
-              className={`font-mono text-3xl font-extrabold leading-none ${
-                openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
-              }`}
+              className={`font-mono text-3xl font-extrabold leading-none ${openIssuesCount > 0 ? 'text-[#EF4444]' : 'text-[#22C55E]'
+                }`}
             >
               {openIssuesCount}
             </div>
@@ -360,16 +345,15 @@ export const AdminOverview: React.FC = () => {
                   ? 'Requires administrator review'
                   : 'Vaatii ylläpidon tarkistusta'
                 : isEn
-                ? 'All reports resolved'
-                : 'Ei avoimia vikailmoituksia'}
+                  ? 'All reports resolved'
+                  : 'Ei avoimia vikailmoituksia'}
             </div>
-          </button>
+          </Link>
 
           {/* KPI 3: Aktiiviset pelipisteet */}
-          <button
-            type="button"
-            onClick={() => handleOpenSection('stations')}
-            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors"
+          <Link
+            to={adminSectionToPath('stations')}
+            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors no-underline"
           >
             <div className="flex items-center justify-between gap-2 w-full">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">
@@ -388,16 +372,15 @@ export const AdminOverview: React.FC = () => {
                   ? 'Room in maintenance mode'
                   : 'Koko tila huoltotilassa'
                 : isEn
-                ? 'Ready for student bookings'
-                : 'Käytettävissä varauksiin'}
+                  ? 'Ready for student bookings'
+                  : 'Käytettävissä varauksiin'}
             </div>
-          </button>
+          </Link>
 
           {/* KPI 4: Käyttäjät ja pelit */}
-          <button
-            type="button"
-            onClick={() => handleOpenSection('users')}
-            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors"
+          <Link
+            to={adminSectionToPath('users')}
+            className="rounded-none bg-[#1C1F24] border-2 border-[#3F444E] hover:border-[#FACC15] shadow-[4px_4px_0px_#000000] p-5 flex flex-col gap-2 text-left cursor-pointer transition-colors no-underline"
           >
             <div className="flex items-center justify-between gap-2 w-full">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">
@@ -413,7 +396,7 @@ export const AdminOverview: React.FC = () => {
             <div className="font-mono text-xs font-bold text-[#9CA3AF]">
               {allGames?.length ?? 0} {isEn ? 'games in catalog' : 'peliä järjestelmässä'}
             </div>
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -430,11 +413,10 @@ export const AdminOverview: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {group.cards.map((card) => (
-                <button
+                <Link
                   key={card.section}
-                  type="button"
-                  onClick={() => handleOpenSection(card.section)}
-                  className="group rounded-none bg-[#1C1F24] border-2 border-[#3F444E] border-l-4 border-l-[#FACC15] shadow-[4px_4px_0px_#000000] hover:border-[#FACC15] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#000000] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_#000000] transition-all p-5 flex items-start justify-between gap-4 text-left cursor-pointer"
+                  to={adminSectionToPath(card.section)}
+                  className="group rounded-none bg-[#1C1F24] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] hover:border-[#FACC15] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#000000] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_#000000] transition-all p-5 flex items-start justify-between gap-4 text-left cursor-pointer no-underline"
                 >
                   <div className="flex flex-col gap-2 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -443,11 +425,10 @@ export const AdminOverview: React.FC = () => {
                       </h3>
                       {card.badgeText && (
                         <span
-                          className={`px-1.5 py-0.5 rounded-none font-mono text-[10px] font-extrabold uppercase border border-black ${
-                            card.badgeDanger
+                          className={`px-1.5 py-0.5 rounded-none font-mono text-[10px] font-extrabold uppercase border border-black ${card.badgeDanger
                               ? 'bg-[#EF4444] text-white'
                               : 'bg-[#121417] text-[#FACC15] border-[#3F444E]'
-                          }`}
+                            }`}
                         >
                           {card.badgeText}
                         </span>
@@ -474,7 +455,7 @@ export const AdminOverview: React.FC = () => {
                   >
                     {card.icon}
                   </span>
-                </button>
+                </Link>
               ))}
             </div>
           </section>

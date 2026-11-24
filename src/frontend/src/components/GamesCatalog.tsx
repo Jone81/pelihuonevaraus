@@ -155,7 +155,7 @@ export const GamesCatalog: React.FC = () => {
         }
         className="my-4"
       >
-        <TabsList aria-label="Pelialustat">
+        <TabsList aria-label="Pelialustat" className="auto-cols-[minmax(max-content,1fr)]">
           <TabsTrigger value="ALL">{t('games.filterAll')}</TabsTrigger>
           <TabsTrigger value="PC" className="inline-flex items-center gap-1.5">
             <Monitor className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />

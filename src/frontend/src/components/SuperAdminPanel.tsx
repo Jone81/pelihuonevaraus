@@ -15,10 +15,10 @@ import {
   Clock,
   ArrowLeft,
 } from 'lucide-react';
+import { Link } from 'react-router';
 import { api, ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useRouter } from '../router';
 import { AdminLayout } from './admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +43,6 @@ export const SuperAdminPanel: React.FC = () => {
   const { user, isAdmin, isSuperAdmin } = useAuth();
   const { lang } = useLanguage();
   const isEn = lang === 'en';
-  const { navigate } = useRouter();
   const queryClient = useQueryClient();
   const formInstanceId = useId();
 
@@ -120,14 +119,13 @@ export const SuperAdminPanel: React.FC = () => {
               ? 'Only SuperAdmin accounts have access to this panel.'
               : 'Vain pääkäyttäjällä, SuperAdmin, on pääsy tähän paneeliin.'}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/book')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer"
+          <Link
+            to="/book"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-none bg-[#FACC15] text-[#09090B] border-2 border-black shadow-[3px_3px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer no-underline"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{isEn ? 'Back to game room' : 'Takaisin pelihuoneeseen'}</span>
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -241,7 +239,7 @@ export const SuperAdminPanel: React.FC = () => {
                   htmlFor="admin-start"
                   className="text-[#09090B] font-mono font-bold uppercase text-xs"
                 >
-                  {isEn ? 'Start time 08:00-17:00 *' : 'Alkamisaika klo 08:00-17:00 *'}
+                  {isEn ? 'Start time *' : 'Alkamisaika *'}
                 </Label>
                 <NativeSelect
                   id="admin-start"
@@ -273,7 +271,7 @@ export const SuperAdminPanel: React.FC = () => {
                   htmlFor="admin-end"
                   className="text-[#09090B] font-mono font-bold uppercase text-xs"
                 >
-                  {isEn ? 'End time 09:00-18:00 *' : 'Päättymisaika klo 09:00-18:00 *'}
+                  {isEn ? 'End time *' : 'Päättymisaika *'}
                 </Label>
                 <NativeSelect
                   id="admin-end"
@@ -339,8 +337,8 @@ export const SuperAdminPanel: React.FC = () => {
                       ? 'Creating event booking...'
                       : 'Luodaan tapahtumavarausta...'
                     : isEn
-                    ? 'Create event & cancel overlaps'
-                    : 'Luo tapahtuma ja peru päällekkäiset'}
+                      ? 'Create event & cancel overlaps'
+                      : 'Luo tapahtuma ja peru päällekkäiset'}
                 </span>
               </Button>
             </div>
@@ -498,8 +496,8 @@ export const SuperAdminPanel: React.FC = () => {
                     ? 'Processing...'
                     : 'Suoritetaan...'
                   : isEn
-                  ? 'Confirm event booking'
-                  : 'Vahvista tapahtumavaraus'}
+                    ? 'Confirm event booking'
+                    : 'Vahvista tapahtumavaraus'}
               </span>
             </Button>
           </DialogFooter>

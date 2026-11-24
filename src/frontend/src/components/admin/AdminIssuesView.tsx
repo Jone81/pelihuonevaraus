@@ -62,8 +62,8 @@ export const AdminIssuesView: React.FC<AdminIssuesViewProps> = ({
         err instanceof ApiError
           ? err.message
           : isEn
-          ? 'Failed to resolve issue.'
-          : 'Vikailmoituksen kuittaus epäonnistui.'
+            ? 'Failed to resolve issue.'
+            : 'Vikailmoituksen kuittaus epäonnistui.'
       );
     },
   });
@@ -103,7 +103,7 @@ export const AdminIssuesView: React.FC<AdminIssuesViewProps> = ({
           value={issueFilter}
           onValueChange={(v) => setIssueFilter(v as 'ALL' | 'OPEN' | 'RESOLVED')}
         >
-          <TabsList className="w-full max-w-[340px]">
+          <TabsList className="w-full">
             <TabsTrigger value="ALL">
               {isEn ? 'All' : 'Kaikki'} ({allIssues?.length ?? 0})
             </TabsTrigger>
@@ -130,9 +130,8 @@ export const AdminIssuesView: React.FC<AdminIssuesViewProps> = ({
           {filteredIssues.map((issue) => (
             <div
               key={issue.id}
-              className={`rounded-none bg-[#121417] border-2 shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3 ${
-                issue.isResolved ? 'border-[#22C55E]' : 'border-[#EF4444]'
-              }`}
+              className={`rounded-none bg-[#121417] border-2 shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3 ${issue.isResolved ? 'border-[#22C55E]' : 'border-[#EF4444]'
+                }`}
             >
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -146,8 +145,8 @@ export const AdminIssuesView: React.FC<AdminIssuesViewProps> = ({
                         ? 'RESOLVED'
                         : 'RATKAISTU'
                       : isEn
-                      ? 'OPEN'
-                      : 'AVOIN'}
+                        ? 'OPEN'
+                        : 'AVOIN'}
                   </Badge>
                   <time className="font-mono text-xs font-bold text-[#9CA3AF]">
                     {new Date(issue.createdAt).toLocaleDateString('fi-FI', {

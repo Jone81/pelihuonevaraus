@@ -6,12 +6,13 @@
  * sivun otsikkorivin ja yhtenäiset tilaviestit.
  */
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Menu, ArrowLeft, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { useRouter, type AdminSection } from '../../router';
+import { type AdminSection } from '../../router';
 import { AdminSidebar } from './AdminSidebar';
 
 /** LocalStorage-avain sivupalkin kokoon taitetun tilan tallentamiseen */
@@ -54,7 +55,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 }) => {
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
-  const { setAdminSubTab, setActiveTab } = useRouter();
   const isEn = lang === 'en';
 
   // Työpöydän sivupalkin leveys (tallennetaan localStorageen)
@@ -94,13 +94,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     });
   };
 
-  const handleNavigateSection = (section: AdminSection) => {
+  const handleNavigateSection = () => {
     onSectionChange?.();
-    if (section === 'superadmin') {
-      setActiveTab('superadmin');
-    } else {
-      setAdminSubTab(section);
-    }
   };
 
   return (
@@ -137,10 +132,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         {openIssuesCount > 0 && (
-          <button
-            type="button"
-            onClick={() => handleNavigateSection('issues')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-none bg-[#EF4444] text-white border-2 border-black shadow-[2px_2px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer shrink-0"
+          <Link
+            to="/admin/issues"
+            onClick={handleNavigateSection}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-none bg-[#EF4444] text-white border-2 border-black shadow-[2px_2px_0px_#000000] font-mono text-xs font-extrabold uppercase cursor-pointer shrink-0 no-underline"
             aria-label={
               isEn
                 ? `${openIssuesCount} open issue reports`
@@ -149,7 +144,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           >
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
             <span>{openIssuesCount}</span>
-          </button>
+          </Link>
         )}
       </header>
 
@@ -170,14 +165,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           {/* Paluupalkki yleiskatsaukseen kaikilla aliosioilla */}
           {activeSection !== 'overview' && (
             <div>
-              <button
-                type="button"
-                onClick={() => handleNavigateSection('overview')}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] shadow-[3px_3px_0px_#000000] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+              <Link
+                to="/admin"
+                onClick={handleNavigateSection}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] hover:border-[#FACC15] hover:text-[#FACC15] shadow-[3px_3px_0px_#000000] font-mono text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors no-underline"
               >
                 <ArrowLeft className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 <span>{isEn ? 'Back to overview' : 'Takaisin yleiskatsaukseen'}</span>
-              </button>
+              </Link>
             </div>
           )}
 

@@ -371,7 +371,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     else if (val === '2' && email.trim()) setStep(2);
                   }}
                 >
-                  <TabsList className="grid-cols-2">
+                  <TabsList>
                     <TabsTrigger value="1">
                       <span className="hidden sm:inline">{isEn ? '1. University email' : '1. Koulun sähköposti'}</span>
                       <span className="sm:hidden">{isEn ? '1. Email' : '1. Sähköposti'}</span>
