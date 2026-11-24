@@ -1,0 +1,110 @@
+name: CI — Build, Lint & Test
+
+on:
+  push:
+    branches:
+      - master
+      - development
+      - dev
+      - 'feature/**'
+  pull_request:
+    branches:
+      - master
+      - development
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (.NET 10 Build & Tests)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore PelihuoneVaraus.slnx
+
+      - name: Build solution (Release, warnings as errors)
+        run: dotnet build PelihuoneVaraus.slnx --configuration Release --no-restore --nologo
+
+      - name: Run Domain & Application unit tests
+        run: >-
+          dotnet test tests/Application.Tests/Pelihuone.Application.Tests.csproj
+          --configuration Release
+          --no-build
+          --nologo
+          --logger "trx;LogFileName=application-tests.trx"
+          --results-directory TestResults
+
+      - name: Run Infrastructure tests
+        run: >-
+          dotnet test tests/Infrastructure.Tests/Pelihuone.Infrastructure.Tests.csproj
+          --configuration Release
+          --no-build
+          --nologo
+          --logger "trx;LogFileName=infrastructure-tests.trx"
+          --results-directory TestResults
+
+      - name: Run WebApi endpoint tests
+        run: >-
+          dotnet test tests/WebApi.Tests/Pelihuone.WebApi.Tests.csproj
+          --configuration Release
+          --no-build
+          --nologo
+          --logger "trx;LogFileName=webapi-tests.trx"
+          --results-directory TestResults
+
+      - name: Run Integration tests (Testcontainers PostgreSQL)
+        run: >-
+          dotnet test tests/Integration.Tests/Pelihuone.Integration.Tests.csproj
+          --configuration Release
+          --no-build
+          --nologo
+          --logger "trx;LogFileName=integration-tests.trx"
+          --results-directory TestResults
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: TestResults/**/*.trx
+          retention-days: 7
+
+  frontend:
+    name: Frontend (React 19 Lint & Build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'src/frontend/package-lock.json'
+
+      - name: Install frontend dependencies
+        run: npm --prefix src/frontend ci
+
+      - name: Run ESLint (0 warnings)
+        run: npm --prefix src/frontend run lint
+
+      - name: Build frontend (TypeScript & Vite)
+        run: npm --prefix src/frontend run build

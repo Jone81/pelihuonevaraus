@@ -1,0 +1,101 @@
+name: CD — Package Release Artifacts
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package-backend:
+    name: Verify & Package Backend (WebApi)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore PelihuoneVaraus.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build PelihuoneVaraus.slnx --configuration Release --no-restore --nologo
+
+      - name: Run all backend tests
+        run: dotnet test PelihuoneVaraus.slnx --configuration Release --no-build --nologo
+
+      - name: Publish WebApi release package
+        run: >-
+          dotnet publish src/backend/WebApi/Pelihuone.WebApi.csproj
+          --configuration Release
+          --no-build
+          --output artifacts/webapi
+          --nologo
+
+      - name: Upload WebApi artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pelihuone-webapi-${{ github.sha }}
+          path: artifacts/webapi
+          retention-days: 30
+
+  package-frontend:
+    name: Verify & Package Frontend (SPA)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'src/frontend/package-lock.json'
+
+      - name: Install frontend dependencies
+        run: npm --prefix src/frontend ci
+
+      - name: Run ESLint (0 warnings)
+        run: npm --prefix src/frontend run lint
+
+      - name: Build production SPA bundle
+        run: npm --prefix src/frontend run build
+
+      - name: Upload Frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pelihuone-frontend-${{ github.sha }}
+          path: src/frontend/dist
+          retention-days: 30
+
+  # Kun kohdeympäristö (esim. Azure App Service, Docker/GHCR tai VPS) päätetään,
+  # lisää alle deploy-job, joka riippuu molemmista paketointijobeista:
+  #
+  # deploy:
+  #   name: Deploy Release
+  #   needs: [package-backend, package-frontend]
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: pelihuone-webapi-${{ github.sha }}
+  #         path: deploy/webapi
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: pelihuone-frontend-${{ github.sha }}
+  #         path: deploy/frontend
