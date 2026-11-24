@@ -38,6 +38,12 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
                 id => id.HasValue ? id.Value.Value : (Guid?)null,
                 value => value.HasValue ? new GamingStationId(value.Value) : null);
 
+        // Pelitilan tunniste on valinnainen
+        builder.Property(r => r.GameRoomId)
+            .HasConversion(
+                id => id.HasValue ? id.Value.Value : (Guid?)null,
+                value => value.HasValue ? new GameRoomId(value.Value) : null);
+
         // Varauksen tyyppi ja tila tallennetaan kokonaislukuina
         builder.Property(r => r.Type)
             .HasConversion<int>()
