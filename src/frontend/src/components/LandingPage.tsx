@@ -192,7 +192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[60px] py-2 flex items-center justify-between gap-3">
           <button
             type="button"
-            className="inline-flex items-center gap-3 min-w-0 shrink-0 bg-transparent border-0 p-0 text-left cursor-pointer"
+            className="inline-flex items-center gap-3 min-w-0 bg-transparent border-0 p-0 text-left cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <img
@@ -261,7 +261,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* LEFT COLUMN: Kirjaudu sisään pelihuoneeseen */}
             <section
-              className="lg:col-span-6 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-6 sm:p-7 flex flex-col gap-5"
+              className="lg:col-span-6 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-4 sm:p-6 flex flex-col gap-5"
               aria-labelledby="heading-landing-login"
             >
               <div>
@@ -368,9 +368,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-[#09090B]">{t('login.allowedHint')}</Label>
                     <div className="rounded-none border-2 border-black bg-[#F4F4F5] text-[#09090B]">
-                      <div className="border-b-2 border-black px-3 py-2.5 font-mono text-xs font-bold flex items-center justify-between">
-                        <span>@edu.xamk.fi / @xamk.fi</span>
-                        <span className="bg-[#FACC15] text-[#09090B] border border-black px-2 py-0.5 uppercase">
+                      <div className="border-b-2 border-black px-3 py-2.5 font-mono text-xs font-bold flex flex-wrap items-center justify-between gap-2">
+                        <span className="break-all">@edu.xamk.fi / @xamk.fi</span>
+                        <span className="bg-[#FACC15] text-[#09090B] border border-black px-2 py-0.5 uppercase shrink-0">
                           {isEn ? 'One-time code' : 'Kertakoodi'}
                         </span>
                       </div>

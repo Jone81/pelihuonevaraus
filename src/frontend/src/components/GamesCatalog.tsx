@@ -258,7 +258,7 @@ export const GamesCatalog: React.FC = () => {
               </CardHeader>
 
               {game.isWishlist && (
-                <CardFooter className="p-0 pt-3 border-t border-[#3F444E] flex items-center justify-between gap-2">
+                <CardFooter className="p-0 pt-3 border-t border-[#3F444E] flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-mono text-[#A1A1AA]">
                     {t('wishlist.communityWish')}
                   </span>

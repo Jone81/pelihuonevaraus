@@ -160,9 +160,9 @@ export const AdminIssuesView: React.FC<AdminIssuesViewProps> = ({
                 </div>
 
                 {issue.reporterEmail && (
-                  <div className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5">
+                  <div className="font-mono text-xs font-bold text-[#9CA3AF] inline-flex items-center gap-1.5 min-w-0">
                     <User className="w-3.5 h-3.5 shrink-0 text-[#3B82F6]" strokeWidth={2.5} aria-hidden="true" />
-                    <span>
+                    <span className="break-all">
                       {issue.reporterName || (isEn ? 'Student' : 'Opiskelija')} ({issue.reporterEmail})
                     </span>
                   </div>

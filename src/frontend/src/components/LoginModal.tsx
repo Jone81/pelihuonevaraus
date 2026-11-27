@@ -165,10 +165,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         >
           <TabsList className="w-full">
             <TabsTrigger value="1">
-              {isEn ? '1. University email' : '1. Koulusähköposti'}
+              <span className="hidden sm:inline">{isEn ? '1. University email' : '1. Koulusähköposti'}</span>
+              <span className="sm:hidden">{isEn ? '1. Email' : '1. Sähköposti'}</span>
             </TabsTrigger>
             <TabsTrigger value="2" disabled={!email.trim() && step === 1}>
-              {isEn ? '2. Verification code' : '2. Vahvistuskoodi'}
+              <span className="hidden sm:inline">{isEn ? '2. Verification code' : '2. Vahvistuskoodi'}</span>
+              <span className="sm:hidden">{isEn ? '2. Code' : '2. Koodi'}</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -237,7 +239,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         ) : (
           <form onSubmit={handleVerifyCode} className="space-y-4">
             <div className="rounded-none bg-[#121417] border-2 border-[#3B82F6] shadow-[4px_4px_0px_#000000] p-3 text-sm text-[#F4F4F5]">
-              {t('login.codeSentAlert')} <strong className="font-mono text-[#FACC15]">{email}</strong>.
+              {t('login.codeSentAlert')} <strong className="font-mono text-[#FACC15] break-all">{email}</strong>.
               {devCodeHint && (
                 <div className="mt-1.5">
                   <em>{t('login.devCodeHint')}</em>{' '}

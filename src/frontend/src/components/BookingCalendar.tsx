@@ -910,7 +910,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
               <tr>
                 <th
                   ref={stickyStationColRef}
-                  className="sticky left-0 z-20 w-36 sm:w-44 px-3 py-2.5 text-left font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] bg-[#1C1F24] border-b-2 border-r border-[#3F444E] touch-pan-x touch-pan-y"
+                  className="sticky left-0 z-20 w-28 sm:w-44 px-2.5 sm:px-3 py-2.5 text-left font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] bg-[#1C1F24] border-b-2 border-r border-[#3F444E] touch-pan-x touch-pan-y"
                 >
                   {t('schedule.station')}
                 </th>
@@ -1018,8 +1018,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       </section>
 
       {/* Kiinteä alavahvistuspalkki mobiilinäkymässä */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#121417]/95 backdrop-blur-sm border-t-2 border-[#FACC15] shadow-[0_-4px_16px_rgba(0,0,0,0.65)] px-4 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#121417]/95 backdrop-blur-sm border-t-2 border-[#FACC15] shadow-[0_-4px_16px_rgba(0,0,0,0.65)] px-3 sm:px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm text-[#F4F4F5] truncate">
               {reservationType === 1 ? (
@@ -1047,7 +1047,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
           <Button
             type="button"
             variant="xamk"
-            className="min-h-[44px] px-4 shrink-0"
+            className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm shrink-0"
             onClick={submitBooking}
             disabled={reservationMutation.isPending || (reservationType === 1 && !effectiveStationId)}
           >

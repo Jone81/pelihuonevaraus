@@ -462,7 +462,7 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
           {selectedActionGame && (
             <>
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="break-words">
                   {isEn
                     ? `Manage game: ${selectedActionGame.name}`
                     : `Hallinnoi peliä: ${selectedActionGame.name}`}
@@ -496,7 +496,7 @@ export const AdminGamesView: React.FC<AdminGamesViewProps> = ({
                 )}
               </div>
 
-              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex items-center justify-between gap-2">
+              <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-wrap items-center justify-between gap-2">
                 <span className="font-mono text-xs font-bold uppercase text-[#9CA3AF]">
                   {isEn ? 'Action *' : 'Toimenpide *'}
                 </span>

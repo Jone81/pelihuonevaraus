@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Vasen reuna: Xamk-brändilogo ja sovelluksen otsikko */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2.5 text-left min-w-0 shrink-0 cursor-pointer no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
+          className="inline-flex items-center gap-2.5 text-left min-w-0 cursor-pointer no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FACC15]"
           onClick={() => setIsMobileMenuOpen(false)}
           aria-label="Uutiset ja tiedotteet"
         >

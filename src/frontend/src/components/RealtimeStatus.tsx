@@ -335,7 +335,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
       {/* Käynnissä oleva koko tilan varaus (kun tarkastellaan tätä päivää) */}
       {activeRoomReservation && (
         <div
-          className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] p-4 text-sm"
+          className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#EF4444] shadow-[4px_4px_0px_#000000] p-4 text-sm min-w-0 break-words"
           role="alert"
         >
           <strong className="font-mono font-bold text-[#EF4444]">
@@ -354,7 +354,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
               {activeRoomReservation.bookerEmail && (
                 <a
                   href={`mailto:${activeRoomReservation.bookerEmail}`}
-                  className="underline font-mono font-bold text-[#FACC15] hover:text-white"
+                  className="underline font-mono font-bold text-[#FACC15] hover:text-white break-all"
                 >
                   ({activeRoomReservation.bookerEmail})
                 </a>
@@ -381,13 +381,13 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
           >
             <Building2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           </div>
-          <div className="flex-1 space-y-2 text-sm">
+          <div className="flex-1 min-w-0 space-y-2 text-sm">
             <strong className="font-extrabold uppercase tracking-tight text-[#FACC15]">
               {t('schedule.roomAlert')}.
             </strong>
             <ul className="space-y-1.5 list-none p-0 m-0">
               {dayRoomReservations.map((r) => (
-                <li key={r.id} className="font-mono text-xs sm:text-sm text-[#F4F4F5]">
+                <li key={r.id} className="font-mono text-xs sm:text-sm text-[#F4F4F5] break-words">
                   <span className="font-bold text-[#FACC15]">
                     {formatLocalTime(r.startUtc)}–{formatLocalTime(r.endUtc)}
                   </span>{' '}
@@ -404,7 +404,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
                           {' '}
                           <a
                             href={`mailto:${r.bookerEmail}`}
-                            className="underline font-bold text-[#FACC15] hover:text-white"
+                            className="underline font-bold text-[#FACC15] hover:text-white break-all"
                           >
                             {r.bookerEmail}
                           </a>
@@ -535,11 +535,11 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
                       {summary.direct.map((b, idx) => (
                         <span
                           key={`dir-${idx}`}
-                          className="rounded-none bg-[#121417] border border-[#EF4444] text-[#EF4444] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          className="rounded-none bg-[#121417] border border-[#EF4444] text-[#EF4444] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1 max-w-full break-words"
                           title={`${t('status.booker')} ${b.booker}`}
                         >
                           <Lock className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                          <span>
+                          <span className="break-words">
                             {b.time} ({b.booker})
                           </span>
                         </span>
@@ -547,17 +547,17 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
                       {summary.tvLocked.map((tv, idx) => (
                         <span
                           key={`tv-${idx}`}
-                          className="rounded-none bg-[#121417] border border-[#3B82F6] text-[#3B82F6] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          className="rounded-none bg-[#121417] border border-[#3B82F6] text-[#3B82F6] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1 max-w-full break-words"
                           title={t('status.sharedTvInUse')}
                         >
                           <Tv className="w-3 h-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-                          <span>{tv.time} TV</span>
+                          <span className="break-words">{tv.time} TV</span>
                         </span>
                       ))}
                       {summary.room.map((rm, idx) => (
                         <span
                           key={`rm-${idx}`}
-                          className="rounded-none bg-[#121417] border border-[#FACC15] text-[#FACC15] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1"
+                          className="rounded-none bg-[#121417] border border-[#FACC15] text-[#FACC15] px-2 py-0.5 text-xs font-mono font-bold inline-flex items-center gap-1 max-w-full break-words"
                           title={`${t('schedule.roomLocked')}: ${rm.booker}`}
                         >
                           <Building2
@@ -565,7 +565,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({ onOpenFloorPlan 
                             strokeWidth={2.5}
                             aria-hidden="true"
                           />
-                          <span>
+                          <span className="break-words">
                             {rm.time} {rm.type}
                           </span>
                         </span>

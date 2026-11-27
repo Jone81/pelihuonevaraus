@@ -453,21 +453,21 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#3B82F6] text-white border border-black shrink-0" aria-hidden="true">
             <Building2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
           </div>
-          <div className="flex-1 space-y-2 text-sm">
+          <div className="flex-1 min-w-0 space-y-2 text-sm">
             <strong className="font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.roomAlert')}.</strong>
             <ul className="space-y-1.5 list-none p-0 m-0">
               {roomReservations.map((r) => {
                 const s = parseTimeToMinutes(r.startUtc).timeStr;
                 const e = parseTimeToMinutes(r.endUtc).timeStr;
                 return (
-                  <li key={r.id} className="text-sm text-[#F4F4F5]">
+                  <li key={r.id} className="text-sm text-[#F4F4F5] break-words">
                     <span className="inline-block px-2 py-0.5 rounded-none bg-[#3B82F6] text-white font-mono font-bold text-xs uppercase border border-black">
                       {r.reservationType === 'Event' ? t('booking.type.event') : t('booking.type.room')}
                     </span>{' '}
                     <strong className="font-mono font-bold text-[#FACC15]">klo {s}-{e}</strong>, {t('booking.booker')}{' '}
                     <strong>{r.bookerName || 'Opiskelija tai Admin'}</strong>{' '}
                     {r.bookerEmail && (
-                      <a href={`mailto:${r.bookerEmail}`} className="font-mono text-xs text-[#FACC15] underline hover:text-white">
+                      <a href={`mailto:${r.bookerEmail}`} className="font-mono text-xs text-[#FACC15] underline hover:text-white break-all">
                         ({r.bookerEmail})
                       </a>
                     )}
@@ -520,7 +520,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
               <div className="overflow-x-auto border border-[#3F444E] bg-[#121417]">
                 {/* Tuntimerkinnät yläreunassa */}
                 <div className="flex items-stretch border-b-2 border-[#3F444E] bg-[#1C1F24] min-w-[780px]">
-                  <div className="w-44 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] flex items-center">
+                  <div className="sticky left-0 z-10 w-36 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] bg-[#1C1F24] font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA] flex items-center">
                     {t('schedule.station')}
                   </div>
                   <div className="relative flex-1 h-10 mx-5">
@@ -544,7 +544,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                     return (
                       <div key={station.id} className="flex items-stretch bg-[#121417] hover:bg-[#1C1F24]/60 transition-colors">
                         {/* Laiteinfo vasemmalla */}
-                        <div className="w-44 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] flex items-center gap-2 bg-[#1C1F24]">
+                        <div className="sticky left-0 z-10 w-36 sm:w-52 shrink-0 px-3 py-2.5 border-r border-[#3F444E] flex items-center gap-2 bg-[#1C1F24]">
                           <span className="text-[#FACC15] shrink-0" aria-hidden="true">
                             {station.type === 'PC' ? (
                               <Monitor className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -667,8 +667,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
 
                 return (
                   <div key={station.id} className="rounded-none bg-[#121417] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] flex flex-col">
-                    <div className="flex items-start justify-between gap-2 p-4 border-b border-[#3F444E] bg-[#1C1F24]">
-                      <div className="flex items-center gap-2.5">
+                    <div className="flex flex-wrap items-start justify-between gap-2 p-4 border-b border-[#3F444E] bg-[#1C1F24]">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <span className="inline-flex items-center justify-center w-9 h-9 rounded-none bg-[#121417] text-[#FACC15] border border-[#3F444E] shrink-0" aria-hidden="true">
                           {station.type === 'PC' ? (
                             <Monitor className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
@@ -676,8 +676,8 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                             <Gamepad2 className="w-5 h-5 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                           )}
                         </span>
-                        <div>
-                          <h4 className="font-extrabold uppercase tracking-tight text-sm text-[#F4F4F5]">{station.name}</h4>
+                        <div className="min-w-0">
+                          <h4 className="font-extrabold uppercase tracking-tight text-sm text-[#F4F4F5] break-words">{station.name}</h4>
                           <span className="font-mono font-bold text-xs text-[#A1A1AA] uppercase">{station.type}</span>
                         </div>
                       </div>
@@ -768,7 +768,7 @@ export const DailyScheduleViewer: React.FC<DailyScheduleViewerProps> = ({
                   <p>{t('schedule.noBookingsForDay')}</p>
                 </div>
               ) : (
-                <table className="w-full border-collapse text-left text-sm">
+                <table className="w-full min-w-[580px] border-collapse text-left text-sm">
                   <thead className="bg-[#1C1F24] border-b-2 border-[#3F444E]">
                     <tr>
                       <th className="px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider text-[#A1A1AA]">{t('schedule.time')}</th>

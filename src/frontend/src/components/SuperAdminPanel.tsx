@@ -195,7 +195,7 @@ export const SuperAdminPanel: React.FC = () => {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Vasen sarake: Tapahtuma-ajan ja perustelun syöttölomake */}
-        <Card className="rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-6 space-y-5">
+        <Card className="rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-4 sm:p-6 space-y-5">
           <CardHeader className="p-0 space-y-2">
             <CardTitle className="inline-flex items-center gap-2 text-lg font-extrabold uppercase tracking-tight text-[#09090B]">
               <Trophy className="w-5 h-5 shrink-0 text-[#09090B]" strokeWidth={2.5} aria-hidden="true" />
@@ -346,7 +346,7 @@ export const SuperAdminPanel: React.FC = () => {
         </Card>
 
         {/* Oikea sarake: Yhteenveto valitusta aikaikkunasta ja tapahtumavarauksen vaikutuksista */}
-        <Card className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-6 space-y-5">
+        <Card className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 sm:p-6 space-y-5">
           <CardHeader className="p-0 space-y-2">
             <CardTitle className="inline-flex items-center gap-2 text-lg font-extrabold uppercase tracking-tight text-[#F4F4F5]">
               <ClipboardList className="w-5 h-5 shrink-0 text-[#FACC15]" strokeWidth={2.5} aria-hidden="true" />
@@ -363,15 +363,15 @@ export const SuperAdminPanel: React.FC = () => {
           </CardHeader>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
+            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <span
                   className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border border-black shrink-0"
                   aria-hidden="true"
                 >
                   <Calendar className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <div className="font-mono font-bold text-sm text-[#F4F4F5]">
                     {new Date(`${date}T12:00:00`).toLocaleDateString('fi-FI', {
                       day: 'numeric',
@@ -387,15 +387,15 @@ export const SuperAdminPanel: React.FC = () => {
               <Badge variant="status">DATE</Badge>
             </div>
 
-            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
+            <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-[#FACC15] shadow-[3px_3px_0px_#000000] p-3.5 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <span
                   className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#FACC15] text-[#09090B] border border-black shrink-0"
                   aria-hidden="true"
                 >
                   <Clock className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <div className="font-mono font-bold text-sm text-[#F4F4F5]">
                     {startHour}-{endHour}
                   </div>
@@ -469,7 +469,7 @@ export const SuperAdminPanel: React.FC = () => {
                 <strong>{isEn ? 'Date and time:' : 'Ajankohta:'}</strong> {date} klo {startHour}-
                 {endHour}
               </div>
-              <div>
+              <div className="break-words">
                 <strong>{isEn ? 'Event and reason:' : 'Tapahtuma ja perustelu:'}</strong> {reason}
               </div>
             </div>

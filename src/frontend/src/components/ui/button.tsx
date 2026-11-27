@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
  * Painikkeen ulkoasu- ja kokovarianttien määrittelyt.
  */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none font-mono text-sm font-extrabold uppercase tracking-tight border-2 border-black shadow-[4px_4px_0px_#000000] transition-transform duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:shadow-[3px_3px_0px_#FACC15] disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none min-h-[44px] px-5 py-2.5',
+  'inline-flex items-center justify-center gap-2 whitespace-normal sm:whitespace-nowrap text-center rounded-none font-mono text-sm font-extrabold uppercase tracking-tight border-2 border-black shadow-[4px_4px_0px_#000000] transition-transform duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:shadow-[3px_3px_0px_#FACC15] disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none min-h-[44px] px-3.5 sm:px-5 py-2.5',
   {
     variants: {
       variant: {

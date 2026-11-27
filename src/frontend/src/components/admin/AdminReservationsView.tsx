@@ -286,10 +286,15 @@ export const AdminReservationsView: React.FC<AdminReservationsViewProps> = ({
                     minute: '2-digit',
                   })}
                 </div>
-                <div className="font-mono text-xs text-[#D1D5DB]">
+                <div className="font-mono text-xs text-[#D1D5DB] break-words">
                   {isEn ? 'Booked by:' : 'Varaaja:'}{' '}
                   {cancelTarget.bookerName || (isEn ? 'Student' : 'Opiskelija')}
-                  {cancelTarget.bookerEmail ? ` (${cancelTarget.bookerEmail})` : ''}
+                  {cancelTarget.bookerEmail && (
+                    <>
+                      {' '}
+                      <span className="break-all">({cancelTarget.bookerEmail})</span>
+                    </>
+                  )}
                 </div>
               </div>
 

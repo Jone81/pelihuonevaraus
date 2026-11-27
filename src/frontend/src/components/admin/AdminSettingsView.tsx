@@ -222,7 +222,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* 1. Aukioloajat */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"
@@ -314,7 +314,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
 
             {/* 2. Ennakkovarausraja */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"
@@ -360,7 +360,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
 
             {/* 3. Yksittäisvaraus ja päiväkiintiö */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"
@@ -404,7 +404,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
 
             {/* 4. Opiskelijan tilavaraus */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"
@@ -450,7 +450,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
 
             {/* 5. Varauksen vähimmäiskesto */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"
@@ -494,7 +494,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
 
             {/* 6. Konsolien SharedTV-rinnakkaislukko */}
             <div className="rounded-none bg-[#121417] border-2 border-[#3F444E] p-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
                     className="inline-flex items-center justify-center w-8 h-8 rounded-none bg-[#1C1F24] border border-[#3F444E] text-[#FACC15] shrink-0"

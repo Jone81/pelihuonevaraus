@@ -51,7 +51,7 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
         </DialogHeader>
 
         {/* Kuva-ikkuna / Luonnosalue */}
-        <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black p-4">
+        <div className="rounded-none bg-[#121417] text-[#F4F4F5] border-2 border-black p-3 sm:p-4">
           <div className="w-full">
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#3F444E]">
@@ -61,9 +61,9 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {/* 6 PC:tä */}
-                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3">
+                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-3 sm:p-4 flex flex-col gap-3">
                   <div className="font-mono font-bold text-xs uppercase tracking-wider text-[#FACC15] border-b border-[#3F444E] pb-1.5">{t('floorplan.pcZone')}</div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {['PC 1', 'PC 2', 'PC 3', 'PC 4', 'PC 5', 'PC 6'].map((pcName) => (
@@ -76,7 +76,7 @@ export const FloorPlanModal: React.FC<FloorPlanModalProps> = ({ isOpen, onClose 
                 </div>
 
                 {/* Konsolit ja yhteinen TV */}
-                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-4 flex flex-col gap-3">
+                <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-3 sm:p-4 flex flex-col gap-3">
                   <div className="font-mono font-bold text-xs uppercase tracking-wider text-[#3B82F6] border-b border-[#3F444E] pb-1.5">{t('floorplan.consoleZone')}</div>
                   <div className="rounded-none bg-[#3B82F6] text-white border-2 border-black shadow-[3px_3px_0px_#000000] px-3 py-2 font-mono font-bold text-xs uppercase tracking-wide inline-flex items-center justify-center gap-1.5">
                     <Tv className="w-4 h-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
