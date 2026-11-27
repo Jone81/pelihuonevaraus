@@ -478,7 +478,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <>
       {/* Työpöydän kiinteä vasen sivupalkki (lg+) */}
       <aside
-        className={`hidden lg:flex flex-col fixed top-0 h-screen shrink-0 border-r-2 border-[#3F444E] transition-[width] duration-150 ${collapsed ? 'w-[72px]' : 'w-70'
+        className={`hidden lg:flex flex-col sticky top-0 h-screen shrink-0 border-r-2 border-[#3F444E] transition-[width] duration-150 ${collapsed ? 'w-[72px]' : 'w-70'
           }`}
       >
         {renderSidebarBody(collapsed, false)}
