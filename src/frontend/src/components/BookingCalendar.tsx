@@ -658,9 +658,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const endMinutes = useMemo(() => parseTimeToMinutes(endHour), [endHour]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-24 lg:pb-0">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch pb-24 lg:pb-0">
       {/* LEFT COLUMN (desktop) / SECOND SECTION (mobile): Tee uusi varaus */}
-      <section className="order-2 lg:order-1 lg:col-span-5 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-5 sm:p-6 space-y-5" aria-labelledby="heading-new-booking">
+      <section className="order-2 lg:order-1 lg:col-span-5 h-full flex flex-col gap-5 rounded-none bg-white text-[#09090B] border-2 border-black shadow-[5px_5px_0px_#FACC15] p-5 sm:p-6" aria-labelledby="heading-new-booking">
         <div className="space-y-2">
           <h2 id="heading-new-booking" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#09090B]">{t('booking.title')}</h2>
           <div className="h-1 w-16 bg-[#FACC15] border border-black" />
@@ -678,7 +678,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleBooking} className="space-y-4">
+        <form onSubmit={handleBooking} className="flex-1 flex flex-col gap-4">
           {/* Varaustyyppi (shadcn/ui Tabs 3-segment control) */}
           <div className="space-y-1.5">
             <Label className="text-[#09090B] font-mono font-bold text-xs uppercase tracking-wider">{t('booking.typeLabel')}</Label>
@@ -794,7 +794,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
           </div>
 
           {/* Submit Pill Button (shadcn/ui Button) */}
-          <div className="pt-2">
+          <div className="mt-auto pt-2">
             <Button
               type="submit"
               variant="pill"
@@ -812,7 +812,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
       </section>
 
       {/* RIGHT COLUMN (desktop) / FIRST SECTION (mobile): Päivän varaukset ja aikataulu */}
-      <section className="order-1 lg:order-2 lg:col-span-7 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6 space-y-5" aria-labelledby="heading-day-schedule">
+      <section className="order-1 lg:order-2 lg:col-span-7 h-full flex flex-col gap-5 rounded-none bg-[#1C1F24] text-[#F4F4F5] border border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 sm:p-6" aria-labelledby="heading-day-schedule">
         <div className="space-y-2">
           <h2 id="heading-day-schedule" className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#F4F4F5]">{t('schedule.title')}</h2>
           <div className="h-1 w-16 bg-[#FACC15] border border-black" />
