@@ -28,6 +28,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { OpeningHoursWidget } from './OpeningHoursWidget';
 import {
   adminSectionToPath,
   pathnameToAdminSubTab,
@@ -158,6 +159,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </Link>
 
+        {/* Center (Desktop): Opening Hours & 3D Xamk X Emblem */}
+        {/* Keskiosa (työpöytä): Aukioloaika-ikkuna, 3D Xamk X -logo ja kiinnitetty tiedote */}
+        <div className="hidden lg:flex flex-1 justify-center min-w-0 px-2">
+          <OpeningHoursWidget />
+        </div>
+
         {/* Right: Report Issue + Language Switcher + User Profile */}
         {/* Oikea reuna: Vikailmoituslinkki, kielivalitsin ja käyttäjäprofiilin valikko */}
         <div className="hidden lg:flex items-center gap-2 shrink-0">
@@ -258,6 +265,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="sm:hidden">{isEn ? 'Log in' : 'Kirjaudu'}</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Mobiilin aukioloaika- ja tiedotenauha yläpalkin rivi 1:n alapuolella */}
+      <div className="lg:hidden border-t border-[#3F444E] bg-[#1C1F24] px-3 py-1.5">
+        <div className="max-w-[1440px] mx-auto">
+          <OpeningHoursWidget compact />
         </div>
       </div>
 

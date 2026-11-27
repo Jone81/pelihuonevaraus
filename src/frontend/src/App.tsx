@@ -16,7 +16,6 @@ import { GamesCatalog } from './components/GamesCatalog';
 import { MyReservations } from './components/MyReservations';
 import { AdminPanel } from './components/AdminPanel';
 import { SuperAdminPanel } from './components/SuperAdminPanel';
-import { NewsBanner } from './components/NewsBanner';
 import { NewsFeedPage } from './components/NewsFeedPage';
 import { LoginModal } from './components/LoginModal';
 import { FloorPlanModal } from './components/FloorPlanModal';
@@ -98,7 +97,7 @@ const ScrollToTop: React.FC = () => {
 };
 
 /**
- * Opiskelijanäkymien jaettu kehys (ylänavigaatio, uutisbanneri, reititettävä sisältö ja alatunniste).
+ * Opiskelijanäkymien jaettu kehys (ylänavigaatio, reititettävä sisältö ja alatunniste).
  */
 interface StudentShellLayoutProps {
   /** Käyttäjän näyttönimi */
@@ -133,10 +132,6 @@ const StudentShellLayout: React.FC<StudentShellLayoutProps> = ({
         onOpenFloorPlan={onOpenFloorPlan}
         onOpenIssueModal={onOpenIssueModal}
       />
-
-      {/* Hero Banner directly below Navbar */}
-      {/* Tiedotebanneri heti ylänavigaation alapuolella */}
-      <NewsBanner />
 
       {/* Main Content Surface */}
       {/* Pääsisältöalue, joka renderöidään aktiivisen React Router -reitin perusteella */}
@@ -314,7 +309,7 @@ export const AppContent: React.FC = () => {
   return (
     <>
       <Routes>
-        {/* Dedikoitu Admin Shell: ei julkista Navbaria, NewsBanneria tai 4-sarakkeista footeria */}
+        {/* Dedikoitu Admin Shell: ei julkista Navbaria tai 4-sarakkeista footeria */}
         <Route path="/superadmin" element={<SuperAdminPanel />} />
         <Route path="/admin/override" element={<SuperAdminPanel />} />
         <Route path="/admin/*" element={<AdminPanel />} />

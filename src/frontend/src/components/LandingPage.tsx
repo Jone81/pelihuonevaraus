@@ -5,7 +5,7 @@
  * mahdollisuuden tarkastella reaaliaikaista tilannetta (`RealtimeStatus`),
  * upotetun OTP-kirjautumislomakkeen, pikatunnukset sekä ajankohtaiset uutiset ja pelisäännöt.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Map,
@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api, ApiError } from '../api/client';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { OpeningHoursWidget } from './OpeningHoursWidget';
 import { RealtimeStatus } from './RealtimeStatus';
 import { RulesAndGuide } from './RulesAndGuide';
 import { Button } from '@/components/ui/button';
@@ -40,27 +41,6 @@ interface LandingPageProps {
   /** Valinnainen funktio pohjakuvamodaalin avaamiseen */
   onOpenFloorPlan?: () => void;
 }
-
-/**
- * Xamkin visuaalinen X-tunnusmerkki (SVG) laskeutumissivun Hero-laatikossa.
- */
-const XamkXEmblem: React.FC = () => (
-  <svg
-    viewBox="0 0 64 64"
-    width="54"
-    height="54"
-    aria-hidden="true"
-    className="shrink-0"
-  >
-    <path
-      d="M6 6 H25 L32 13 L39 6 H58 V25 L51 32 L58 39 V58 H39 L32 51 L25 58 H6 V39 L13 32 L6 25 Z"
-      fill="none"
-      stroke="#FACC15"
-      strokeWidth="3.2"
-      strokeLinejoin="miter"
-    />
-  </svg>
-);
 
 /**
  * Julkinen laskeutumissivu ennen sisäänkirjautumista.
@@ -91,12 +71,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     queryKey: ['news'],
     queryFn: () => api.getNews(),
   });
-
-  // Poimitaan kiinnitetty tai uusin tiedote Hero-laatikon alaotsikoksi
-  const pinnedOrLatestNews = useMemo(() => {
-    if (!newsItems || newsItems.length === 0) return null;
-    return newsItems.find((n) => n.isPinned) || newsItems[0];
-  }, [newsItems]);
 
   /**
    * Vierittää sivun pehmeästi kirjautumisen sähköpostikenttään ja asettaa siihen fokuksen.
@@ -212,19 +186,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-[#121417] text-[#F4F4F5] font-sans">
-      {/* 1. Single-Row Top Navigation Bar (Only Brand, LanguageSwitcher, and Login Button when not logged in) */}
-      {/* 1. Ylätunniste: Brändilogo, kielivalitsin ja kirjautumispainike */}
+      {/* 1. Top Navigation Bar (Brand, Opening Hours Widget, LanguageSwitcher, and Login Button when not logged in) */}
+      {/* 1. Ylätunniste: Brändilogo, aukioloaika-ikkuna 3D X -logolla, kielivalitsin ja kirjautumispainike */}
       <header className="sticky top-0 z-50 bg-[#121417] border-b-[3px] border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[60px] py-2 flex items-center justify-between gap-3">
           <button
             type="button"
-            className="inline-flex items-center gap-3 min-w-0 flex-shrink bg-transparent border-0 p-0 text-left cursor-pointer"
+            className="inline-flex items-center gap-3 min-w-0 shrink-0 bg-transparent border-0 p-0 text-left cursor-pointer"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <img
               src="/xamk_logo_tiivis_kehys_keltainen_rgb.png"
               alt="Xamk"
-              className="h-6 sm:h-7 md:h-8 w-auto object-contain flex-shrink-0"
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0"
             />
             <div className="flex flex-col min-w-0">
               <span className="font-extrabold uppercase tracking-tight text-[#F4F4F5] text-[11px] sm:text-xs md:text-sm truncate">
@@ -236,7 +210,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </button>
 
-          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+          {/* Keskiosa (työpöytä): Aukioloaika-ikkuna, 3D Xamk X -logo ja kiinnitetty tiedote */}
+          <div className="hidden lg:flex flex-1 justify-center min-w-0 px-2">
+            <OpeningHoursWidget
+              onNewsClick={() => scrollToSection('landing-news-col')}
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <LanguageSwitcher className="mobile-lang-switcher" />
 
             <Button
@@ -250,56 +231,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </Button>
           </div>
         </div>
-      </header>
 
-      {/* 2. Hero Banner */}
-      {/* 2. Tervetulobanneri ja aukioloaikojen infolaatikko */}
-      <section className="bg-[#121417] border-b-[3px] border-black py-10 sm:py-14 px-4 sm:px-6 lg:px-8" aria-label={t('landing.welcome')}>
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div className="flex flex-col items-start">
-              <h1 className="bg-[#FACC15] text-[#09090B] border-[3px] border-black shadow-[6px_6px_0px_#000000] -rotate-1 inline-flex flex-col px-6 py-3 font-extrabold uppercase tracking-tight text-3xl sm:text-4xl md:text-5xl leading-[1.05]">
-                <span className="block">
-                  {isEn ? 'Welcome to Xamk' : 'Tervetuloa Xamk'}
-                </span>
-                <span className="block">
-                  {isEn ? 'Game Room' : 'Game Roomiin'}
-                </span>
-              </h1>
-            </div>
-
-            <div className="rounded-none bg-[#1C1F24] text-[#F4F4F5] border-2 border-[#3F444E] shadow-[4px_4px_0px_#000000] p-5 flex items-center gap-4 max-w-xl w-full">
-              <div className="shrink-0">
-                <XamkXEmblem />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-extrabold uppercase tracking-tight text-base sm:text-lg text-[#FACC15]">
-                  {isEn
-                    ? 'Opening hours Mon-Fri 08:00-18:00'
-                    : 'Aukioloajat ma-pe klo 08:00-18:00'}
-                </h2>
-                <p
-                  className="font-mono text-xs sm:text-sm text-[#F4F4F5] mt-1"
-                  style={pinnedOrLatestNews ? { cursor: 'pointer' } : undefined}
-                  onClick={() => {
-                    if (pinnedOrLatestNews) {
-                      scrollToSection('landing-news-col');
-                    }
-                  }}
-                  title={pinnedOrLatestNews ? (isEn ? 'Click to view announcements' : 'Klikkaa siirtyäksesi tiedotteisiin') : undefined}
-                >
-                  {pinnedOrLatestNews
-                    ? pinnedOrLatestNews.title
-                    : t('landing.subtitle')}
-                </p>
-              </div>
-            </div>
+        {/* Mobiilin aukioloaika- ja tiedotenauha yläpalkin rivi 1:n alapuolella */}
+        <div className="lg:hidden border-t border-[#3F444E] bg-[#1C1F24] px-4 sm:px-6 py-1.5">
+          <div className="max-w-7xl mx-auto">
+            <OpeningHoursWidget
+              compact
+              onNewsClick={() => scrollToSection('landing-news-col')}
+            />
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* 3. Main Content Surface (#232323) */}
-      {/* 3. Pääsisältöalue: pikakortit, valinnainen tilannetaulu, kirjautumislomake ja tiedotteet */}
+      {/* 2. Main Content Surface */}
+      {/* 2. Pääsisältöalue: valinnainen tilannetaulu, kirjautumislomake, tiedotteet ja pikalinkit */}
       <main className="flex-1 bg-[#121417] py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Esikatseltava reaaliaikainen tilannetaulu */}
